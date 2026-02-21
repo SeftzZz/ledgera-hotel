@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Feb 21, 2026 at 08:36 PM
+-- Generation Time: Feb 22, 2026 at 02:20 AM
 -- Server version: 10.11.10-MariaDB-log
 -- PHP Version: 8.3.27
 
@@ -209,7 +209,7 @@ INSERT INTO `coa` (`id`, `company_id`, `account_code`, `account_name`, `account_
 (3, 1, '1301', 'Persediaan', 'asset', 14, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
 (4, 1, '2101', 'Utang Usaha', 'liability', 15, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
 (5, 1, '2201', 'Utang Pajak', 'liability', 15, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
-(6, 1, '3100', 'Modal Disetor', 'equity', 11, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(6, 1, '3100', 'Modal', 'equity', 11, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
 (7, 1, '3200', 'Laba Ditahan', 'equity', 11, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
 (8, 1, '4101', 'Penjualan', 'revenue', 17, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
 (9, 1, '5101', 'Beban Gaji', 'expense', 18, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
@@ -368,7 +368,26 @@ INSERT INTO `journal_details` (`id`, `journal_id`, `account_id`, `debit`, `credi
 (35, 18, 29, 2000000.00, 0.00, '2026-02-21 18:32:49'),
 (36, 18, 1, 0.00, 2000000.00, '2026-02-21 18:32:49'),
 (39, 22, 1, 50000000.00, 0.00, '2026-02-21 19:19:40'),
-(40, 22, 8, 0.00, 50000000.00, '2026-02-21 19:19:40');
+(40, 22, 8, 0.00, 50000000.00, '2026-02-21 19:19:40'),
+(41, 23, 9, 15000000.00, 0.00, '2026-02-21 22:56:12'),
+(42, 23, 1, 0.00, 15000000.00, '2026-02-21 22:56:12'),
+(43, 24, 29, 10000000.00, 0.00, '2026-02-21 22:59:38'),
+(44, 24, 1, 0.00, 10000000.00, '2026-02-21 22:59:38'),
+(45, 25, 29, 11000000.00, 0.00, '2026-02-21 23:19:30'),
+(46, 25, 20, 0.00, 11000000.00, '2026-02-21 23:19:30'),
+(53, 29, 20, 500000000.00, 0.00, '2026-02-21 23:53:55'),
+(54, 29, 6, 0.00, 500000000.00, '2026-02-21 23:53:55'),
+(57, 31, 9, 12000000.00, 0.00, '2026-02-21 23:56:59'),
+(58, 31, 23, 0.00, 12000000.00, '2026-02-21 23:56:59'),
+(67, 36, 29, 1000000.00, 0.00, '2026-02-22 00:41:34'),
+(68, 36, 22, 110000.00, 0.00, '2026-02-22 00:41:34'),
+(69, 36, 20, 0.00, 1110000.00, '2026-02-22 00:41:34'),
+(70, 37, 29, 900900.90, 0.00, '2026-02-22 00:42:13'),
+(71, 37, 22, 99099.10, 0.00, '2026-02-22 00:42:13'),
+(72, 37, 20, 0.00, 1000000.00, '2026-02-22 00:42:13'),
+(79, 41, 9, 15000000.00, 0.00, '2026-02-22 01:15:53'),
+(80, 41, 25, 0.00, 750000.00, '2026-02-22 01:15:53'),
+(81, 41, 20, 0.00, 14250000.00, '2026-02-22 01:15:53');
 
 -- --------------------------------------------------------
 
@@ -405,7 +424,15 @@ INSERT INTO `journal_headers` (`id`, `company_id`, `branch_id`, `fiscal_year_id`
 (18, 1, NULL, 2, 'AUTO-18', '2026-02-23', NULL, 0.00, 2, 2026, 'posted', 0, NULL, NULL, '2026-02-21 18:32:49', '0000-00-00 00:00:00'),
 (19, 1, NULL, NULL, 'CLOSING-1-2026', '2026-01-31', NULL, 0.00, 1, 2026, 'posted', 1, NULL, NULL, '2026-02-21 18:55:59', '0000-00-00 00:00:00'),
 (20, 1, NULL, NULL, 'CLOSING-2-2026', '2026-02-28', NULL, 0.00, 2, 2026, 'posted', 1, NULL, NULL, '2026-02-21 18:56:06', '0000-00-00 00:00:00'),
-(22, 1, NULL, 2, 'AUTO-20', '2026-03-01', NULL, 0.00, 3, 2026, 'posted', 0, NULL, NULL, '2026-02-21 19:19:40', '0000-00-00 00:00:00');
+(22, 1, NULL, 2, 'AUTO-20', '2026-03-01', NULL, 0.00, 3, 2026, 'posted', 0, NULL, NULL, '2026-02-21 19:19:40', '0000-00-00 00:00:00'),
+(23, 1, NULL, 2, 'AUTO-21', '2026-03-05', NULL, 0.00, 3, 2026, 'posted', 0, NULL, NULL, '2026-02-21 22:56:12', '0000-00-00 00:00:00'),
+(24, 1, NULL, 2, 'AUTO-22', '2026-03-09', NULL, 0.00, 3, 2026, 'posted', 0, NULL, NULL, '2026-02-21 22:59:38', '0000-00-00 00:00:00'),
+(25, 1, NULL, 2, 'AUTO-23', '2026-03-17', NULL, 0.00, 3, 2026, 'posted', 0, NULL, NULL, '2026-02-21 23:19:30', '0000-00-00 00:00:00'),
+(29, 1, NULL, 2, 'AUTO-27', '2026-03-21', NULL, 0.00, 3, 2026, 'draft', 0, NULL, NULL, '2026-02-21 23:53:55', '0000-00-00 00:00:00'),
+(31, 1, NULL, 2, 'AUTO-29', '2026-04-01', NULL, 0.00, 4, 2026, 'draft', 0, NULL, NULL, '2026-02-21 23:56:59', '0000-00-00 00:00:00'),
+(36, 1, NULL, 2, 'AUTO-35', '2026-04-22', NULL, 0.00, 4, 2026, 'draft', 0, NULL, NULL, '2026-02-22 00:41:34', '0000-00-00 00:00:00'),
+(37, 1, NULL, 2, 'AUTO-36', '2026-04-23', NULL, 0.00, 4, 2026, 'draft', 0, NULL, NULL, '2026-02-22 00:42:13', '0000-00-00 00:00:00'),
+(41, 1, NULL, 2, 'AUTO-40', '2026-04-24', NULL, 0.00, 4, 2026, 'draft', 0, NULL, NULL, '2026-02-22 01:15:53', '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -586,16 +613,23 @@ CREATE TABLE `tax_codes` (
   `tax_type` enum('ppn','withholding') DEFAULT NULL,
   `tax_rate` decimal(5,2) DEFAULT NULL,
   `is_active` tinyint(4) DEFAULT 1,
-  `deleted_at` datetime NOT NULL
+  `deleted_at` datetime NOT NULL,
+  `company_id` int(11) DEFAULT NULL,
+  `tax_direction` enum('input','output','both') DEFAULT NULL,
+  `coa_account_id` int(11) DEFAULT NULL,
+  `is_included` tinyint(4) DEFAULT 0,
+  `is_creditable` tinyint(4) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `tax_codes`
 --
 
-INSERT INTO `tax_codes` (`id`, `tax_code`, `tax_name`, `tax_type`, `tax_rate`, `is_active`, `deleted_at`) VALUES
-(1, 'PPN11', 'PPN 11%', 'ppn', 11.00, 1, '0000-00-00 00:00:00'),
-(2, 'PPh23', 'PPh 23', 'withholding', 2.00, 1, '0000-00-00 00:00:00');
+INSERT INTO `tax_codes` (`id`, `tax_code`, `tax_name`, `tax_type`, `tax_rate`, `is_active`, `deleted_at`, `company_id`, `tax_direction`, `coa_account_id`, `is_included`, `is_creditable`) VALUES
+(1, 'PPN11', 'PPN 11%', 'ppn', 11.00, 1, '0000-00-00 00:00:00', 1, 'input', 22, 0, 1),
+(2, 'PPh23', 'PPh 23', 'withholding', 2.00, 1, '0000-00-00 00:00:00', 1, NULL, NULL, 0, 1),
+(3, 'PPN11', 'PPN 11%', 'ppn', 11.00, 1, '0000-00-00 00:00:00', 1, 'output', 24, 0, 1),
+(4, 'PPh21', 'PPh 21', 'withholding', 5.00, 1, '0000-00-00 00:00:00', 1, NULL, 25, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -615,6 +649,7 @@ CREATE TABLE `transactions` (
   `journal_id` int(11) DEFAULT NULL,
   `debit_account_id` int(11) DEFAULT NULL,
   `credit_account_id` int(11) DEFAULT NULL,
+  `payment_account_id` int(11) NOT NULL,
   `status` enum('draft','submitted','approved','posted','rejected') DEFAULT 'draft',
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -623,11 +658,19 @@ CREATE TABLE `transactions` (
 -- Dumping data for table `transactions`
 --
 
-INSERT INTO `transactions` (`id`, `company_id`, `branch_id`, `trx_date`, `trx_type`, `reference_no`, `amount`, `created_at`, `journal_id`, `debit_account_id`, `credit_account_id`, `status`, `updated_at`) VALUES
-(16, 1, NULL, '2026-02-21', 'sales_cash', 'SC01', 20000000.00, '2026-02-21 18:31:48', 16, NULL, NULL, 'posted', '2026-02-21 18:31:48'),
-(17, 1, NULL, '2026-02-22', 'expense_salary', 'SL01', 5000000.00, '2026-02-21 18:32:08', 17, NULL, NULL, 'posted', '2026-02-21 18:32:08'),
-(18, 1, NULL, '2026-02-23', 'expense_electric', 'EL01', 2000000.00, '2026-02-21 18:32:49', 18, NULL, NULL, 'posted', '2026-02-21 18:32:49'),
-(20, 1, NULL, '2026-03-01', 'sales_cash', 'SC03', 50000000.00, '2026-02-21 19:19:40', 22, NULL, NULL, 'posted', '2026-02-21 19:19:40');
+INSERT INTO `transactions` (`id`, `company_id`, `branch_id`, `trx_date`, `trx_type`, `reference_no`, `amount`, `created_at`, `journal_id`, `debit_account_id`, `credit_account_id`, `payment_account_id`, `status`, `updated_at`) VALUES
+(16, 1, NULL, '2026-02-21', 'sales_cash', 'SC01', 20000000.00, '2026-02-21 18:31:48', 16, NULL, NULL, 0, 'posted', '2026-02-21 18:31:48'),
+(17, 1, NULL, '2026-02-22', 'expense_salary', 'SL01', 5000000.00, '2026-02-21 18:32:08', 17, NULL, NULL, 0, 'posted', '2026-02-21 18:32:08'),
+(18, 1, NULL, '2026-02-23', 'expense_electric', 'EL01', 2000000.00, '2026-02-21 18:32:49', 18, NULL, NULL, 0, 'posted', '2026-02-21 18:32:49'),
+(20, 1, NULL, '2026-03-01', 'sales_cash', 'SC03', 50000000.00, '2026-02-21 19:19:40', 22, NULL, NULL, 0, 'posted', '2026-02-21 19:19:40'),
+(21, 1, NULL, '2026-03-05', 'expense_salary', 'SL03', 15000000.00, '2026-02-21 22:56:12', 23, NULL, NULL, 0, 'posted', '2026-02-21 22:56:12'),
+(22, 1, NULL, '2026-03-09', 'expense_electric', 'EL03', 10000000.00, '2026-02-21 22:59:38', 24, NULL, NULL, 0, 'posted', '2026-02-21 22:59:38'),
+(23, 1, NULL, '2026-03-17', 'expense_electric', 'EL03A', 11000000.00, '2026-02-21 23:19:30', 25, NULL, NULL, 0, 'draft', '2026-02-21 23:19:30'),
+(27, 1, NULL, '2026-03-21', 'capital_injection', 'EQ03A', 500000000.00, '2026-02-21 23:53:55', 29, NULL, NULL, 0, 'draft', '2026-02-21 23:53:55'),
+(29, 1, NULL, '2026-04-01', 'expense_salary', 'EX0401', 12000000.00, '2026-02-21 23:56:59', 31, NULL, NULL, 0, 'draft', '2026-02-21 23:56:59'),
+(35, 1, NULL, '2026-04-22', 'expense_electric', 'EX0402', 1000000.00, '2026-02-22 00:41:34', 36, NULL, NULL, 0, 'draft', '2026-02-22 00:41:34'),
+(36, 1, NULL, '2026-04-23', 'expense_electric', 'EX0403', 900900.90, '2026-02-22 00:42:13', 37, NULL, NULL, 0, 'draft', '2026-02-22 00:42:13'),
+(40, 1, NULL, '2026-04-24', 'expense_salary', 'EX0404', 15000000.00, '2026-02-22 01:15:53', 41, NULL, NULL, 0, 'draft', '2026-02-22 01:15:53');
 
 -- --------------------------------------------------------
 
@@ -651,7 +694,34 @@ CREATE TABLE `transaction_account_map` (
 INSERT INTO `transaction_account_map` (`id`, `company_id`, `trx_type`, `debit_account_id`, `credit_account_id`, `created_at`) VALUES
 (1, 1, 'sales_cash', 1, 8, '2026-02-21 18:21:20'),
 (2, 1, 'expense_salary', 9, 1, '2026-02-21 18:21:27'),
-(3, 1, 'expense_electric', 29, 1, '2026-02-21 18:21:33');
+(3, 1, 'expense_electric', 29, 1, '2026-02-21 18:21:33'),
+(4, 1, 'capital_injection', 1, 6, '2026-02-21 23:38:13'),
+(5, 1, 'capital_withdrawal', 1, 6, '2026-02-21 23:38:13'),
+(6, 1, 'dividend_distribution', 1, 6, '2026-02-21 23:38:13');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `transaction_taxes`
+--
+
+CREATE TABLE `transaction_taxes` (
+  `id` int(11) NOT NULL,
+  `transaction_id` int(11) NOT NULL,
+  `tax_code_id` int(11) NOT NULL,
+  `tax_base` decimal(18,2) NOT NULL DEFAULT 0.00,
+  `tax_amount` decimal(18,2) NOT NULL DEFAULT 0.00,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `transaction_taxes`
+--
+
+INSERT INTO `transaction_taxes` (`id`, `transaction_id`, `tax_code_id`, `tax_base`, `tax_amount`, `created_at`) VALUES
+(5, 35, 1, 1000000.00, 110000.00, '2026-02-22 00:41:34'),
+(6, 36, 1, 900900.90, 99099.10, '2026-02-22 00:42:13'),
+(10, 40, 4, 15000000.00, 750000.00, '2026-02-22 01:15:53');
 
 -- --------------------------------------------------------
 
@@ -683,9 +753,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `company_id`, `branch_id`, `name`, `email`, `phone`, `password`, `photo`, `is_active`, `last_login_at`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) VALUES
-(1, 0, 0, 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-02-12 12:11:18', '2026-01-18 12:25:53', 1, '2026-02-12 12:11:18', NULL, NULL, NULL),
+(1, 0, 0, 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-02-21 23:27:27', '2026-01-18 12:25:53', 1, '2026-02-21 23:27:27', NULL, NULL, NULL),
 (2, 1, 0, 'Arya Seftian', 'yerblues6@gmail.com', '895330907220', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', 'profile_2_1768811928.png', 'active', '2026-02-12 13:56:55', '2026-01-18 18:59:55', 1, '2026-02-12 13:56:55', NULL, NULL, NULL),
-(3, 1, 0, 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', 'profile_3_1768820480.png', 'active', '2026-02-21 16:09:08', '2026-01-19 10:53:08', 1, '2026-02-21 16:09:08', NULL, NULL, NULL),
+(3, 1, 0, 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', 'profile_3_1768820480.png', 'active', '2026-02-21 23:31:32', '2026-01-19 10:53:08', 1, '2026-02-21 23:31:32', NULL, NULL, NULL),
 (4, 1, 0, 'Muhammad', 'worker@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '1770800774_86ac11607620813dfeb3.png', 'active', NULL, '2026-01-19 10:53:08', 1, '2026-02-11 16:39:18', 2, NULL, NULL);
 
 -- --------------------------------------------------------
@@ -918,6 +988,14 @@ ALTER TABLE `transaction_account_map`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `transaction_taxes`
+--
+ALTER TABLE `transaction_taxes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `transaction_id` (`transaction_id`),
+  ADD KEY `tax_code_id` (`tax_code_id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -992,7 +1070,7 @@ ALTER TABLE `coa`
 -- AUTO_INCREMENT for table `coa_opening_balances`
 --
 ALTER TABLE `coa_opening_balances`
-  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `companies`
@@ -1016,13 +1094,13 @@ ALTER TABLE `journal_approvals`
 -- AUTO_INCREMENT for table `journal_details`
 --
 ALTER TABLE `journal_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
 
 --
 -- AUTO_INCREMENT for table `journal_headers`
 --
 ALTER TABLE `journal_headers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `journal_taxes`
@@ -1076,19 +1154,25 @@ ALTER TABLE `sub_ledgers`
 -- AUTO_INCREMENT for table `tax_codes`
 --
 ALTER TABLE `tax_codes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `transaction_account_map`
 --
 ALTER TABLE `transaction_account_map`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `transaction_taxes`
+--
+ALTER TABLE `transaction_taxes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -1207,6 +1291,13 @@ ALTER TABLE `sub_ledgers`
 ALTER TABLE `transactions`
   ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
   ADD CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`);
+
+--
+-- Constraints for table `transaction_taxes`
+--
+ALTER TABLE `transaction_taxes`
+  ADD CONSTRAINT `fk_transaction_tax_code` FOREIGN KEY (`tax_code_id`) REFERENCES `tax_codes` (`id`),
+  ADD CONSTRAINT `fk_transaction_tax_trx` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
