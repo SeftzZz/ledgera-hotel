@@ -90,7 +90,9 @@
                                             data-type="<?= $tax['tax_type'] ?>"
                                             data-account="<?= esc($tax['coa_account_name'] ?? '-') ?>"
                                         >
-                                            <?= esc($tax['tax_name']) ?> (<?= $tax['tax_rate'] ?>%)
+                                            <?= esc($tax['tax_name']) ?> 
+                                            (<?= $tax['tax_rate'] ?>%) 
+                                            - <?= ucfirst($tax['tax_direction']) ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
