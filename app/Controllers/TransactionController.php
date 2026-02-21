@@ -17,16 +17,19 @@ class TransactionController extends BaseController
 
     public function index()
     {
-        $mapModel = new TransactionAccountMapModel();
+        $coaModel = new \App\Models\CoaModel();
 
-        $trxTypes = $mapModel
-            ->select('trx_type')
-            ->distinct()
+        $paymentAccounts = $coaModel
+            ->where('company_id', session('company_id'))
+            ->whereIn('account_type', ['asset','liability'])
+            ->where('parent_id IS NOT NULL')
+            ->orderBy('account_code', 'ASC')
             ->findAll();
 
         return view('accounting/transaction/index', [
-            'title'     => 'Transaction',
-            'trxTypes'  => $trxTypes
+            'title'           => 'Transaction',
+            'trxTypes'        => (new \App\Models\TransactionAccountMapModel())->findAll(),
+            'paymentAccounts' => $paymentAccounts
         ]);
     }
 
@@ -93,13 +96,13 @@ class TransactionController extends BaseController
             $branchId = $this->request->getPost('branch_id');
 
             $trxId = $service->create([
-                'company_id'   => $this->request->getPost('company_id'),
-                'branch_id'    => $branchId > 0 ? $branchId : null,
-                'trx_date'     => $this->request->getPost('trx_date'),
-                'trx_type'     => $this->request->getPost('trx_type'),
-                'reference_no' => $this->request->getPost('reference_no'),
-                'amount'       => $this->request->getPost('amount'),
-                'status'       => 'posted'
+                'company_id'        => $this->request->getPost('company_id'),
+                'branch_id'         => $branchId > 0 ? $branchId : null,
+                'trx_date'          => $this->request->getPost('trx_date'),
+                'trx_type'          => $this->request->getPost('trx_type'),
+                'reference_no'      => $this->request->getPost('reference_no'),
+                'amount'            => (float) $this->request->getPost('amount'),
+                'payment_account_id'=> $this->request->getPost('payment_account_id') // 🔥 penting
             ]);
 
             return $this->response->setJSON([
@@ -116,5 +119,4 @@ class TransactionController extends BaseController
             ]);
         }
     }
-
 }

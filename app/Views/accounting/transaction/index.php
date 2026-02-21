@@ -35,14 +35,26 @@
                     <div class="modal-body">
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Transaction Date *</label>
                                 <input type="date" name="trx_date" class="form-control" required>
                             </div>
 
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Reference No *</label>
                                 <input type="text" name="reference_no" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Payment Account *</label>
+                                <select name="payment_account_id" class="form-select" required>
+                                    <option value="">Select Account</option>
+                                    <?php foreach($paymentAccounts as $acc): ?>
+                                        <option value="<?= $acc['id'] ?>">
+                                            <?= esc($acc['account_code'].' - '.$acc['account_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                         </div>
 

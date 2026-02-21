@@ -132,7 +132,7 @@ class JournalService
             'journal_date' => $reverseDate,
             'period_month' => $reverseMonth,
             'period_year'  => $reverseYear,
-            'status'       => 'posted',
+            'status'       => $original['status'],
             'is_locked'    => 1,
             'reversal_of'  => $journalId
         ], true);
