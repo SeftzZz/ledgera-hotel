@@ -105,6 +105,13 @@
             </a>
         </li>
 
+        <li class="menu-item <?= ($uri=='income-statement')?'active':'' ?>">
+            <a href="<?= base_url('income-statement') ?>" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-chart-line"></i>
+                <div>Income Statement</div>
+            </a>
+        </li>
+
         <li class="menu-item <?= ($uri=='equity')?'active':'' ?>">
             <a href="<?= base_url('equity') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-wallet"></i>

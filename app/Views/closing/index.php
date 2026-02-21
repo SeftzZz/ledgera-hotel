@@ -15,6 +15,7 @@
                         <th>No</th>
                         <th>Period</th>
                         <th>Status</th>
+                        <th>Closed At</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -49,6 +50,7 @@ $(function(){
             { data: 'no' },
             { data: 'period' },
             { data: 'status' },
+            { data: 'closed_at' },
             { data: 'action' }
         ]
     });

@@ -8,21 +8,36 @@ class ReportService
     {
         return db_connect()->query("
             SELECT
+                coa.account_code,
                 coa.account_name,
                 coa.account_type,
-                SUM(jd.debit - jd.credit) AS balance
-            FROM journal_details jd
-            JOIN journal_headers jh ON jh.id = jd.journal_id
-            JOIN coa ON coa.id = jd.account_id
-            WHERE jh.company_id = ?
-              AND jh.period_month = ?
-              AND jh.period_year = ?
-              AND jh.status = 'posted'
-            GROUP BY coa.id
-            ORDER BY coa.account_type
-        ", [$companyId, $month, $year])->getResultArray();
-    }
 
+                CASE
+                    WHEN coa.account_type = 'revenue'
+                        THEN COALESCE(SUM(jd.credit),0) - COALESCE(SUM(jd.debit),0)
+                    ELSE
+                        COALESCE(SUM(jd.debit),0) - COALESCE(SUM(jd.credit),0)
+                END AS balance
+
+            FROM coa
+            LEFT JOIN journal_details jd 
+                ON jd.account_id = coa.id
+            LEFT JOIN journal_headers jh 
+                ON jh.id = jd.journal_id
+                AND jh.company_id = ?
+                AND jh.period_month = ?
+                AND jh.period_year = ?
+                AND jh.status = 'posted'
+
+            WHERE coa.company_id = ?
+              AND coa.parent_id IS NOT NULL
+              AND coa.account_type IN ('revenue','expense','cogs')
+
+            GROUP BY coa.id
+            ORDER BY coa.account_code
+        ", [$companyId, $month, $year, $companyId])->getResultArray();
+    }
+    
     public function balanceSheet(int $companyId, int $month, int $year)
     {
         return db_connect()->query("

@@ -35,7 +35,8 @@ class TransactionService
             'journal_no'    => 'AUTO-' . $trxId,
             'journal_date'  => $trx['trx_date'],
             'period_month'  => (int) date('m', strtotime($trx['trx_date'])),
-            'period_year'   => (int) date('Y', strtotime($trx['trx_date']))
+            'period_year'   => (int) date('Y', strtotime($trx['trx_date'])),
+            'status'        => 'posted', // 🔥 tambahkan ini
         ], [
             [
                 'account_id' => $map['debit_account_id'],

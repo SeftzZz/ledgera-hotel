@@ -21,6 +21,7 @@ class IncomeStatementController extends BaseController
         $builder = $this->db->table('coa c');
 
         $builder->select("
+            c.id,
             c.account_name,
             c.account_type,
             COALESCE(ob.opening_balance,0) as opening_balance,
@@ -30,22 +31,32 @@ class IncomeStatementController extends BaseController
 
         $builder->join(
             'coa_opening_balances ob',
-            "ob.coa_id = c.id AND ob.period_year = {$year}",
+            "ob.coa_id = c.id 
+             AND ob.period_year = {$year}
+             AND ob.company_id = {$companyId}",
             'left'
         );
 
-        $builder->join('journal_details jd','jd.account_id = c.id','left');
+        $builder->join(
+            'journal_details jd',
+            'jd.account_id = c.id',
+            'left'
+        );
+
         $builder->join(
             'journal_headers jh',
             "jh.id = jd.journal_id
-             AND jh.status='posted'
-             AND jh.period_year={$year}",
+             AND jh.status = 'posted'
+             AND jh.period_year = {$year}
+             AND jh.company_id = {$companyId}",
             'left'
         );
 
         $builder->where('c.company_id', $companyId);
+        $builder->where('c.parent_id IS NOT NULL'); // 🔥 PENTING
         $builder->whereIn('c.account_type', ['revenue','expense','cogs']);
         $builder->groupBy('c.id');
+        $builder->orderBy('c.account_code','ASC');
 
         $rows = $builder->get()->getResultArray();
 
@@ -59,42 +70,49 @@ class IncomeStatementController extends BaseController
 
         foreach ($rows as $row) {
 
-            $balance = $row['opening_balance']
-                     + $row['total_debit']
-                     - $row['total_credit'];
+            // ===== NORMAL BALANCE RULE =====
+            if ($row['account_type'] == 'revenue') {
+                $ending = $row['opening_balance']
+                        + $row['total_credit']
+                        - $row['total_debit'];
+            } else {
+                $ending = $row['opening_balance']
+                        + $row['total_debit']
+                        - $row['total_credit'];
+            }
+
+            $ending = max(0, $ending);
 
             if ($row['account_type'] == 'revenue') {
-                $amount = abs($balance);
-                $revenue[] = $row + ['balance'=>$amount];
-                $totalRevenue += $amount;
+                $revenue[] = $row + ['balance'=>$ending];
+                $totalRevenue += $ending;
             }
 
             if ($row['account_type'] == 'cogs') {
-                $amount = abs($balance);
-                $cogs[] = $row + ['balance'=>$amount];
-                $totalCogs += $amount;
+                $cogs[] = $row + ['balance'=>$ending];
+                $totalCogs += $ending;
             }
 
             if ($row['account_type'] == 'expense') {
-                $amount = abs($balance);
-                $expense[] = $row + ['balance'=>$amount];
-                $totalExpense += $amount;
+                $expense[] = $row + ['balance'=>$ending];
+                $totalExpense += $ending;
             }
         }
 
         $grossProfit = $totalRevenue - $totalCogs;
         $netProfit   = $grossProfit - $totalExpense;
 
-        return view('income_statement/index', [
-            'revenue'=>$revenue,
-            'expense'=>$expense,
-            'cogs'=>$cogs,
-            'totalRevenue'=>$totalRevenue,
-            'totalExpense'=>$totalExpense,
-            'totalCogs'=>$totalCogs,
-            'grossProfit'=>$grossProfit,
-            'netProfit'=>$netProfit,
-            'year'=>$year
+        return view('accounting/income_statement/index', [
+            'title'         => 'Income Statement',
+            'revenue'       => $revenue,
+            'expense'       => $expense,
+            'cogs'          => $cogs,
+            'totalRevenue'  => $totalRevenue,
+            'totalExpense'  => $totalExpense,
+            'totalCogs'     => $totalCogs,
+            'grossProfit'   => $grossProfit,
+            'netProfit'     => $netProfit,
+            'year'          => $year
         ]);
     }
 }

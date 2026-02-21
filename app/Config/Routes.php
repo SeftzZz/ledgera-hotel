@@ -81,6 +81,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->post('submit/(:num)', 'JournalController::submit/$1');
         $routes->post('post/(:num)', 'JournalController::post/$1');
         $routes->post('reverse/(:num)', 'JournalController::reverse/$1');
+        $routes->get('detail/(:num)', 'JournalController::detail/$1');
     });
 });
 
@@ -155,6 +156,7 @@ $routes->post('opening-balance/save', 'OpeningBalanceController::save');
 $routes->get('trial-balance', 'TrialBalanceController::index');
 $routes->get('balance-sheet', 'BalanceSheetController::index');
 $routes->get('income-statement', 'IncomeStatementController::index');
+
 // =========================
 // API – PUBLIC
 // =========================

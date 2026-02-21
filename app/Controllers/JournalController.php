@@ -35,7 +35,7 @@ class JournalController extends BaseController
 
         $builder = $this->headerModel
             ->select('journal_headers.*, 
-                      SUM(journal_details.debit) as total')
+                      COALESCE(SUM(journal_details.debit),0) as total')
             ->join('journal_details','journal_details.journal_id = journal_headers.id','left')
             ->groupBy('journal_headers.id');
 
@@ -69,17 +69,20 @@ class JournalController extends BaseController
                 default     => '<span class="badge bg-label-dark">Unknown</span>',
             };
 
+            $btnPost = $row['status'] === 'posted'
+                ? '<button class="btn btn-sm btn-success" disabled>Posted</button>'
+                : '<button class="btn btn-sm btn-success btn-post" data-id="'.$row['id'].'">Post</button>';
+
             $result[] = [
                 'no'          => $no++.'.',
                 'journal_no'  => esc($row['journal_no']),
                 'date'        => date('d-m-Y', strtotime($row['journal_date'])),
                 'description' => esc($row['description']),
-                'total'       => number_format($row['total'] ?? 0,2),
                 'status'      => $badge,
                 'action'      => '
                     <div class="d-flex gap-2">
                         <button class="btn btn-sm btn-primary btn-view" data-id="'.$row['id'].'">View</button>
-                        <button class="btn btn-sm btn-success btn-post" data-id="'.$row['id'].'">Post</button>
+                        '.$btnPost.'
                     </div>
                 '
             ];
@@ -106,6 +109,58 @@ class JournalController extends BaseController
         return response()->setJSON([
             'status' => true,
             'message' => 'Submitted for approval'
+        ]);
+    }
+
+    public function post($id)
+    {
+        $journal = $this->headerModel->find($id);
+
+        if (!$journal) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Journal not found'
+            ]);
+        }
+
+        if ($journal['status'] === 'posted') {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Already posted'
+            ]);
+        }
+
+        $this->headerModel->update($id, [
+            'status' => 'posted'
+        ]);
+
+        return $this->response->setJSON([
+            'status' => true,
+            'message' => 'Journal posted successfully'
+        ]);
+    }
+
+    public function detail($id)
+    {
+        $header = $this->headerModel->find($id);
+
+        if (!$header) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Journal not found'
+            ]);
+        }
+
+        $details = $this->detailModel
+            ->select('journal_details.*, coa.account_name')
+            ->join('coa','coa.id = journal_details.account_id')
+            ->where('journal_id',$id)
+            ->findAll();
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'header'  => $header,
+            'details' => $details
         ]);
     }
 }

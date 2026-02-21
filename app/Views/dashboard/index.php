@@ -44,7 +44,7 @@
         <div class="card-body">
             <div class="progress" style="height: 8px">
                 <div class="progress-bar bg-success"
-                     style="width: <?= $revenue > 0 ? ($profit/$revenue)*100 : 0 ?>%">
+                     style="width: <?= $revenue > 0 ? round(($profit/$revenue)*100,2) : 0 ?>%">
                 </div>
             </div>
             <small class="text-muted mt-2 d-block">

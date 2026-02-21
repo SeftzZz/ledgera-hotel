@@ -14,9 +14,9 @@
         $expense = 0;
 
         foreach($rows as $r){
-            if($r['account_type'] == 'revenue') $revenue += abs($r['balance']);
-            if($r['account_type'] == 'cogs') $cogs += abs($r['balance']);
-            if($r['account_type'] == 'expense') $expense += abs($r['balance']);
+            if($r['account_type'] == 'revenue') $revenue += $r['balance'];
+            if($r['account_type'] == 'cogs') $cogs += $r['balance'];
+            if($r['account_type'] == 'expense') $expense += $r['balance'];
         }
 
         $grossProfit = $revenue - $cogs;
@@ -33,7 +33,7 @@
                     <?php if($r['account_type'] == 'revenue'): ?>
                         <tr>
                             <td><?= esc($r['account_name']) ?></td>
-                            <td class="text-end"><?= number_format(abs($r['balance']),2) ?></td>
+                            <td class="text-end"><?= number_format($r['balance'],2) ?></td>
                         </tr>
                     <?php endif; ?>
                 <?php endforeach; ?>
@@ -49,7 +49,7 @@
                     <?php if($r['account_type'] == 'cogs'): ?>
                         <tr>
                             <td><?= esc($r['account_name']) ?></td>
-                            <td class="text-end"><?= number_format(abs($r['balance']),2) ?></td>
+                            <td class="text-end"><?= number_format($r['balance'],2) ?></td>
                         </tr>
                     <?php endif; ?>
                 <?php endforeach; ?>
@@ -70,7 +70,7 @@
                     <?php if($r['account_type'] == 'expense'): ?>
                         <tr>
                             <td><?= esc($r['account_name']) ?></td>
-                            <td class="text-end"><?= number_format(abs($r['balance']),2) ?></td>
+                            <td class="text-end"><?= number_format($r['balance'],2) ?></td>
                         </tr>
                     <?php endif; ?>
                 <?php endforeach; ?>
