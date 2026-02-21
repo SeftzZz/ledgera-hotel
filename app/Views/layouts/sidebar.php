@@ -69,6 +69,13 @@
             <span class="menu-header-text">Accounting</span>
         </li>
 
+        <li class="menu-item <?= ($uri=='opening-balance')?'active':'' ?>">
+            <a href="<?= base_url('opening-balance') ?>" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-scale"></i>
+                <div>Opening Balance</div>
+            </a>
+        </li>
+
         <li class="menu-item <?= ($uri=='journal')?'active':'' ?>">
             <a href="<?= base_url('journal') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-file-text"></i>
@@ -80,6 +87,21 @@
             <a href="<?= base_url('transaction') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-credit-card"></i>
                 <div>Transactions</div>
+            </a>
+        </li>
+
+        <!-- NEW MENU -->
+        <li class="menu-item <?= ($uri=='trial-balance')?'active':'' ?>">
+            <a href="<?= base_url('trial-balance') ?>" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-report-analytics"></i>
+                <div>Trial Balance</div>
+            </a>
+        </li>
+
+        <li class="menu-item <?= ($uri=='balance-sheet')?'active':'' ?>">
+            <a href="<?= base_url('balance-sheet') ?>" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-report-money"></i>
+                <div>Balance Sheet</div>
             </a>
         </li>
 
@@ -103,7 +125,6 @@
                 <div>Closing Period</div>
             </a>
         </li>
-
         <!-- REPORT -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Reports</span>
@@ -113,13 +134,6 @@
             <a href="<?= base_url('report') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-chart-bar"></i>
                 <div>Financial Reports</div>
-            </a>
-        </li>
-
-        <li class="menu-item <?= ($uri=='export')?'active':'' ?>">
-            <a href="<?= base_url('export') ?>" class="menu-link">
-                <i class="menu-icon tf-icons ti ti-file-export"></i>
-                <div>Export Journal</div>
             </a>
         </li>
 

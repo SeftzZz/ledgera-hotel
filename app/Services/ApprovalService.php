@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Services\JournalService;
+
 class ApprovalService
 {
     protected $db;
@@ -11,28 +13,50 @@ class ApprovalService
         $this->db = db_connect();
     }
 
-    public function init(string $module, int $transactionId, float $amount)
+    // ==========================================
+    // INIT APPROVAL
+    // ==========================================
+    public function init(string $module, int $journalId, float $amount): void
     {
+        $this->db->transStart();
+
+        $journal = $this->db->table('journal_headers')
+            ->where('id', $journalId)
+            ->get()
+            ->getRow();
+
+        if (!$journal) {
+            throw new \Exception('Journal not found');
+        }
+
+        if ($journal->status !== 'draft') {
+            throw new \Exception('Journal already submitted');
+        }
+
         $flow = $this->db->table('approval_flows')
             ->where('module', $module)
             ->where('is_active', 1)
             ->get()
             ->getRow();
 
-        if (! $flow) {
-            return $this->autoApprove($module, $transactionId);
+        if (!$flow) {
+            $this->autoApprove($module, $journalId);
+            $this->db->transComplete();
+            return;
         }
 
         $rule = $this->db->table('approval_rules')
             ->where('approval_flow_id', $flow->id)
             ->where('min_amount <=', $amount)
-            ->groupBy('id')
+            ->where("(max_amount IS NULL OR max_amount >= {$amount})")
             ->orderBy('min_amount', 'DESC')
             ->get()
             ->getRow();
 
-        if (! $rule || $rule->auto_approve) {
-            return $this->autoApprove($module, $transactionId);
+        if (!$rule || $rule->auto_approve) {
+            $this->autoApprove($module, $journalId);
+            $this->db->transComplete();
+            return;
         }
 
         $steps = $this->db->table('approval_steps')
@@ -41,55 +65,148 @@ class ApprovalService
             ->get()
             ->getResult();
 
+        if (!$steps) {
+            throw new \Exception('Approval steps not configured');
+        }
+
         foreach ($steps as $step) {
             $this->db->table('approval_logs')->insert([
-                'module' => $module,
-                'transaction_id' => $transactionId,
+                'module'     => $module,
+                'journal_id' => $journalId,
                 'step_order' => $step->step_order,
-                'role_id' => $step->role_id,
-                'status' => 'pending'
+                'role_id'    => $step->role_id,
+                'status'     => 'pending'
             ]);
         }
 
-        return true;
+        $this->db->table('journal_headers')
+            ->where('id', $journalId)
+            ->update(['status' => 'waiting']);
+
+        $this->db->transComplete();
     }
 
-    private function autoApprove($module, $transactionId)
+    // ==========================================
+    // APPROVE STEP
+    // ==========================================
+    public function approve(string $module, int $journalId, int $userId): void
     {
-        $this->db->table('approval_logs')->insert([
-            'module' => $module,
-            'transaction_id' => $transactionId,
-            'status' => 'approved',
-            'note' => 'Auto approved',
-            'approved_at' => date('Y-m-d H:i:s')
-        ]);
+        $this->db->transStart();
+
+        // Lock journal row
+        $journal = $this->db->query(
+            "SELECT * FROM journal_headers WHERE id = ? FOR UPDATE",
+            [$journalId]
+        )->getRow();
+
+        if (!$journal) {
+            throw new \Exception('Journal not found');
+        }
+
+        if ($journal->status !== 'waiting') {
+            throw new \Exception('Journal not in waiting status');
+        }
+
+        // Ambil step paling kecil yg masih pending
+        $step = $this->db->table('approval_logs')
+            ->where('module', $module)
+            ->where('journal_id', $journalId)
+            ->where('status', 'pending')
+            ->orderBy('step_order', 'ASC')
+            ->get()
+            ->getRow();
+
+        if (!$step) {
+            throw new \Exception('No pending approval step');
+        }
+
+        if (!userHasRole($userId, $step->role_id)) {
+            throw new \Exception('Not authorized');
+        }
+
+        // Approve current step
+        $this->db->table('approval_logs')
+            ->where('id', $step->id)
+            ->update([
+                'status'      => 'approved',
+                'approved_by' => $userId,
+                'approved_at' => date('Y-m-d H:i:s')
+            ]);
+
+        // Cek apakah masih ada pending step
+        $remaining = $this->db->table('approval_logs')
+            ->where('journal_id', $journalId)
+            ->where('status', 'pending')
+            ->countAllResults();
+
+        if ($remaining == 0) {
+
+            $this->db->table('journal_headers')
+                ->where('id', $journalId)
+                ->update(['status' => 'approved']);
+
+            (new JournalService())->post($journalId);
+        }
+
+        $this->db->transComplete();
     }
 
-    public function approve($module, $transactionId)
+    // ==========================================
+    // REJECT
+    // ==========================================
+    public function reject(string $module, int $journalId, int $userId, string $reason): void
     {
-        $user = service('request')->user;
+        $this->db->transStart();
 
         $step = $this->db->table('approval_logs')
             ->where('module', $module)
-            ->where('transaction_id', $transactionId)
+            ->where('journal_id', $journalId)
             ->where('status', 'pending')
             ->orderBy('step_order')
             ->get()
             ->getRow();
 
-        if (! $step) return;
+        if (!$step) {
+            throw new \Exception('No pending step to reject');
+        }
 
-        // check role user
-        if (! userHasRole($user->sub, $step->role_id)) {
+        if (!userHasRole($userId, $step->role_id)) {
             throw new \Exception('Not authorized');
         }
 
         $this->db->table('approval_logs')
             ->where('id', $step->id)
             ->update([
-                'status' => 'approved',
-                'approved_by' => $user->sub,
+                'status'      => 'rejected',
+                'note'        => $reason,
+                'approved_by' => $userId,
                 'approved_at' => date('Y-m-d H:i:s')
             ]);
+
+        $this->db->table('journal_headers')
+            ->where('id', $journalId)
+            ->update(['status' => 'rejected']);
+
+        $this->db->transComplete();
+    }
+
+    // ==========================================
+    // AUTO APPROVE
+    // ==========================================
+    private function autoApprove(string $module, int $journalId): void
+    {
+        $this->db->table('approval_logs')->insert([
+            'module'     => $module,
+            'journal_id' => $journalId,
+            'status'     => 'approved',
+            'note'       => 'Auto approved',
+            'approved_at'=> date('Y-m-d H:i:s')
+        ]);
+
+        $this->db->table('journal_headers')
+            ->where('id', $journalId)
+            ->update(['status' => 'approved']);
+
+        (new JournalService())->post($journalId);
     }
 }

@@ -93,4 +93,19 @@ class JournalController extends BaseController
         ]);
     }
 
+    public function submit($id)
+    {
+        $journal = $this->header->find($id);
+
+        (new ApprovalService())->init(
+            'journal',
+            $id,
+            $journal['total_amount']
+        );
+
+        return response()->setJSON([
+            'status' => true,
+            'message' => 'Submitted for approval'
+        ]);
+    }
 }

@@ -29,8 +29,6 @@ class JournalService
             $data['period_year']
         );
 
-        $this->db->transStart();
-
         // resolve fiscal year
         $fy = (new FiscalYearModel())
             ->where('company_id', $data['company_id'])
@@ -47,41 +45,102 @@ class JournalService
             $this->detail->insert($line);
         }
 
-        $this->db->transComplete();
         return $journalId;
     }
 
     public function post(int $journalId): void
     {
-        $journal = $this->header->find($journalId);
+        $this->db->transStart();
+
+        // Lock row
+        $journal = $this->db->query(
+            "SELECT * FROM journal_headers WHERE id = ? FOR UPDATE",
+            [$journalId]
+        )->getRowArray();
+
+        if (!$journal) {
+            throw new \Exception('Journal not found');
+        }
 
         if ($journal['status'] !== 'approved') {
             throw new \Exception('Journal not approved');
         }
 
+        if ($journal['is_locked']) {
+            throw new \Exception('Journal already posted');
+        }
+
+        AccountingService::assertPeriodOpen(
+            $journal['company_id'],
+            $journal['period_month'],
+            $journal['period_year']
+        );
+
         $this->header->update($journalId, [
             'status'    => 'posted',
             'is_locked' => 1
         ]);
-    }
 
+        $this->db->transComplete();
+    }
+    
     public function reverse(int $journalId, string $reverseDate): int
     {
-        $original = $this->header->find($journalId);
-        $details  = $this->detail->where('journal_id', $journalId)->findAll();
-
         $this->db->transStart();
 
+        // Lock original journal
+        $original = $this->db->query(
+            "SELECT * FROM journal_headers WHERE id = ? FOR UPDATE",
+            [$journalId]
+        )->getRowArray();
+
+        if (!$original) {
+            throw new \Exception('Journal not found');
+        }
+
+        if ($original['status'] !== 'posted') {
+            throw new \Exception('Only posted journal can be reversed');
+        }
+
+        if ($original['reversal_of'] !== null) {
+            throw new \Exception('Journal is already a reversal entry');
+        }
+
+        // Check if already reversed
+        $alreadyReversed = $this->header
+            ->where('reversal_of', $journalId)
+            ->first();
+
+        if ($alreadyReversed) {
+            throw new \Exception('Journal already reversed');
+        }
+
+        $reverseMonth = date('m', strtotime($reverseDate));
+        $reverseYear  = date('Y', strtotime($reverseDate));
+
+        AccountingService::assertPeriodOpen(
+            $original['company_id'],
+            $reverseMonth,
+            $reverseYear
+        );
+
+        // Insert reversal header
         $newId = $this->header->insert([
             'company_id'   => $original['company_id'],
             'branch_id'    => $original['branch_id'],
             'journal_no'   => $original['journal_no'] . '-REV',
             'journal_date' => $reverseDate,
-            'period_month'=> date('m', strtotime($reverseDate)),
-            'period_year' => date('Y', strtotime($reverseDate)),
+            'period_month' => $reverseMonth,
+            'period_year'  => $reverseYear,
             'status'       => 'posted',
+            'is_locked'    => 1,
             'reversal_of'  => $journalId
         ], true);
+
+        // Reverse details
+        $details = $this->detail
+            ->where('journal_id', $journalId)
+            ->findAll();
 
         foreach ($details as $d) {
             $this->detail->insert([
@@ -93,6 +152,7 @@ class JournalService
         }
 
         $this->db->transComplete();
+
         return $newId;
     }
 }

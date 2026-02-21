@@ -118,20 +118,43 @@ $routes->group('equity', ['filter' => 'auth'], function ($routes) {
 
 });
 
-// $routes->group('equity', ['filter' => 'auth'], function ($routes) {
-//     $routes->get('/', 'EquityController::index', ['filter' => 'permission:equity.view']);
-//     $routes->post('datatable', 'EquityController::datatable', ['filter' => 'permission:equity.view']);
-//     $routes->post('store', 'EquityController::store', ['filter' => 'permission:equity.create']);
-//     $routes->post('update', 'EquityController::update', ['filter' => 'permission:equity.edit']);
-//     $routes->post('delete', 'EquityController::delete', ['filter' => 'permission:equity.delete']);
-//     $routes->post('get', 'EquityController::get');
-//     $routes->get('opening-balance', 'EquityController::openingBalance', ['filter' => 'permission:equity.create']);
-//     $routes->post('opening-balance/save', 'EquityController::saveOpeningBalance', ['filter' => 'permission:equity.create']);
-// });
+// Transaction
+$routes->group('transaction', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'TransactionController::index');
+    $routes->post('datatable', 'TransactionController::datatable');
+    $routes->post('store', 'TransactionController::store');
+});
 
+// Approval
+$routes->group('approval', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'ApprovalController::index');
+    $routes->post('datatable', 'ApprovalController::datatable');
+    $routes->post('approve/(:num)', 'ApprovalController::approve/$1');
+    $routes->post('reject/(:num)', 'ApprovalController::reject/$1');
+    $routes->post('history/(:num)', 'ApprovalController::history/$1');
+});
 
+// Closing periode
+$routes->group('closing', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'ClosingController::index');
+    $routes->post('datatable', 'ClosingController::datatable');
+    $routes->post('close/(:num)', 'ClosingController::close/$1');
+    $routes->post('open/(:num)', 'ClosingController::open/$1');
+});
 
+// Financial Reports
+$routes->group('report', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'ReportController::index');
+    $routes->get('profit-loss', 'ReportController::profitLoss');
+});
 
+$routes->get('export/journals', 'ExportController::journals', ['filter' => 'auth']);
+
+$routes->get('opening-balance', 'OpeningBalanceController::index');
+$routes->post('opening-balance/save', 'OpeningBalanceController::save');
+$routes->get('trial-balance', 'TrialBalanceController::index');
+$routes->get('balance-sheet', 'BalanceSheetController::index');
+$routes->get('income-statement', 'IncomeStatementController::index');
 // =========================
 // API – PUBLIC
 // =========================

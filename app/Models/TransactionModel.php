@@ -15,6 +15,13 @@ class TransactionModel extends Model
         'trx_date',
         'trx_type',
         'reference_no',
-        'amount'
+        'amount',
+        'debit_account_id',
+        'credit_account_id',
+        'journal_id',
+        'status'
     ];
+
+    protected $useTimestamps = true;
+
 }
