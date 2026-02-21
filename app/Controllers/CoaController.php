@@ -9,47 +9,40 @@ use App\Models\CoaOpeningBalanceModel;
 
 class CoaController extends BaseController
 {
-    protected CoaModel $coaModel;
-    protected CompanyModel $companyModel;
-    protected CoaOpeningBalanceModel $openingModel;
+    protected $coa;
+    protected $opening;
 
     public function __construct()
     {
-        $this->coaModel      = new CoaModel();
-        $this->companyModel  = new CompanyModel();
-        $this->openingModel  = new CoaOpeningBalanceModel();
+        $this->coaModel = new CoaModel();
+        $this->companyModel = new CompanyModel();
+        $this->opening = new CoaOpeningBalanceModel();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | INDEX
-    |--------------------------------------------------------------------------
-    */
     public function index()
     {
-        return view('coa/index', [
-            'title'     => 'COA',
+        $data = [
+            'title'  => 'COA',
             'companies' => $this->companyModel
                 ->where('deleted_at', null)
                 ->orderBy('company_name', 'ASC')
                 ->findAll()
-        ]);
+        ];
+
+        return view('coa/index', $data);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DATATABLE
-    |--------------------------------------------------------------------------
-    */
+    // DATATABLE SERVER SIDE
     public function datatable()
     {
-        $request      = service('request');
-        $companyId    = (int) session()->get('company_id');
-        $searchValue  = $request->getPost('search')['value'] ?? null;
-        $length       = (int) $request->getPost('length');
-        $start        = (int) $request->getPost('start');
-        $draw         = (int) $request->getPost('draw');
-        $order        = $request->getPost('order');
+        $request = service('request');
+
+        $searchValue = $request->getPost('search')['value'] ?? null;
+        $length = (int) $request->getPost('length');
+        $start  = (int) $request->getPost('start');
+        $draw   = (int) $request->getPost('draw');
+
+        $order = $request->getPost('order');
 
         $orderColumns = [
             null,
@@ -64,208 +57,112 @@ class CoaController extends BaseController
             null
         ];
 
-        $builder = $this->baseQuery($companyId);
+        $companyId = (int) session()->get('company_id');
 
-        // TOTAL
-        $recordsTotal = (clone $builder)->countAllResults(false);
-
-        // SEARCH
-        if ($searchValue) {
-            $builder->groupStart()
-                ->like('coa.account_code', $searchValue)
-                ->orLike('companies.company_name', $searchValue)
-                ->orLike('coa.account_name', $searchValue)
-                ->orLike('coa.account_type', $searchValue)
-                ->orLike('coa.cashflow_type', $searchValue)
-                ->orLike('coa.is_active', $searchValue)
-            ->groupEnd();
-        }
-
-        $recordsFiltered = (clone $builder)->countAllResults(false);
-
-        // ORDER
-        if ($order) {
-            $idx = (int) $order[0]['column'];
-            if (!empty($orderColumns[$idx])) {
-                $builder->orderBy($orderColumns[$idx], $order[0]['dir']);
-            }
-        } else {
-            $builder->orderBy('coa.id', 'DESC');
-        }
-
-        $data = $builder
-            ->limit($length, $start)
-            ->get()
-            ->getResultArray();
-
-        return $this->response->setJSON([
-            'draw'            => $draw,
-            'recordsTotal'    => $recordsTotal,
-            'recordsFiltered' => $recordsFiltered,
-            'data'            => $this->formatData($data, $start)
-        ]);
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | STORE
-    |--------------------------------------------------------------------------
-    */
-    public function store()
-    {
-        $request = service('request');
-        $companyId = (int) $request->getPost('kantor_coa');
-        $accountCode = trim($request->getPost('kode_coa'));
-
-        // VALIDASI UNIK
-        if ($this->coaModel
-            ->where('company_id', $companyId)
-            ->where('account_code', $accountCode)
-            ->first()) {
-
-            return $this->response->setJSON([
-                'status'  => false,
-                'message' => 'Account code already exists'
-            ]);
-        }
-
-        $this->coaModel->insert([
-            'company_id'    => $companyId,
-            'account_code'  => $accountCode,
-            'account_name'  => $request->getPost('nama_coa'),
-            'account_type'  => $request->getPost('tipe_coa'),
-            'parent_id'     => $request->getPost('induk_coa') ?: null,
-            'cashflow_type' => $request->getPost('aruskas_coa'),
-            'is_active'     => $request->getPost('status_coa'),
-            'created_at'    => date('Y-m-d H:i:s'),
-            'created_by'    => session()->get('user_id'),
-            'updated_by'    => session()->get('user_id')
-        ]);
-
-        return $this->response->setJSON([
-            'status'  => true,
-            'message' => 'Data added successfully'
-        ]);
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | OPENING BALANCE VIEW
-    |--------------------------------------------------------------------------
-    */
-    public function openingBalance()
-    {
-        $companyId = session()->get('company_id');
-
-        $accounts = $this->coaModel
-            ->where('company_id', $companyId)
-            ->where('is_active', 1)
-            ->orderBy('account_code', 'ASC')
-            ->findAll();
-
-        return view('accounting/equity/opening_balance', [
-            'title'    => 'Opening Balance',
-            'accounts' => $accounts
-        ]);
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | SAVE OPENING BALANCE
-    |--------------------------------------------------------------------------
-    */
-    public function saveOpeningBalance()
-    {
-        $companyId = session()->get('company_id');
-        $rows      = $this->request->getJSON(true);
-
-        $totalDebit  = 0;
-        $totalCredit = 0;
-
-        foreach ($rows as $row) {
-            $totalDebit  += (float) ($row['debit'] ?? 0);
-            $totalCredit += (float) ($row['credit'] ?? 0);
-        }
-
-        if ($totalDebit !== $totalCredit) {
-            return $this->response->setJSON([
-                'status'  => false,
-                'message' => 'Opening balance not balanced'
-            ]);
-        }
-
-        $this->openingModel
-            ->where('company_id', $companyId)
-            ->delete();
-
-        foreach ($rows as $row) {
-
-            if (empty($row['debit']) && empty($row['credit'])) {
-                continue;
-            }
-
-            $this->openingModel->insert([
-                'coa_id'     => $row['coa_id'],
-                'company_id' => $companyId,
-                'debit'      => $row['debit'] ?? 0,
-                'credit'     => $row['credit'] ?? 0
-            ]);
-        }
-
-        return $this->response->setJSON([
-            'status'  => true,
-            'message' => 'Opening Balance Saved'
-        ]);
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | BASE QUERY
-    |--------------------------------------------------------------------------
-    */
-    private function baseQuery(int $companyId)
-    {
-        $builder = $this->coaModel
+        // QUERY FILTERED (COUNT)
+        $countQuery = $this->coaModel
             ->select('coa.*, companies.company_name, parent.account_code AS parent_code')
             ->join('companies', 'companies.id = coa.company_id', 'left')
             ->join('coa parent', 'parent.id = coa.parent_id', 'left')
             ->where('coa.deleted_at', null);
 
+        // Company Scope
         if ($companyId !== 0) {
-            $builder->where('coa.company_id', $companyId);
+            $countQuery->where('coa.company_id', $companyId);
         }
 
-        return $builder;
-    }
+        if ($searchValue) {
+            $countQuery->groupStart()
+                ->like('coa.account_code', $searchValue)
+                ->orLike('companies.company_name', $searchValue)
+                ->orLike('coa.account_name', $searchValue)
+                ->orLike('coa.account_type ', $searchValue)
+                ->orLike('coa.cashflow_type ', $searchValue)
+                ->orLike('coa.is_active', $searchValue)
+            ->groupEnd();
+        }
 
-    /*
-    |--------------------------------------------------------------------------
-    | FORMAT DATATABLE RESULT
-    |--------------------------------------------------------------------------
-    */
-    private function formatData(array $data, int $start): array
-    {
+        $recordsFiltered = $countQuery->countAllResults();
+
+        // QUERY TOTAL
+        $totalQuery = $this->coaModel
+            ->select('coa.*, companies.company_name, parent.account_code AS parent_code')
+            ->join('companies', 'companies.id = coa.company_id', 'left')
+            ->join('coa parent', 'parent.id = coa.parent_id', 'left')
+            ->where('coa.deleted_at', null);
+
+        // Company Scope
+        if ($companyId !== 0) {
+            $totalQuery->where('coa.company_id', $companyId);
+        }
+
+        $recordsTotal = $totalQuery->countAllResults();
+
+        // QUERY DATA
+        $dataQuery = $this->coaModel
+            ->select('coa.*, companies.company_name, parent.account_code AS parent_code')
+            ->join('companies', 'companies.id = coa.company_id', 'left')
+            ->join('coa parent', 'parent.id = coa.parent_id', 'left')
+            ->where('coa.deleted_at', null);
+
+        // Company Scope
+        if ($companyId !== 0) {
+            $dataQuery->where('coa.company_id', $companyId);
+        }
+
+        if ($searchValue) {
+            $dataQuery->groupStart()
+                ->like('coa.account_code', $searchValue)
+                ->orLike('companies.company_name', $searchValue)
+                ->orLike('coa.account_name', $searchValue)
+                ->orLike('coa.account_type ', $searchValue)
+                ->orLike('coa.cashflow_type ', $searchValue)
+                ->orLike('coa.is_active', $searchValue)
+            ->groupEnd();
+        }
+
+        // ORDERING
+        if ($order) {
+            $idx = (int) $order[0]['column'];
+            if (!empty($orderColumns[$idx])) {
+                $dataQuery->orderBy($orderColumns[$idx], $order[0]['dir']);
+            }
+        } else {
+            $dataQuery->orderBy('coa.id', 'DESC');
+        }
+
+        $data = $dataQuery
+            ->limit($length, $start)
+            ->get()
+            ->getResultArray();
+
+        // FORMAT DATA
         $result = [];
         $no = $start + 1;
-
         foreach ($data as $row) {
-
-            $badgeStatus = $row['is_active']
-                ? '<span class="badge bg-label-success">Active</span>'
-                : '<span class="badge bg-label-danger">Inactive</span>';
+            $status = strtolower($row['is_active']);
+            $badgeStatus = match ($status) {
+                '1' => '<span class="badge bg-label-success">Active</span>',
+                '0' => '<span class="badge bg-label-danger">Inactive</span>',
+                default    => '<span class="badge bg-label-secondary">'.ucfirst(esc($status)).'</span>',
+            };
 
             $actionBtn = '<div class="d-flex gap-2">';
 
             if (hasPermission('coa.edit')) {
-                $actionBtn .= '<button class="btn btn-sm btn-icon btn-primary btn-edit" data-id="'.$row['id'].'">
-                                <i class="ti ti-pencil"></i>
-                               </button>';
+                $actionBtn .= '
+                    <button class="btn btn-sm btn-icon btn-primary btn-edit" data-id="'.$row['id'].'" title="Edit">
+                        <i class="ti ti-pencil"></i>
+                    </button>
+                ';
             }
 
-            if (hasPermission('coa.delete')) {
-                $actionBtn .= '<button class="btn btn-sm btn-icon btn-danger btn-delete" data-id="'.$row['id'].'">
-                                <i class="ti ti-trash"></i>
-                               </button>';
+            if (hasPermission('coa.delete') && session()->get('user_id') != $row['id']) {
+                $actionBtn .= '
+                    <button class="btn btn-sm btn-icon btn-danger btn-delete" data-id="'.$row['id'].'" title="Delete">
+                        <i class="ti ti-trash"></i>
+                    </button>
+                ';
             }
 
             $actionBtn .= '</div>';
@@ -283,6 +180,152 @@ class CoaController extends BaseController
             ];
         }
 
-        return $result;
+        return $this->response->setJSON([
+            'draw'            => $draw,
+            'recordsTotal'    => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data'            => $result
+        ]);
     }
+
+    public function store()
+    {
+        $request = service('request');
+        $data = [
+            'company_id'    => $request->getPost('kantor_coa'),
+            'account_code'  => $request->getPost('kode_coa'),
+            'account_name'  => $request->getPost('nama_coa'),
+            'account_type'  => $request->getPost('tipe_coa'),
+            'parent_id'     => $request->getPost('induk_coa'),
+            'cashflow_type' => $request->getPost('aruskas_coa'),
+            'is_active'     => $request->getPost('status_coa'),
+            'created_at'    => date('Y-m-d H:i:s'),
+            'created_by'    => session()->get('user_id'),
+            'updated_at'    => date('Y-m-d H:i:s'),
+            'updated_by'    => session()->get('user_id')
+        ];
+
+        $this->coaModel->insert($data);
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'Data added successfully'
+        ]);
+    }
+
+    public function getById()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(404);
+        }
+
+        $id = $this->request->getPost('id');
+
+        $coa = $this->coaModel->find($id);
+
+        if (!$coa) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Data tidak ditemukan'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status' => true,
+            'data'   => $coa
+        ]);
+    }
+
+    public function update()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(404);
+        }
+
+        $id = $this->request->getPost('id');
+        $coa = $this->coaModel->find($id);
+
+        if (!$coa) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Data tidak ditemukan'
+            ]);
+        }
+
+        $data = [
+            'company_id'    => $this->request->getPost('kantor_coa'),
+            'account_code'  => $this->request->getPost('kode_coa'),
+            'account_name'  => $this->request->getPost('nama_coa'),
+            'account_type'  => $this->request->getPost('tipe_coa'),
+            'parent_id'     => $this->request->getPost('induk_coa'),
+            'cashflow_type' => $this->request->getPost('aruskas_coa'),
+            'is_active'     => $this->request->getPost('status_coa'),
+            'updated_at'    => date('Y-m-d H:i:s'),
+            'updated_by'    => session()->get('user_id')
+        ];
+
+        if ($this->coaModel->update($id, $data)) {
+            return $this->response->setJSON([
+                'status'  => true,
+                'message' => 'Data updated successfully'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => false,
+            'message' => 'Gagal memperbarui data'
+        ]);
+    }
+
+    public function openingBalance()
+    {
+        $companyId = session()->get('company_id');
+
+        $coaModel = new \App\Models\CoaModel();
+
+        $accounts = $coaModel
+            ->where('company_id', $companyId)
+            ->where('is_active', 1)
+            ->orderBy('account_code', 'ASC')
+            ->findAll();
+
+        return view('accounting/equity/opening_balance', [
+            'title'  => 'Opening Balance',
+            'accounts' => $accounts
+        ]);
+    }
+
+    public function saveOpeningBalance()
+    {
+        $companyId = session()->get('company_id');
+        $data = $this->request->getJSON(true);
+
+        $model = new \App\Models\CoaOpeningBalanceModel();
+
+        // delete existing first
+        $model->where('company_id', $companyId)->delete();
+
+        foreach ($data as $row) {
+
+            if (empty($row['debit']) && empty($row['credit'])) {
+                continue;
+            }
+
+            $model->insert([
+                'coa_id'     => $row['coa_id'],
+                'company_id' => $companyId,
+                'debit'      => $row['debit'] ?? 0,
+                'credit'     => $row['credit'] ?? 0
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status' => true,
+            'message' => 'Opening Balance Saved'
+        ]);
+    }
+
+
+
 }
+

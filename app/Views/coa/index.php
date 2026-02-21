@@ -31,7 +31,7 @@
                                 <div class="modal fade" id="modalAddCoa" tabindex="-1" aria-hidden="true">
 									<div class="modal-dialog modal-lg modal-dialog-centered">
 									    <div class="modal-content">
-										    <form id="formAddUser" enctype="multipart/form-data">
+										    <form id="formAddCoa" enctype="multipart/form-data">
 										        <div class="modal-header">
 										          	<h5 class="modal-title">Add New COA</h5>
 										          	<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -100,9 +100,79 @@
 									</div>
 								</div>
 				                
-
 				                <!-- edit modal form -->
-				                
+				                <div class="modal fade" id="modalEditCoa" tabindex="-1" aria-hidden="true">
+									<div class="modal-dialog modal-lg modal-dialog-centered">
+									    <div class="modal-content">
+										    <form id="formEditCoa" enctype="multipart/form-data">
+										        <div class="modal-header">
+										          	<h5 class="modal-title">Edit COA</h5>
+										          	<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+										        </div>
+
+										        <div class="modal-body">
+										          	<input type="hidden" name="id" id="edit_id">
+										          	<div class="row">
+										          		<div class="col-md-6 mb-3">
+								                            <label class="form-label" for="edit_company_user">Company *</label>
+								                        	<select
+															   	name="company_user"
+															    id="edit_company_user"
+															    class="form-select select2"
+															    <?= !$isSuperAdmin ? 'disabled' : '' ?>>
+															    <option value=""></option>
+															    <?php foreach ($companies as $company): ?>
+															        <option value="<?= $company['id'] ?>">
+															            <?= esc($company['company_name']) ?>
+															        </option>
+															    <?php endforeach; ?>
+															</select>
+								                        </div>
+								                        <div class="col-md-6 mb-3">
+								                            <label class="form-label" for="edit_kode_coa">Account Code *</label>
+										            		<input type="text" class="form-control" name="kode_coa" id="edit_kode_coa" required>
+								                        </div>
+								                    </div>
+								                    <div class="row">
+								                    	<div class="col-md-6 mb-3">
+								                            <label class="form-label" for="edit_nama_coa">Account Name *</label>
+										            		<input type="text" class="form-control" name="nama_coa" id="edit_nama_coa" required>
+								                        </div>
+								                        <div class="col-md-6 mb-3">
+								                            <label class="form-label" for="edit_tipe_coa">Account Type *</label>
+										            		<input type="text" class="form-control" name="tipe_coa" id="edit_tipe_coa" required>
+								                        </div>
+								                    </div>
+								                    <div class="row">
+								                    	<div class="col-md-6 mb-3">
+								                            <label class="form-label" for="edit_induk_coa">Parent Code</label>
+										            		<input type="text" class="form-control" name="induk_coa" id="edit_induk_coa" required>
+								                        </div>
+								                        <div class="col-md-6 mb-3">
+								                            <label class="form-label" for="edit_aruskas_coa">Cashflow Type</label>
+										            		<input type="text" class="form-control" name="aruskas_coa" id="edit_aruskas_coa" required>
+								                        </div>
+								                    </div>
+								                    <div class="row">
+								                    	<div class="col-md-12 mb-12">
+								                            <label class="form-label" for="edit_status_coa">Status *</label>
+								                            <select name="status_coa" id="edit_status_coa" class="form-control required">
+							                                    <option value="1">Active</option>
+							                                    <option value="0">Inactive</option>
+							                                </select>
+								                        </div>
+								                    </div>
+										        </div>
+
+										        <div class="modal-footer">
+										        	<input type="hidden" name="kantor_coa" id="hidden_edit_kantor_coa">
+										        	<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+										          	<button type="submit" class="btn btn-primary">Save</button>
+										        </div>
+										    </form>
+									    </div>
+									</div>
+								</div>
                             </div>
                         <?= $this->endSection() ?>
 
@@ -301,14 +371,14 @@
 								                id: 'hidden_kantor_coa',
 								                name: 'kantor_coa',
 								                value: sessionCompany
-								            }).appendTo('#formAddUser');
+								            }).appendTo('#formAddCoa');
 								        }
 								    }
 								});
 
 								// RESET FORM ADD USER jika di tutup
 							    $('#modalAddCoa').on('hidden.bs.modal', function () {
-							        const $form = $('#formAddUser');
+							        const $form = $('#formAddCoa');
 
 							        // reset form native
 							        $form[0].reset();
@@ -328,14 +398,14 @@
 							        $form.find('.invalid-feedback').remove();
 							    });
 
-							    $('#modalEditUser').on('shown.bs.modal', function () {
+							    $('#modalEditCoa').on('shown.bs.modal', function () {
 							        initCompanySelect2('#edit_kantor_coa', $(this));
 								    if (!isSuperAdmin) {
 								         $('#edit_kantor_coa').prop('disabled', true);
 								    }
 							    });
 
-							    // Auto Set Company Add User
+							    // Auto Set Company Add Coa
 							    function lockAddCompany() {
 							        $('#add_kantor_coa')
 							            .val(sessionCompany)
@@ -348,7 +418,7 @@
 							            .off('select2:opening select2:selecting');
 							    }
 
-							    // Auto Set Company Edit User
+							    // Auto Set Company Edit Coa
 							    function lockEditCompany() {
 							        $('#edit_kantor_coa')
 							            .val(sessionCompany)
@@ -380,38 +450,27 @@
 							            const d = res.data;
 
 							            $('#edit_id').val(d.id);
-							            $('#edit_name_user').val(d.name);
-							            $('#edit_hp_user').val(d.phone);
-							            $('#edit_status_user').val(d.is_active);
 							            $('#edit_kantor_coa').val(d.company_id).trigger('change');
+							            $('#edit_kode_coa').val(d.account_code);
+							            $('#edit_nama_coa').val(d.account_name);
+							            $('#edit_tipe_coa').val(d.account_type);
+							            $('#edit_induk_coa').val(d.parent_id);
+							            $('#edit_aruskas_coa').val(d.cashflow_type);
+							            $('#edit_status_coa').val(d.is_active);
 										$('#hidden_edit_kantor_coa').val(d.company_id);
 
-							            if (d.photo) {
-							                $('#preview_foto').attr('src', "<?= base_url('uploads/profiles/') ?>" + d.photo).show();
-							            } else {
-							                $('#preview_foto').hide();
-							            }
-
-							            $('#modalEditUser').modal('show');
+							            $('#modalEditCoa').modal('show');
 							        }, 'json');
-							    });
-
-							    // PREVIEW FOTO
-							    $('#edit_foto').on('change', function () {
-							        const file = this.files[0];
-							        if (file) {
-							            $('#preview_foto').attr('src', URL.createObjectURL(file));
-							        }
 							    });
 							});
 
 							// Submit form insert data
-							$('#formAddUser').on('submit', function (e) {
+							$('#formAddCoa').on('submit', function (e) {
 							    e.preventDefault();
 							    let formData = new FormData(this);
 							    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 							    Swal.fire({
-							        title: 'Add new hotel?',
+							        title: 'Add new COA?',
 							        icon: 'question',
 							        showCancelButton: true,
 							        reverseButtons: true,
@@ -448,7 +507,7 @@
 							});
 
 							// Submit form edit data
-							$('#formEditUser').on('submit', function (e) {
+							$('#formEditCoa').on('submit', function (e) {
 							    e.preventDefault();
 							    let formData = new FormData(this);
 							    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
@@ -479,7 +538,7 @@
 									                    showConfirmButton: false
 									                });
 
-									                $('#modalEditUser').modal('hide');
+									                $('#modalEditCoa').modal('hide');
 									                $('.dtCoa').DataTable().ajax.reload(null, false);
 									            } else {
 									                Swal.fire('Failed', res.message, 'error');
@@ -507,7 +566,7 @@
 							    }).then((result) => {
 							        if (result.isConfirmed) {
 							            $.ajax({
-							                url: "<?= base_url('users/delete') ?>",
+							                url: "<?= base_url('coa/delete') ?>",
 							                type: "POST",
 							                dataType: "json",
 							                data: {

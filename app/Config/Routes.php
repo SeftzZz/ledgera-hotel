@@ -97,12 +97,12 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 
 // COA (WEB)
 $routes->group('coa', ['filter' => 'auth'], function ($routes) {
-    $routes->get('/', 'CoaController::index');
-    $routes->post('datatable', 'CoaController::datatable');
-    $routes->post('store', 'CoaController::store');
-    $routes->post('get', 'CoaController::get');
-    $routes->post('update', 'CoaController::update');
-    $routes->post('delete', 'CoaController::delete');
+    $routes->get('/', 'CoaController::index', ['filter' => 'permission:coa.view']);
+    $routes->post('datatable', 'CoaController::datatable', ['filter' => 'permission:coa.view']);
+    $routes->post('store', 'CoaController::store', ['filter' => 'permission:coa.create']);
+    $routes->post('get', 'CoaController::getById', ['filter' => 'permission:coa.edit']);
+    $routes->post('update', 'CoaController::update', ['filter' => 'permission:coa.edit']);
+    $routes->post('delete', 'CoaController::delete', ['filter' => 'permission:coa.delete']);
 });
 
 // equity
