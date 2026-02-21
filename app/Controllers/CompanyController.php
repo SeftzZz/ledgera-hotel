@@ -109,4 +109,57 @@ class CompanyController extends BaseController
         ]);
     }
 
+    public function store(): ResponseInterface
+    {
+        try {
+
+            $request = service('request');
+
+            $companyCode = trim($request->getPost('company_code'));
+            $companyName = trim($request->getPost('company_name'));
+            $companyAddr = trim($request->getPost('company_addr'));
+
+            if (empty($companyCode) || empty($companyName)) {
+                return $this->response->setJSON([
+                    'status'  => false,
+                    'message' => 'Company code and name are required'
+                ]);
+            }
+
+            // Cek duplicate company code
+            $exists = $this->model
+                ->where('company_code', $companyCode)
+                ->where('deleted_at', null)
+                ->first();
+
+            if ($exists) {
+                return $this->response->setJSON([
+                    'status'  => false,
+                    'message' => 'Company code already exists'
+                ]);
+            }
+
+            $this->model->insert([
+                'company_code' => $companyCode,
+                'company_name' => $companyName,
+                'company_addr' => $companyAddr,
+                'is_active'    => 1,
+                'created_at'   => date('Y-m-d H:i:s'),
+                'created_by'   => session('user_id') ?? 0,
+                'deleted_at'   => null
+            ]);
+
+            return $this->response->setJSON([
+                'status'  => true,
+                'message' => 'Company successfully added'
+            ]);
+
+        } catch (\Throwable $e) {
+
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
 }
