@@ -18,6 +18,7 @@ class TransactionController extends BaseController
     public function index()
     {
         $coaModel = new \App\Models\CoaModel();
+        $taxModel = new \App\Models\TaxCodeModel();
 
         $paymentAccounts = $coaModel
             ->where('company_id', session('company_id'))
@@ -26,13 +27,21 @@ class TransactionController extends BaseController
             ->orderBy('account_code', 'ASC')
             ->findAll();
 
+        $taxCodes = $taxModel
+            ->select('tax_codes.*, coa.account_name as coa_account_name')
+            ->join('coa', 'coa.id = tax_codes.coa_account_id', 'left')
+            ->where('tax_codes.is_active', 1)
+            ->where('tax_codes.deleted_at', '0000-00-00 00:00:00')
+            ->findAll();
+
         return view('accounting/transaction/index', [
             'title'           => 'Transaction',
             'trxTypes'        => (new \App\Models\TransactionAccountMapModel())->findAll(),
-            'paymentAccounts' => $paymentAccounts
+            'paymentAccounts' => $paymentAccounts,
+            'taxCodes'        => $taxCodes   // 🔥 tambah ini
         ]);
     }
-
+    
     public function datatable()
     {
         $request = service('request');
@@ -96,13 +105,17 @@ class TransactionController extends BaseController
             $branchId = $this->request->getPost('branch_id');
 
             $trxId = $service->create([
-                'company_id'        => $this->request->getPost('company_id'),
-                'branch_id'         => $branchId > 0 ? $branchId : null,
-                'trx_date'          => $this->request->getPost('trx_date'),
-                'trx_type'          => $this->request->getPost('trx_type'),
-                'reference_no'      => $this->request->getPost('reference_no'),
-                'amount'            => (float) $this->request->getPost('amount'),
-                'payment_account_id'=> $this->request->getPost('payment_account_id') // 🔥 penting
+                'company_id'         => $this->request->getPost('company_id'),
+                'branch_id'          => $branchId > 0 ? $branchId : null,
+                'trx_date'           => $this->request->getPost('trx_date'),
+                'trx_type'           => $this->request->getPost('trx_type'),
+                'reference_no'       => $this->request->getPost('reference_no'),
+                'amount'             => (float) $this->request->getPost('amount'),
+                'payment_account_id' => $this->request->getPost('payment_account_id'),
+
+                // 🔥 TAX
+                'tax_code_id'        => $this->request->getPost('tax_code_id'),
+                'tax_mode'           => $this->request->getPost('tax_mode') ?? 'exclusive'
             ]);
 
             return $this->response->setJSON([

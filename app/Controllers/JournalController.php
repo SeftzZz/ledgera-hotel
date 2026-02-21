@@ -142,14 +142,38 @@ class JournalController extends BaseController
 
     public function detail($id)
     {
-        $header = $this->headerModel->find($id);
+        $db = \Config\Database::connect();
+
+        $header = $this->headerModel
+            ->select('journal_headers.*, 
+                      transactions.id as transaction_id,
+                      transactions.amount as base_amount')
+            ->join('transactions', 'transactions.journal_id = journal_headers.id', 'left')
+            ->where('journal_headers.id', $id)
+            ->first();
 
         if (!$header) {
             return $this->response->setJSON([
-                'status' => false,
+                'status'  => false,
                 'message' => 'Journal not found'
             ]);
         }
+
+        $taxSummary = 0;
+
+        if (!empty($header['transaction_id'])) {
+
+            $taxRow = $db->table('transaction_taxes')
+                ->select('SUM(tax_amount) as total_tax')
+                ->where('transaction_id', $header['transaction_id'])
+                ->get()
+                ->getRow();
+
+            $taxSummary = $taxRow->total_tax ?? 0;
+        }
+
+        $header['tax_amount']   = (float) $taxSummary;
+        $header['total_amount'] = (float) $header['base_amount'] + (float) $taxSummary;
 
         $details = $this->detailModel
             ->select('journal_details.*, coa.account_name')

@@ -16,41 +16,197 @@ class TransactionService
         $trxModel = new TransactionModel();
         $mapModel = new TransactionAccountMapModel();
         $journal  = new JournalService();
+        $taxModel = new \App\Models\TaxCodeModel();
 
         // ==============================
-        // INSERT TRANSACTION
+        // TAX CALCULATION
         // ==============================
-        $trxId = $trxModel->insert($trx, true);
+        $baseAmount = (float) $trx['amount'];
+        $taxAmount  = 0;
+        $tax        = null;
+
+        if (!empty($trx['tax_code_id'])) {
+
+            $tax = $taxModel->find($trx['tax_code_id']);
+
+            if (!$tax) {
+                throw new \Exception('Invalid tax selected.');
+            }
+
+            if (($trx['tax_mode'] ?? 'exclusive') === 'inclusive') {
+                $base = $baseAmount / (1 + ($tax['tax_rate'] / 100));
+                $taxAmount = $baseAmount - $base;
+                $baseAmount = $base;
+            } else {
+                $taxAmount = $baseAmount * ($tax['tax_rate'] / 100);
+            }
+
+            $taxAmount = round($taxAmount, 2);
+        }
 
         // ==============================
-        // GET ACCOUNT MAPPING
+        // INSERT TRANSACTION (BASE ONLY)
+        // ==============================
+        $trxId = $trxModel->insert([
+            ...$trx,
+            'amount' => $baseAmount
+        ], true);
+
+        // ==============================
+        // SAVE TAX TO transaction_taxes
+        // ==============================
+        if ($taxAmount > 0 && $tax) {
+
+            $db->table('transaction_taxes')->insert([
+                'transaction_id' => $trxId,
+                'tax_code_id'    => $tax['id'],
+                'tax_base'       => $baseAmount,
+                'tax_amount'     => $taxAmount
+            ]);
+        }
+
+        // ==============================
+        // ACCOUNT MAPPING
         // ==============================
         $map = $mapModel
             ->where('trx_type', $trx['trx_type'])
             ->first();
 
         if (!$map) {
-            throw new \Exception(
-                "Transaction account mapping not found for trx_type: {$trx['trx_type']}"
-            );
+            throw new \Exception("Mapping not found for trx_type: {$trx['trx_type']}");
         }
 
-        // ==============================
-        // DETERMINE ACCOUNTS
-        // ==============================
-        $debitAccountId  = $map['debit_account_id'];
-
-        // Jika ada payment_account_id → pakai itu
-        // Kalau tidak → fallback ke mapping default
-        $creditAccountId = $trx['payment_account_id']
-            ?? $map['credit_account_id'];
-
-        if (!$creditAccountId) {
+        if (empty($trx['payment_account_id'])) {
             throw new \Exception('Payment account not defined.');
         }
 
+        $journalLines = [];
+
+        // =====================================
+        // EXPENSE
+        // =====================================
+        $type = strtolower($trx['trx_type']);
+
+        if (str_starts_with($type, 'expense')) {
+
+            // Debit Expense
+            $journalLines[] = [
+                'account_id' => $map['debit_account_id'],
+                'debit'      => $baseAmount,
+                'credit'     => 0
+            ];
+
+            // =========================
+            // PPN INPUT
+            // =========================
+            if ($taxAmount > 0 && $tax && $tax['tax_type'] === 'ppn' && $tax['tax_direction'] === 'input') {
+
+                $journalLines[] = [
+                    'account_id' => $tax['coa_account_id'],
+                    'debit'      => $taxAmount,
+                    'credit'     => 0
+                ];
+
+                $bankCredit = $baseAmount + $taxAmount;
+            }
+
+            // =========================
+            // WITHHOLDING (PPh21, PPh23)
+            // =========================
+            elseif ($taxAmount > 0 && $tax && $tax['tax_type'] === 'withholding') {
+
+                // Credit Utang Pajak
+                $journalLines[] = [
+                    'account_id' => $tax['coa_account_id'],
+                    'debit'      => 0,
+                    'credit'     => $taxAmount
+                ];
+
+                $bankCredit = $baseAmount - $taxAmount;
+            }
+
+            else {
+                $bankCredit = $baseAmount;
+            }
+
+            // Credit Bank
+            $journalLines[] = [
+                'account_id' => $trx['payment_account_id'],
+                'debit'      => 0,
+                'credit'     => $bankCredit
+            ];
+        }
+        elseif (str_starts_with($type, 'revenue')) {
+
+            // Debit Bank total
+            $journalLines[] = [
+                'account_id' => $trx['payment_account_id'],
+                'debit'      => $baseAmount + $taxAmount,
+                'credit'     => 0
+            ];
+
+            // Credit Revenue
+            $journalLines[] = [
+                'account_id' => $map['debit_account_id'],
+                'debit'      => 0,
+                'credit'     => $baseAmount
+            ];
+
+            // Credit PPN Keluaran
+            if ($taxAmount > 0 && $tax && $tax['tax_type'] === 'ppn' && $tax['tax_direction'] === 'output') {
+                $journalLines[] = [
+                    'account_id' => $tax['coa_account_id'],
+                    'debit'      => 0,
+                    'credit'     => $taxAmount
+                ];
+            }
+        }
+        // =====================================
+        // WITHHOLDING TAX (PPh23 dll)
+        // =====================================
+        elseif ($taxAmount > 0 && $tax && $tax['tax_type'] === 'withholding') {
+
+            // Debit Expense
+            $journalLines[] = [
+                'account_id' => $map['debit_account_id'],
+                'debit'      => $baseAmount,
+                'credit'     => 0
+            ];
+
+            // Credit Utang Pajak
+            $journalLines[] = [
+                'account_id' => $tax['coa_account_id'],
+                'debit'      => 0,
+                'credit'     => $taxAmount
+            ];
+
+            // Credit Bank (net dibayar)
+            $journalLines[] = [
+                'account_id' => $trx['payment_account_id'],
+                'debit'      => 0,
+                'credit'     => $baseAmount - $taxAmount
+            ];
+        }
+
+        // =====================================
+        // DEFAULT (capital, draw, dll)
+        // =====================================
+        else {
+
+            $journalLines[] = [
+                'account_id' => $map['debit_account_id'],
+                'debit'      => $baseAmount,
+                'credit'     => 0
+            ];
+
+            $journalLines[] = [
+                'account_id' => $trx['payment_account_id'],
+                'debit'      => 0,
+                'credit'     => $baseAmount
+            ];
+        }
         // ==============================
-        // CREATE JOURNAL (DRAFT)
+        // CREATE JOURNAL
         // ==============================
         $journalId = $journal->create([
             'company_id'   => $trx['company_id'],
@@ -59,22 +215,8 @@ class TransactionService
             'journal_date' => $trx['trx_date'],
             'period_month' => (int) date('m', strtotime($trx['trx_date'])),
             'period_year'  => (int) date('Y', strtotime($trx['trx_date']))
-        ], [
-            [
-                'account_id' => $debitAccountId,
-                'debit'      => $trx['amount'],
-                'credit'     => 0
-            ],
-            [
-                'account_id' => $creditAccountId,
-                'debit'      => 0,
-                'credit'     => $trx['amount']
-            ]
-        ]);
+        ], $journalLines);
 
-        // ==============================
-        // LINK JOURNAL TO TRANSACTION
-        // ==============================
         $trxModel->update($trxId, [
             'journal_id' => $journalId
         ]);
@@ -86,5 +228,29 @@ class TransactionService
         }
 
         return $trxId;
+    }
+    
+    public function applyTax($amount, $taxId, $transactionType)
+    {
+        $tax = $this->taxModel->find($taxId);
+
+        $taxAmount = $amount * ($tax->tax_rate / 100);
+
+        if ($tax->tax_type === 'ppn') {
+
+            if ($tax->tax_direction === 'output') {
+                $this->journal->credit($tax->coa_account_id, $taxAmount);
+            }
+
+            if ($tax->tax_direction === 'input') {
+                $this->journal->debit($tax->coa_account_id, $taxAmount);
+            }
+        }
+
+        if ($tax->tax_type === 'withholding') {
+            $this->journal->credit($tax->coa_account_id, $taxAmount);
+        }
+
+        return $taxAmount;
     }
 }

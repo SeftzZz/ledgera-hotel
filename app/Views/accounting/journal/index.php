@@ -135,19 +135,53 @@ $(function () {
                 $('#viewJournalDate').text(res.header.journal_date);
 
                 let html = '';
+                let totalDebit = 0;
+                let totalCredit = 0;
 
-                res.details.forEach(d => {
+                // Urutkan: akun utama dulu, lalu akun pajak
+                let sorted = res.details.sort((a, b) => {
+                    let aIsTax = a.account_name.toLowerCase().includes('ppn') || 
+                                 a.account_name.toLowerCase().includes('pph');
+                    let bIsTax = b.account_name.toLowerCase().includes('ppn') || 
+                                 b.account_name.toLowerCase().includes('pph');
+
+                    return aIsTax - bIsTax; // tax ke bawah
+                });
+
+                sorted.forEach(d => {
+
+                    let debit = parseFloat(d.debit);
+                    let credit = parseFloat(d.credit);
+
+                    totalDebit += debit;
+                    totalCredit += credit;
+
+                    let isTax = d.account_name.toLowerCase().includes('ppn') ||
+                                d.account_name.toLowerCase().includes('pph');
+
+                    let style = isTax 
+                        ? 'padding-left:25px; font-style:italic; color:#b8860b;' 
+                        : '';
+
                     html += `
                         <tr>
-                            <td>${d.account_name}</td>
-                            <td class="text-end">${parseFloat(d.debit).toLocaleString()}</td>
-                            <td class="text-end">${parseFloat(d.credit).toLocaleString()}</td>
+                            <td style="${style}">${d.account_name}</td>
+                            <td class="text-end">${debit.toLocaleString()}</td>
+                            <td class="text-end">${credit.toLocaleString()}</td>
                         </tr>
                     `;
                 });
 
-                $('#journalDetailBody').html(html);
+                // Garis total
+                html += `
+                    <tr style="border-top:2px solid #000;">
+                        <td><strong>Total</strong></td>
+                        <td class="text-end"><strong>${totalDebit.toLocaleString()}</strong></td>
+                        <td class="text-end"><strong>${totalCredit.toLocaleString()}</strong></td>
+                    </tr>
+                `;
 
+                $('#journalDetailBody').html(html);
                 $('#modalViewJournal').modal('show');
 
             } else {
@@ -157,7 +191,6 @@ $(function () {
         }, 'json');
 
     });
-
 });
 </script>
 
