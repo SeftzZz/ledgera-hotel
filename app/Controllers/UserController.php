@@ -182,7 +182,7 @@ class UserController extends BaseController
             'name'       => $request->getPost('name_user'),
             'email'      => $request->getPost('email_user'),
             'phone'      => $request->getPost('hp_user'),
-            'password'   => password_hash($request->getPost('password_user'), PASSWORD_DEFAULT),
+            'password'   => password_hash($request->getPost('pass_user'), PASSWORD_DEFAULT),
             'company_id' => $request->getPost('company_user'),
             'is_active'  => $request->getPost('status_user'),
             'created_at' => date('Y-m-d H:i:s'),
