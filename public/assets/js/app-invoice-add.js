@@ -9,16 +9,6 @@
     invoiceItemQtyList = document.querySelectorAll('.invoice-item-qty'),
     invoiceDateList = document.querySelectorAll('.date-picker');
 
-  // Price
-  if (invoiceItemPriceList) {
-    invoiceItemPriceList.forEach(function (invoiceItemPrice) {
-      new Cleave(invoiceItemPrice, {
-        delimiter: '',
-        numeral: true
-      });
-    });
-  }
-
   // Qty
   if (invoiceItemQtyList) {
     invoiceItemQtyList.forEach(function (invoiceItemQty) {
@@ -116,12 +106,209 @@ $(function () {
 
   // Item details select onchange
   $(document).on('change', '.item-details', function () {
-    var $this = $(this),
-      value = adminDetails[$this.val()];
-    if ($this.next('textarea').length) {
-      $this.next('textarea').val(value);
-    } else {
-      $this.after('<textarea class="form-control" rows="2">' + value + '</textarea>');
+    var $this = $(this);
+
+    if (!$this.next('.extra-fields').length) {
+
+      $this.after(`
+        <div class="extra-fields mt-2">
+          
+          <select 
+            name="customer[]" 
+            class="form-select select2 mb-3" 
+            data-placeholder="Select customer" 
+            style="width:100%">
+            <option value=""></option>
+            ${window.customerOptions || ''}
+          </select>
+
+          <input type="text" name="customer_phone[]" class="form-control mb-3 mt-3" placeholder="No Telepon">
+          <input type="email" name="customer_email[]" class="form-control" placeholder="Email">
+        </div>
+      `);
+
+      // init select2 (WAJIB karena dynamic)
+      $this.next('.extra-fields').find('.select2').select2({
+        placeholder: "Select customer",
+        width: '100%',
+        tags: true,                // 🔥 ini kunci
+        allowClear: true,
+        createTag: function (params) {
+          var term = $.trim(params.term);
+
+          if (term === '') {
+            return null;
+          }
+
+          return {
+            id: term,
+            text: term,
+            newTag: true // optional flag
+          };
+        }
+      });
+
     }
+  });
+
+  $(document).on('change', '.select2', function () {
+
+    const selected = $(this).find(':selected');
+    const wrapper = $(this).closest('.extra-fields');
+
+    const phone = selected.data('phone') || '';
+    const email = selected.data('email') || '';
+    const name  = selected.text(); // 🔥 ambil nama (termasuk input manual)
+
+    wrapper.find('input[name="customer_phone[]"]').val(phone);
+    wrapper.find('input[name="customer_email[]"]').val(email);
+
+    // simpan name ke hidden (biar gampang kirim)
+    if (!wrapper.find('.customer-name-hidden').length) {
+      wrapper.append(`<input type="hidden" class="customer-name-hidden" name="customer_name[]" value="${name}">`);
+    } else {
+      wrapper.find('.customer-name-hidden').val(name);
+    }
+
+  });
+
+  async function loadItemsDropdown() {
+    try {
+      const res = await fetch('/api/items', {
+        headers: {
+          Authorization: 'Bearer ' + window.jwtToken
+        }
+      });
+
+      const json = await res.json();
+
+      const selectList = document.querySelectorAll('.item-details');
+
+      selectList.forEach(select => {
+        select.innerHTML = '<option disabled selected>Select Item</option>';
+
+        json.data.forEach(item => {
+          select.innerHTML += `
+            <option value="${item.id}">
+              ${item.name} (${item.category_name})
+            </option>
+          `;
+        });
+      });
+
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  loadItemsDropdown();
+
+  $(document).on('click', '[data-repeater-create]', function () {
+    setTimeout(() => {
+      loadItemsDropdown();
+    }, 300);
+  });
+
+  document.getElementById('btnSubmit').addEventListener('click', async function () {
+
+    try {
+
+      const rows = document.querySelectorAll('[data-repeater-item]');
+
+      if (rows.length === 0) {
+        alert('Item kosong');
+        return;
+      }
+
+      // =========================
+      // 🔥 AMBIL CUSTOMER (ROW PERTAMA SAJA)
+      // =========================
+      const firstRow = rows[0];
+
+      const name = firstRow.querySelector('.customer-name-hidden')?.value || '';
+      const phone = firstRow.querySelector('input[name="customer_phone[]"]')?.value || '';
+      const email = firstRow.querySelector('input[name="customer_email[]"]')?.value || '';
+
+      if (!email) {
+        alert('Email wajib diisi');
+        return;
+      }
+
+      // =========================
+      // 1. CREATE CART (🔥 sekarang kirim customer)
+      // =========================
+      const cartRes = await fetch('/api/cart/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + window.jwtToken
+        },
+        body: JSON.stringify({
+          branch_id: window.branchId,
+          name: name,
+          phone: phone,
+          email: email
+        })
+      });
+
+      const cartJson = await cartRes.json();
+      const cartId = cartJson.data.cart_id;
+
+      // =========================
+      // 2. ADD ITEMS
+      // =========================
+      for (let row of rows) {
+
+        const itemId = row.querySelector('.item-details').value;
+        const qty    = row.querySelector('.invoice-item-qty').value;
+        const price  = row.querySelector('.invoice-item-price').value;
+        const date  = row.querySelector('.invoice-item-date').value;
+
+        if (!itemId || !qty || qty <= 0) continue;
+
+        await fetch('/api/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + window.jwtToken
+          },
+          body: JSON.stringify({
+            cart_id: cartId,
+            item_id: itemId,
+            quantity: Number(qty),
+            price: Number(price),
+            date: date
+          })
+        });
+      }
+
+      // =========================
+      // 3. CHECKOUT (🔥 TANPA PRICE)
+      // =========================
+      const orderRes = await fetch('/api/orders/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + window.jwtToken
+        },
+        body: JSON.stringify({
+          cart_id: cartId,
+          order_number: document.getElementById('invoiceId').value,
+          payment_method: 'cash',
+          deposit: document.getElementById('deposit').value,
+        })
+      });
+
+      const orderJson = await orderRes.json();
+
+      alert('Order berhasil: ' + orderJson.data.order_number);
+
+      location.reload(); // 🔥 clean reset
+
+    } catch (err) {
+      console.error(err);
+      alert('Terjadi error');
+    }
+
   });
 });

@@ -25,21 +25,21 @@
   // ! Don't change it unless you really know what you are doing
 
   const previewTemplate = `<div class="dz-preview dz-file-preview">
-<div class="dz-details">
-  <div class="dz-thumbnail">
-    <img data-dz-thumbnail>
-    <span class="dz-nopreview">No preview</span>
-    <div class="dz-success-mark"></div>
-    <div class="dz-error-mark"></div>
-    <div class="dz-error-message"><span data-dz-errormessage></span></div>
-    <div class="progress">
-      <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-dz-uploadprogress></div>
+  <div class="dz-details">
+    <div class="dz-thumbnail">
+      <img data-dz-thumbnail>
+      <span class="dz-nopreview">No preview</span>
+      <div class="dz-success-mark"></div>
+      <div class="dz-error-mark"></div>
+      <div class="dz-error-message"><span data-dz-errormessage></span></div>
+      <div class="progress">
+        <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-dz-uploadprogress></div>
+      </div>
     </div>
+    <div class="dz-filename" data-dz-name></div>
+    <div class="dz-size" data-dz-size></div>
   </div>
-  <div class="dz-filename" data-dz-name></div>
-  <div class="dz-size" data-dz-size></div>
-</div>
-</div>`;
+  </div>`;
 
   // ? Start your code from here
 
@@ -59,8 +59,8 @@
 
   // Basic Tags
 
-  const tagifyBasicEl = document.querySelector('#ecommerce-product-tags');
-  const TagifyBasic = new Tagify(tagifyBasicEl);
+  // const tagifyBasicEl = document.querySelector('#ecommerce-product-tags');
+  // const TagifyBasic = new Tagify(tagifyBasicEl);
 
   // Flatpickr
 
@@ -135,4 +135,71 @@ $(function () {
       }
     });
   }
+});
+
+$('#imageUpload').on('change', function () {
+
+  const formData = new FormData();
+  formData.append('image', this.files[0]);
+
+  $.ajax({
+    url: '/api/upload/product',
+    type: 'POST',
+    data: formData,
+    processData: false,
+    contentType: false,
+
+    success: function (res) {
+      $('#imagePath').val(res.path);
+    }
+  });
+
+});
+
+$('#addBranch').click(function () {
+
+  const row = `
+    <tr>
+
+      <td>
+        <select name="branch_id[]" class="form-control branchSelect"></select>
+      </td>
+
+      <td>
+        <input type="number" name="price[]" class="form-control">
+      </td>
+
+      <td>
+        <input type="number" name="stock[]" class="form-control">
+      </td>
+
+    </tr>
+  `;
+
+  $('#branchTable tbody').append(row);
+
+});
+
+$('#formProduct').submit(function (e) {
+
+  e.preventDefault();
+
+  $.ajax({
+    url: '/api/items/create',
+    headers: {
+      Authorization: 'Bearer ' + window.jwtToken
+    },
+    type: 'POST',
+    data: $(this).serialize(),
+
+    success: function (res) {
+
+      alert('Product saved');
+
+      window.location = '/items/item-list';
+
+    }
+
+  });
+
 });

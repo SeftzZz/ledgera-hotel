@@ -283,76 +283,143 @@
             let account   = taxSelect.data('account') || '-';
             let mode      = $('[name="tax_mode"]').val();
 
-            let taxAmount = 0;
             let base = amount;
+            let serviceAmount = 0;
+            let taxAmount = 0;
+            let total = 0;
 
-            if (mode === 'inclusive') {
-                base = amount / (1 + (rate / 100));
-                taxAmount = amount - base;
-            } else {
-                taxAmount = base * (rate / 100);
-            }
+            let rateDecimal = rate / 100;
 
-            taxAmount = Math.round(taxAmount);
-            base = Math.round(base);
-
-            let total = mode === 'inclusive'
-                ? amount
-                : base + (taxType === 'ppn' ? taxAmount : 0);
-
-            let badgeText = '';
-            let badgeClass = '';
-
-            // =============================
-            // PPN
-            // =============================
+            // =====================================
+            // 🔵 PPN
+            // =====================================
             if (taxType === 'ppn') {
 
-                if (direction === 'input') {
-                    badgeText = 'PPN MASUKAN';
-                    badgeClass = 'bg-success';
-                }
-                else if (direction === 'output') {
-                    badgeText = 'PPN KELUARAN';
-                    badgeClass = 'bg-danger';
+                if (mode === 'inclusive') {
+                    base = amount / (1 + rateDecimal);
+                    taxAmount = amount - base;
+                } else {
+                    taxAmount = base * rateDecimal;
                 }
 
+                total = base + taxAmount;
             }
 
-            // =============================
-            // WITHHOLDING (PPh21, PPh23)
-            // =============================
-            if (taxType === 'withholding') {
-                badgeText = 'WITHHOLDING TAX';
-                badgeClass = 'bg-warning';
+            // =====================================
+            // 🏨 PB1 (HOTEL LOGIC - FINAL)
+            // =====================================
+            else if (taxType === 'pb1') {
 
-                // Total yang dibayar dikurangi pajak
+                let serviceRate = 0.10;
+
+                if (mode === 'inclusive') {
+
+                    let factor = 1 + serviceRate + (1 + serviceRate) * rateDecimal;
+
+                    base = amount / factor;
+                    serviceAmount = base * serviceRate;
+                    taxAmount = (base + serviceAmount) * rateDecimal;
+
+                    total = amount;
+                } else {
+
+                    serviceAmount = base * serviceRate;
+                    taxAmount = (base + serviceAmount) * rateDecimal;
+
+                    total = base + serviceAmount + taxAmount;
+                }
+            }
+
+            // =====================================
+            // 🟡 WITHHOLDING
+            // =====================================
+            else if (taxType === 'withholding') {
+
+                taxAmount = base * rateDecimal;
                 total = base - taxAmount;
             }
 
+            // =====================================
+            // 🔥 ROUNDING (DISPLAY ONLY)
+            // =====================================
+            let baseRounded = Math.round(base);
+            let serviceRounded = Math.round(serviceAmount);
+            let taxRounded = Math.round(taxAmount);
+
+            // 🔥 FIX: TOTAL HARUS SELALU MATCH
+            let totalRounded;
+
+            if (mode === 'inclusive') {
+                totalRounded = Math.round(amount); // pakai input langsung
+            } else {
+                totalRounded = baseRounded + serviceRounded + taxRounded;
+            }
+
+            // =====================================
+            // BADGE
+            // =====================================
+            let badgeText = '';
+            let badgeClass = '';
+
+            if (taxType === 'ppn') {
+                badgeText = (direction === 'input') ? 'PPN MASUKAN' : 'PPN KELUARAN';
+                badgeClass = (direction === 'input') ? 'bg-success' : 'bg-danger';
+            }
+
+            if (taxType === 'withholding') {
+                badgeText = 'WITHHOLDING TAX';
+                badgeClass = 'bg-warning';
+            }
+
+            if (taxType === 'pb1') {
+                badgeText = (direction === 'input') ? 'PB1 MASUKAN' : 'PB1 KELUARAN';
+                badgeClass = (direction === 'input') ? 'bg-primary' : 'bg-secondary';
+            }
+
+            let taxableRounded = baseRounded + serviceRounded;
+
+            // =====================================
+            // HTML OUTPUT
+            // =====================================
             let html = `
                 <span class="badge ${badgeClass}">
                     ${badgeText}
                 </span>
                 <br><br>
-                Base Amount : <strong>${base.toLocaleString()}</strong><br>
-                Tax Amount  : <strong>${taxAmount.toLocaleString()}</strong><br>
-                ${taxType === 'withholding' 
-                    ? `Net Payment : <strong>${total.toLocaleString()}</strong><br>` 
-                    : `Total       : <strong>${total.toLocaleString()}</strong><br>`
+
+                Base Amount : <strong>${baseRounded.toLocaleString()}</strong><br>
+
+                ${taxType === 'pb1'
+                    ? `Service 10% : <strong>${serviceRounded.toLocaleString()}</strong><br>`
+                    : ''
                 }
+
+                Tax Base    : <strong>${taxableRounded.toLocaleString()}</strong><br>
+                Tax Amount  : <strong>${taxRounded.toLocaleString()}</strong><br>
+
+                ${taxType === 'withholding'
+                    ? `Net Payment : <strong>${totalRounded.toLocaleString()}</strong><br>`
+                    : `Total       : <strong>${totalRounded.toLocaleString()}</strong><br>`
+                }
+
                 Account     : <strong>${account}</strong>
             `;
 
+            let alertClass = 'alert-warning';
+
+            if (taxType === 'ppn') {
+                alertClass = (direction === 'input') ? 'alert-success' : 'alert-danger';
+            }
+            else if (taxType === 'pb1') {
+                alertClass = (direction === 'input') ? 'alert-primary' : 'alert-secondary';
+            }
+
             $('#taxPreviewBox')
-                .removeClass('d-none alert-success alert-danger alert-warning')
-                .addClass(
-                    taxType === 'ppn'
-                        ? (direction === 'input' ? 'alert-success' : 'alert-danger')
-                        : 'alert-warning'
-                )
+                .removeClass('d-none alert-success alert-danger alert-warning alert-primary alert-secondary')
+                .addClass(alertClass)
                 .html(html);
         }
+
         /* =====================================
            EVENT BINDING
         ===================================== */

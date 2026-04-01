@@ -20,19 +20,21 @@ $(function () {
 
   // Variable declaration for table
   var dt_product_table = $('.datatables-products'),
-    productAdd = 'app-ecommerce-product-add.html',
+    productAdd = 'items/item-add',
     statusObj = {
-      1: { title: 'Scheduled', class: 'bg-label-warning' },
-      2: { title: 'Publish', class: 'bg-label-success' },
-      3: { title: 'Inactive', class: 'bg-label-danger' }
+      1: { title: 'available', class: 'bg-label-success' },
+      2: { title: 'Inactive', class: 'bg-label-danger' }
     },
     categoryObj = {
-      0: { title: 'Household' },
-      1: { title: 'Office' },
-      2: { title: 'Electronics' },
-      3: { title: 'Shoes' },
-      4: { title: 'Accessories' },
-      5: { title: 'Game' }
+      1: { title: 'FB Product' },
+      2: { title: 'FB Services' },
+      3: { title: 'House Keeping' },
+      4: { title: 'Front Office' },
+      5: { title: 'Accounting' },
+      6: { title: 'Human Resources' },
+      7: { title: 'Sales & Marketing' },
+      8: { title: 'Engineering & IT' },
+      9: { title: 'POMEC' }
     },
     stockObj = {
       0: { title: 'Out_of_Stock' },
@@ -47,60 +49,75 @@ $(function () {
 
   if (dt_product_table.length) {
     var dt_products = dt_product_table.DataTable({
-      ajax: assetsPath + 'json/ecommerce-product-list.json', // JSON file to add data
+      ajax: {
+        url: '/api/items',
+        headers: {
+          Authorization: 'Bearer ' + window.jwtToken
+        },
+        dataSrc: function (json) {
+          
+          let rows = [];
+
+          json.data.forEach(item => {
+
+            item.branches?.forEach(branch => {
+
+              rows.push({
+                id: item.id,
+                name: item.name,
+                category_name: item.category_name,
+                image: item.image,
+                status: item.status ?? 'available',
+
+                branch_name: branch.branch_name,
+                price: Number(branch.price || 0),
+                stock: Number(branch.stock || 0)
+              });
+
+            });
+
+          });
+
+          return rows;
+        }
+      },
       columns: [
-        // columns according to JSON
         { data: 'id' },
-        { data: 'id' },
-        { data: 'product_name' },
-        { data: 'category' },
-        { data: 'stock' },
-        { data: 'sku' },
+        { data: 'name' },
+        { data: 'branch_name' },
+        { data: 'category_name' },
         { data: 'price' },
-        { data: 'quantity' },
+        { data: 'stock' },
         { data: 'status' },
-        { data: '' }
+        { data: null }
       ],
+
       columnDefs: [
+
         {
-          // For Responsive
           className: 'control',
-          searchable: false,
           orderable: false,
-          responsivePriority: 2,
+          searchable: false,
           targets: 0,
-          render: function (data, type, full, meta) {
+          render: function () {
             return '';
           }
         },
+
         {
-          // For Checkboxes
+          // ITMES
           targets: 1,
-          orderable: false,
-          checkboxes: {
-            selectAllRender: '<input type="checkbox" class="form-check-input">'
-          },
-          render: function () {
-            return '<input type="checkbox" class="dt-checkboxes form-check-input" >';
-          },
-          searchable: false
-        },
-        {
-          // Product name and product_brand
-          targets: 2,
           responsivePriority: 1,
           render: function (data, type, full, meta) {
-            var $name = full['product_name'],
+            var $name = full['name'],
               $id = full['id'],
-              $product_brand = full['product_brand'],
+              $category_name = full['category_name'],
               $image = full['image'];
             if ($image) {
               // For Product image
 
               var $output =
-                '<img src="' +
-                assetsPath +
-                'img/ecommerce-images/' +
+                '<img src="../' +
                 $image +
                 '" alt="Product-' +
                 $id +
@@ -110,12 +127,12 @@ $(function () {
               var stateNum = Math.floor(Math.random() * 6);
               var states = ['success', 'danger', 'warning', 'info', 'dark', 'primary', 'secondary'];
               var $state = states[stateNum],
-                $name = full['product_brand'],
+                $name = full['name'],
                 $initials = $name.match(/\b\w/g) || [];
               $initials = (($initials.shift() || '') + ($initials.pop() || '')).toUpperCase();
               $output = '<span class="avatar-initial rounded-2 bg-label-' + $state + '">' + $initials + '</span>';
             }
-            // Creates full output for Product name and product_brand
+            // Creates full output for Product name and category_name
             var $row_output =
               '<div class="d-flex justify-content-start align-items-center product-name">' +
               '<div class="avatar-wrapper">' +
@@ -128,141 +145,82 @@ $(function () {
               $name +
               '</h6>' +
               '<small class="text-muted text-truncate d-none d-sm-block">' +
-              $product_brand +
+              $category_name +
               '</small>' +
               '</div>' +
               '</div>';
             return $row_output;
           }
         },
-        {
-          // Product Category
 
+        {
+          // BRANCH
+          targets: 2,
+          render: function (data) {
+            return data;
+          }
+        },
+
+        {
+          // CATEGORY
           targets: 3,
           responsivePriority: 5,
           render: function (data, type, full, meta) {
-            var $category = categoryObj[full['category']].title;
-            var categoryBadgeObj = {
-              Household:
-                '<span class="avatar-sm rounded-circle d-flex justify-content-center align-items-center bg-label-warning me-2 p-3"><i class="ti ti-home-2 ti-xs"></i></span>',
-              Office:
-                '<span class="avatar-sm rounded-circle d-flex justify-content-center align-items-center bg-label-info me-2 p-3"><i class="ti ti-briefcase ti-xs"></i></span>',
-              Electronics:
-                '<span class="avatar-sm rounded-circle d-flex justify-content-center align-items-center bg-label-danger me-2 p-3"><i class="ti ti-device-mobile ti-xs"></i></span>',
-              Shoes:
-                '<span class="avatar-sm rounded-circle d-flex justify-content-center align-items-center bg-label-success me-2"><i class="ti ti-shoe ti-xs"></i></span>',
-              Accessories:
-                '<span class="avatar-sm rounded-circle d-flex justify-content-center align-items-center bg-label-secondary me-2"><i class="ti ti-device-watch ti-xs"></i></span>',
-              Game: '<span class="avatar-sm rounded-circle d-flex justify-content-center align-items-center bg-label-primary me-2"><i class="ti ti-device-gamepad-2 ti-xs"></i></span>'
-            };
+            var $category = full['category_name'];
             return (
               "<span class='text-truncate d-flex align-items-center'>" +
-              categoryBadgeObj[$category] +
               $category +
               '</span>'
             );
           }
         },
+
         {
-          // Stock
+          // PRICE
           targets: 4,
-          orderable: false,
-          responsivePriority: 3,
-          render: function (data, type, full, meta) {
-            var $stock = full['stock'];
-            var stockSwitchObj = {
-              Out_of_Stock:
-                '<label class="switch switch-primary switch-sm">' +
-                '<input type="checkbox" class="switch-input" id="switch">' +
-                '<span class="switch-toggle-slider">' +
-                '<span class="switch-off">' +
-                '</span>' +
-                '</span>' +
-                '</label>',
-              In_Stock:
-                '<label class="switch switch-primary switch-sm">' +
-                '<input type="checkbox" class="switch-input" checked="">' +
-                '<span class="switch-toggle-slider">' +
-                '<span class="switch-on">' +
-                '</span>' +
-                '</span>' +
-                '</label>'
-            };
-            return (
-              "<span class='text-truncate'>" +
-              stockSwitchObj[stockObj[$stock].title] +
-              '<span class="d-none">' +
-              stockObj[$stock].title +
-              '</span>' +
-              '</span>'
-            );
+          render: function (data) {
+            return 'Rp ' + parseFloat(data).toLocaleString('id-ID');
           }
         },
+
         {
-          // Sku
+          // STOCK
           targets: 5,
-          render: function (data, type, full, meta) {
-            var $sku = full['sku'];
-
-            return '<span>' + $sku + '</span>';
-          }
+          data: 'stock'
         },
+
         {
-          // price
+          // STATUS
           targets: 6,
-          render: function (data, type, full, meta) {
-            var $price = full['price'];
+          render: function (data) {
 
-            return '<span>' + $price + '</span>';
+            let badge = 'bg-label-success';
+
+            if (data !== 'available') {
+              badge = 'bg-label-danger';
+            }
+
+            return `<span class="badge ${badge}">${data}</span>`;
           }
         },
+
         {
-          // qty
+          // ACTIONS
           targets: 7,
-          responsivePriority: 4,
-          render: function (data, type, full, meta) {
-            var $qty = full['qty'];
-
-            return '<span>' + $qty + '</span>';
-          }
-        },
-        {
-          // Status
-          targets: -2,
-          render: function (data, type, full, meta) {
-            var $status = full['status'];
-
-            return (
-              '<span class="badge ' +
-              statusObj[$status].class +
-              '" text-capitalized>' +
-              statusObj[$status].title +
-              '</span>'
-            );
-          }
-        },
-        {
-          // Actions
-          targets: -1,
-          title: 'Actions',
-          searchable: false,
           orderable: false,
-          render: function (data, type, full, meta) {
-            return (
-              '<div class="d-inline-block text-nowrap">' +
-              '<button class="btn btn-sm btn-icon"><i class="ti ti-edit"></i></button>' +
-              '<button class="btn btn-sm btn-icon delete-record"><i class="ti ti-trash"></i></button>' +
-              '<button class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="ti ti-dots-vertical me-2"></i></button>' +
-              '<div class="dropdown-menu dropdown-menu-end m-0">' +
-              '<a href="javascript:0;" class="dropdown-item">View</a>' +
-              '<a href="javascript:0;" class="dropdown-item">Suspend</a>' +
-              '</div>' +
-              '</div>'
-            );
+          render: function () {
+            return `
+            <div class="d-inline-block">
+              <button class="btn btn-sm btn-icon"><i class="ti ti-edit"></i></button>
+              <button class="btn btn-sm btn-icon delete-record"><i class="ti ti-trash"></i></button>
+            </div>
+            `;
           }
         }
+
       ],
-      order: [2, 'asc'], //set any columns order asc/desc
+
+      order: [2, 'asc'],
       dom:
         '<"card-header d-flex border-top rounded-0 flex-wrap py-2"' +
         '<"me-5 ms-n2 pe-5"f>' +
@@ -272,7 +230,11 @@ $(function () {
         '<"col-sm-12 col-md-6"i>' +
         '<"col-sm-12 col-md-6"p>' +
         '>',
-      lengthMenu: [7, 10, 20, 50, 70, 100], //for length of menu
+      pageLength: 10,
+      lengthMenu: [
+        [10, 25, 50, 100, -1],
+        [10, 25, 50, 100, "All"]
+      ],
       language: {
         sLengthMenu: '_MENU_',
         search: '',
@@ -430,7 +392,7 @@ $(function () {
           display: $.fn.dataTable.Responsive.display.modal({
             header: function (row) {
               var data = row.data();
-              return 'Details of ' + data['product_name'];
+              return 'Details of ' + data['name'];
             }
           }),
           type: 'column',
@@ -460,7 +422,7 @@ $(function () {
       initComplete: function () {
         // Adding status filter once table initialized
         this.api()
-          .columns(-2)
+          .columns(7)
           .every(function () {
             var column = this;
             var select = $(
@@ -477,7 +439,7 @@ $(function () {
               .unique()
               .sort()
               .each(function (d, j) {
-                select.append('<option value="' + statusObj[d].title + '">' + statusObj[d].title + '</option>');
+                select.append('<option value="' + d + '">' + d + '</option>');
               });
           });
         // Adding category filter once table initialized
@@ -499,18 +461,18 @@ $(function () {
               .unique()
               .sort()
               .each(function (d, j) {
-                select.append('<option value="' + categoryObj[d].title + '">' + categoryObj[d].title + '</option>');
+                select.append('<option value="' + d + '">' + d + '</option>');
               });
           });
-        // Adding stock filter once table initialized
+        // Adding branch filter once table initialized
         this.api()
-          .columns(4)
+          .columns(2)
           .every(function () {
             var column = this;
             var select = $(
-              '<select id="ProductStock" class="form-select text-capitalize"><option value=""> Stock </option></select>'
+              '<select id="ProductBranch" class="form-select text-capitalize"><option value=""> Branch </option></select>'
             )
-              .appendTo('.product_stock')
+              .appendTo('.product_branch')
               .on('change', function () {
                 var val = $.fn.dataTable.util.escapeRegex($(this).val());
                 column.search(val ? '^' + val + '$' : '', true, false).draw();
@@ -521,7 +483,7 @@ $(function () {
               .unique()
               .sort()
               .each(function (d, j) {
-                select.append('<option value="' + stockObj[d].title + '">' + stockFilterValObj[d].title + '</option>');
+                select.append('<option value="' + d + '">' + d + '</option>');
               });
           });
       }

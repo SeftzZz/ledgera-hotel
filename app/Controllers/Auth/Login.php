@@ -5,14 +5,17 @@ namespace App\Controllers\Auth;
 use App\Controllers\BaseController;
 use App\Models\UserModel;
 use App\Services\PermissionService;
+use App\Libraries\JwtService;
 
 class Login extends BaseController
 {
     protected UserModel $userModel;
+    protected $jwt;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
+        $this->jwt   = new JwtService();
     }
 
     /**
@@ -47,8 +50,15 @@ class Login extends BaseController
         }
 
         $user = $this->userModel
-            ->where('email', $email)
-            ->where('is_active', 1)
+            ->select('
+                users.*,
+                companies.company_name,
+                branches.*
+            ')
+            ->join('companies', 'companies.id = users.company_id', 'left')
+            ->join('branches', 'branches.id = users.branch_id', 'left')
+            ->where('users.email', $email)
+            ->where('users.is_active', 1)
             ->first();
 
         if (! $user || ! password_verify($password, $user['password'])) {
@@ -60,18 +70,33 @@ class Login extends BaseController
         // Ambil permission & cache ke session
         $permissions = service('permission')->cache($user['id']);
 
+        /*
+        =========================
+        GENERATE JWT TOKEN
+        =========================
+        */
+
+        $token = $this->jwt->generateAccessToken((object)$user);
+        $refreshToken = $this->jwt->generateRefreshToken();
+
         // Set session login
         session()->set([
-            'user_id'      => $user['id'],
-            'user_name'    => $user['name'],
-            'user_email'   => $user['email'],
-            'company_id'   => $user['company_id'] ?? null,
-            'branch_id'    => $user['branch_id'] ?? null,
-            'permissions'  => $permissions,
-            'is_logged_in' => true,
-            'logged_at'    => date('Y-m-d H:i:s'),
+            'user_id'         => $user['id'],
+            'user_name'       => $user['name'],
+            'user_email'      => $user['email'],
+            'company_id'      => $user['company_id'],
+            'company_name'    => $user['company_name'],
+            'branch_id'       => $user['branch_id'],
+            'branch_name'     => $user['branch_name'],
+            'branch_address'  => $user['branch_address'],
+            'branch_logo'     => $user['branch_logo'],
+            'permissions'     => $permissions,
+            'jwt_token'       => $token,
+            'refresh_token'   => $refreshToken,
+            'is_logged_in'    => true,
+            'logged_at'       => date('Y-m-d H:i:s'),
         ]);
-
+        
         // Update last login
         $this->userModel->update($user['id'], [
             'last_login_at' => date('Y-m-d H:i:s')

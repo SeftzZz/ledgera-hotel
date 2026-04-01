@@ -5,204 +5,466 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', function () {
-  (function () {
-    const chatContactsBody = document.querySelector('.app-chat-contacts .sidebar-body'),
-      chatContactListItems = [].slice.call(
-        document.querySelectorAll('.chat-contact-list-item:not(.chat-contact-list-item-title)')
-      ),
-      chatHistoryBody = document.querySelector('.chat-history-body'),
-      chatSidebarLeftBody = document.querySelector('.app-chat-sidebar-left .sidebar-body'),
-      chatSidebarRightBody = document.querySelector('.app-chat-sidebar-right .sidebar-body'),
-      chatUserStatus = [].slice.call(document.querySelectorAll(".form-check-input[name='chat-user-status']")),
-      chatSidebarLeftUserAbout = $('.chat-sidebar-left-user-about'),
-      formSendMessage = document.querySelector('.form-send-message'),
-      messageInput = document.querySelector('.message-input'),
-      searchInput = document.querySelector('.chat-search-input'),
-      speechToText = $('.speech-to-text'), // ! jQuery dependency for speech to text
-      userStatusObj = {
-        active: 'avatar-online',
-        offline: 'avatar-offline',
-        away: 'avatar-away',
-        busy: 'avatar-busy'
-      };
+    (function () {
 
-    // Initialize PerfectScrollbar
-    // ------------------------------
+        const chatContactsBody = document.querySelector('.app-chat-contacts .sidebar-body'),
+            chatHistoryBody = document.querySelector('.chat-history-body'),
+            chatSidebarLeftBody = document.querySelector('.app-chat-sidebar-left .sidebar-body'),
+            chatSidebarRightBody = document.querySelector('.app-chat-sidebar-right .sidebar-body'),
+            formSendMessage = document.querySelector('.form-send-message'),
+            messageInput = document.querySelector('.message-input'),
+            searchInput = document.querySelector('.chat-search-input'),
+            chatList = document.getElementById('chat-list'),
+            contactList = document.getElementById('contact-list'),
+            speechToText = $('.speech-to-text');
 
-    // Chat contacts scrollbar
-    if (chatContactsBody) {
-      new PerfectScrollbar(chatContactsBody, {
-        wheelPropagation: false,
-        suppressScrollX: true
-      });
-    }
+        let activeChatId = null;
 
-    // Chat history scrollbar
-    if (chatHistoryBody) {
-      new PerfectScrollbar(chatHistoryBody, {
-        wheelPropagation: false,
-        suppressScrollX: true
-      });
-    }
+        /*
+        ========================
+        PERFECT SCROLLBAR
+        ========================
+        */
 
-    // Sidebar left scrollbar
-    if (chatSidebarLeftBody) {
-      new PerfectScrollbar(chatSidebarLeftBody, {
-        wheelPropagation: false,
-        suppressScrollX: true
-      });
-    }
-
-    // Sidebar right scrollbar
-    if (chatSidebarRightBody) {
-      new PerfectScrollbar(chatSidebarRightBody, {
-        wheelPropagation: false,
-        suppressScrollX: true
-      });
-    }
-
-    // Scroll to bottom function
-    function scrollToBottom() {
-      chatHistoryBody.scrollTo(0, chatHistoryBody.scrollHeight);
-    }
-    scrollToBottom();
-
-    // User About Maxlength Init
-    if (chatSidebarLeftUserAbout.length) {
-      chatSidebarLeftUserAbout.maxlength({
-        alwaysShow: true,
-        warningClass: 'label label-success bg-success text-white',
-        limitReachedClass: 'label label-danger',
-        separator: '/',
-        validate: true,
-        threshold: 120
-      });
-    }
-
-    // Update user status
-    chatUserStatus.forEach(el => {
-      el.addEventListener('click', e => {
-        let chatLeftSidebarUserAvatar = document.querySelector('.chat-sidebar-left-user .avatar'),
-          value = e.currentTarget.value;
-        //Update status in left sidebar user avatar
-        chatLeftSidebarUserAvatar.removeAttribute('class');
-        Helpers._addClass('avatar avatar-xl ' + userStatusObj[value] + '', chatLeftSidebarUserAvatar);
-        //Update status in contacts sidebar user avatar
-        let chatContactsUserAvatar = document.querySelector('.app-chat-contacts .avatar');
-        chatContactsUserAvatar.removeAttribute('class');
-        Helpers._addClass('flex-shrink-0 avatar ' + userStatusObj[value] + ' me-3', chatContactsUserAvatar);
-      });
-    });
-
-    // Select chat or contact
-    chatContactListItems.forEach(chatContactListItem => {
-      // Bind click event to each chat contact list item
-      chatContactListItem.addEventListener('click', e => {
-        // Remove active class from chat contact list item
-        chatContactListItems.forEach(chatContactListItem => {
-          chatContactListItem.classList.remove('active');
-        });
-        // Add active class to current chat contact list item
-        e.currentTarget.classList.add('active');
-      });
-    });
-
-    // Filter Chats
-    if (searchInput) {
-      searchInput.addEventListener('keyup', e => {
-        let searchValue = e.currentTarget.value.toLowerCase(),
-          searchChatListItemsCount = 0,
-          searchContactListItemsCount = 0,
-          chatListItem0 = document.querySelector('.chat-list-item-0'),
-          contactListItem0 = document.querySelector('.contact-list-item-0'),
-          searchChatListItems = [].slice.call(
-            document.querySelectorAll('#chat-list li:not(.chat-contact-list-item-title)')
-          ),
-          searchContactListItems = [].slice.call(
-            document.querySelectorAll('#contact-list li:not(.chat-contact-list-item-title)')
-          );
-
-        // Search in chats
-        searchChatContacts(searchChatListItems, searchChatListItemsCount, searchValue, chatListItem0);
-        // Search in contacts
-        searchChatContacts(searchContactListItems, searchContactListItemsCount, searchValue, contactListItem0);
-      });
-    }
-
-    // Search chat and contacts function
-    function searchChatContacts(searchListItems, searchListItemsCount, searchValue, listItem0) {
-      searchListItems.forEach(searchListItem => {
-        let searchListItemText = searchListItem.textContent.toLowerCase();
-        if (searchValue) {
-          if (-1 < searchListItemText.indexOf(searchValue)) {
-            searchListItem.classList.add('d-flex');
-            searchListItem.classList.remove('d-none');
-            searchListItemsCount++;
-          } else {
-            searchListItem.classList.add('d-none');
-          }
-        } else {
-          searchListItem.classList.add('d-flex');
-          searchListItem.classList.remove('d-none');
-          searchListItemsCount++;
+        if (chatContactsBody) {
+            new PerfectScrollbar(chatContactsBody, {
+                wheelPropagation: false,
+                suppressScrollX: true
+            });
         }
-      });
-      // Display no search fount if searchListItemsCount == 0
-      if (searchListItemsCount == 0) {
-        listItem0.classList.remove('d-none');
-      } else {
-        listItem0.classList.add('d-none');
-      }
-    }
 
-    // Send Message
-    formSendMessage.addEventListener('submit', e => {
-      e.preventDefault();
-      if (messageInput.value) {
-        // Create a div and add a class
-        let renderMsg = document.createElement('div');
-        renderMsg.className = 'chat-message-text mt-2';
-        renderMsg.innerHTML = '<p class="mb-0 text-break">' + messageInput.value + '</p>';
-        document.querySelector('li:last-child .chat-message-wrapper').appendChild(renderMsg);
-        messageInput.value = '';
-        scrollToBottom();
-      }
-    });
+        if (chatHistoryBody) {
+            new PerfectScrollbar(chatHistoryBody, {
+                wheelPropagation: false,
+                suppressScrollX: true
+            });
+        }
 
-    // on click of chatHistoryHeaderMenu, Remove data-overlay attribute from chatSidebarLeftClose to resolve overlay overlapping issue for two sidebar
-    let chatHistoryHeaderMenu = document.querySelector(".chat-history-header [data-target='#app-chat-contacts']"),
-      chatSidebarLeftClose = document.querySelector('.app-chat-sidebar-left .close-sidebar');
-    chatHistoryHeaderMenu.addEventListener('click', e => {
-      chatSidebarLeftClose.removeAttribute('data-overlay');
-    });
-    // }
+        if (chatSidebarLeftBody) {
+            new PerfectScrollbar(chatSidebarLeftBody, {
+                wheelPropagation: false,
+                suppressScrollX: true
+            });
+        }
 
-    // Speech To Text
-    if (speechToText.length) {
-      var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
-      if (SpeechRecognition !== undefined && SpeechRecognition !== null) {
-        var recognition = new SpeechRecognition(),
-          listening = false;
-        speechToText.on('click', function () {
-          const $this = $(this);
-          recognition.onspeechstart = function () {
-            listening = true;
-          };
-          if (listening === false) {
-            recognition.start();
+        if (chatSidebarRightBody) {
+            new PerfectScrollbar(chatSidebarRightBody, {
+                wheelPropagation: false,
+                suppressScrollX: true
+            });
+        }
+
+        function scrollToBottom() {
+            chatHistoryBody.scrollTo(0, chatHistoryBody.scrollHeight);
+        }
+
+        /*
+        ========================
+        LOAD CHAT LIST
+        ========================
+        */
+
+        function loadChats() {
+
+            fetch('/api/chat/admin', {
+                headers: {
+                    Authorization: 'Bearer ' + window.jwtToken
+                }
+            })
+            .then(res => res.json())
+            .then(res => {
+
+                chatList.innerHTML = '';
+
+                if (!res.data.length) {
+                    document.querySelector('.chat-list-item-0').classList.remove('d-none');
+                    return;
+                }
+
+                res.data.forEach(chat => {
+
+                    const avatar = chat.avatar
+                        ? `/uploads/avatars/${chat.avatar}`
+                        : '/assets/img/avatars/2.png';
+
+                    const time = formatTime(chat.last_time ?? chat.created_at);
+
+                    const li = document.createElement('li');
+                    li.className = 'chat-contact-list-item';
+
+                    li.innerHTML = `
+                        <a class="d-flex align-items-center">
+                            <div class="flex-shrink-0 avatar avatar-online">
+                                <img src="${avatar}" class="rounded-circle">
+                            </div>
+
+                            <div class="chat-contact-info flex-grow-1 ms-2">
+                                <h6 class="chat-contact-name text-truncate m-0">${chat.name}</h6>
+                                <p class="chat-contact-status text-muted text-truncate mb-0">
+                                    ${chat.last_message ?? 'Start conversation'}
+                                </p>
+                            </div>
+
+                            <small class="text-muted mb-auto">${time}</small>
+                        </a>
+                    `;
+
+                    li.addEventListener('click', function () {
+
+                        document.querySelectorAll('.chat-contact-list-item')
+                            .forEach(el => el.classList.remove('active'));
+
+                        li.classList.add('active');
+
+                        openChat(chat.id);
+
+                    });
+
+                    chatList.appendChild(li);
+
+                });
+
+            });
+
+        }
+
+        /*
+        ========================
+        LOAD CONTACTS
+        ========================
+        */
+
+        function loadContacts() {
+
+            fetch('/api/customers', {
+                headers: {
+                    Authorization: 'Bearer ' + window.jwtToken
+                },
+            })
+            .then(res => res.json())
+            .then(res => {
+
+                const empty = document.querySelector('.contact-list-item-0');
+
+                document.querySelectorAll('#contact-list .contact-item')
+                    .forEach(el => el.remove());
+
+                if (!res.data.length) {
+                    empty.classList.remove('d-none');
+                    return;
+                }
+
+                empty.classList.add('d-none');
+
+                res.data.forEach(user => {
+
+                    const avatar = user.avatar
+                        ? `/uploads/avatars/${user.avatar}`
+                        : '/assets/img/avatars/4.png';
+
+                    const li = document.createElement('li');
+                    li.className = 'chat-contact-list-item contact-item';
+
+                    li.innerHTML = `
+                        <a class="d-flex align-items-center">
+                            <div class="flex-shrink-0 avatar avatar-offline">
+                                <img src="${avatar}" class="rounded-circle">
+                            </div>
+
+                            <div class="chat-contact-info flex-grow-1 ms-2">
+                                <h6 class="chat-contact-name text-truncate m-0">${user.name}</h6>
+                                <p class="chat-contact-status text-muted text-truncate mb-0">
+                                    ${user.email ?? ''}
+                                </p>
+                            </div>
+                        </a>
+                    `;
+
+                    li.addEventListener('click', function () {
+
+                        createChat(branchId, user.id);
+
+                    });
+
+                    contactList.appendChild(li);
+
+                });
+
+            });
+
+        }
+
+        /*
+        ========================
+        OPEN CHAT
+        ========================
+        */
+
+        function openChat(chatId) {
+
+            activeChatId = chatId;
+
+            fetch('/api/chat/messages/' + chatId, {
+                headers: {
+                    Authorization: 'Bearer ' + window.jwtToken
+                }
+            })
+            .then(res => res.json())
+            .then(res => {
+
+                const ul = document.getElementById('chat-history');
+                ul.innerHTML = '';
+
+                res.data.forEach(msg => {
+                    renderMessage(msg);
+                });
+
+                scrollToBottom();
+
+            });
+
+        }
+
+        /*
+        ========================
+        RENDER MESSAGE
+        ========================
+        */
+
+        function renderMessage(msg) {
+
+          const ul = document.querySelector('.chat-history');
+          const li = document.createElement('li');
+
+          if (msg.sender_type === 'user') {
+
+            li.className = 'chat-message chat-message-right';
+
+            li.innerHTML = `
+              <div class="d-flex overflow-hidden">
+                <div class="chat-message-wrapper flex-grow-1">
+                  <div class="chat-message-text">
+                    <p class="mb-0">${msg.message}</p>
+                  </div>
+                  <div class="text-end text-muted mt-1">
+                    <small>${formatTime(msg.created_at)}</small>
+                  </div>
+                </div>
+              </div>
+            `;
+
+          } else {
+
+            li.className = 'chat-message';
+
+            li.innerHTML = `
+              <div class="d-flex overflow-hidden">
+                <div class="chat-message-wrapper flex-grow-1">
+                  <div class="chat-message-text">
+                    <p class="mb-0">${msg.message}</p>
+                  </div>
+                  <div class="text-muted mt-1">
+                    <small>${formatTime(msg.created_at)}</small>
+                  </div>
+                </div>
+              </div>
+            `;
+
           }
-          recognition.onerror = function (event) {
-            listening = false;
-          };
-          recognition.onresult = function (event) {
-            $this.closest('.form-send-message').find('.message-input').val(event.results[0][0].transcript);
-          };
-          recognition.onspeechend = function (event) {
-            listening = false;
-            recognition.stop();
-          };
+
+          ul.appendChild(li);
+
+        }
+
+        /*
+        ========================
+        SEND MESSAGE
+        ========================
+        */
+
+        formSendMessage.addEventListener('submit', function (e) {
+
+            e.preventDefault();
+
+            if (!messageInput.value || !activeChatId) return;
+
+            const message = messageInput.value;
+
+            fetch('/api/chat/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + window.jwtToken
+                },
+                body: JSON.stringify({
+                    chat_id: activeChatId,
+                    message: message,
+                    sender_type: 'admin'
+                })
+            })
+            .then(res => res.json())
+            .then(() => {
+
+                renderMessage({
+                    sender_type: 'admin',
+                    message: message,
+                    created_at: new Date()
+                });
+
+                messageInput.value = '';
+
+                scrollToBottom();
+
+            });
+
         });
-      }
-    }
-  })();
+
+        /*
+        ========================
+        SEARCH CHAT
+        ========================
+        */
+
+        if (searchInput) {
+
+            searchInput.addEventListener('keyup', function () {
+
+                const searchValue = this.value.toLowerCase();
+
+                document.querySelectorAll('#chat-list li').forEach(li => {
+
+                    const text = li.textContent.toLowerCase();
+
+                    if (text.indexOf(searchValue) > -1) {
+                        li.classList.remove('d-none');
+                    } else {
+                        li.classList.add('d-none');
+                    }
+
+                });
+
+            });
+
+        }
+
+        /*
+        ========================
+        CREATE CHAT
+        ========================
+        */
+
+        function createChat(branchId, userId) {
+
+            fetch('/api/chat/create-admin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + window.jwtToken
+                },
+                body: JSON.stringify({
+                    branch_id: branchId,
+                    user_id: userId,
+                })
+            })
+            .then(res => res.json())
+            .then(res => {
+
+                openChat(res.data.chat_id);
+                loadChats();
+
+            });
+
+        }
+
+        /*
+        ========================
+        SIDEBAR OVERLAY FIX
+        ========================
+        */
+
+        const chatHistoryHeaderMenu = document.querySelector(".chat-history-header [data-target='#app-chat-contacts']");
+        const chatSidebarLeftClose = document.querySelector('.app-chat-sidebar-left .close-sidebar');
+
+        if (chatHistoryHeaderMenu && chatSidebarLeftClose) {
+
+            chatHistoryHeaderMenu.addEventListener('click', function () {
+                chatSidebarLeftClose.removeAttribute('data-overlay');
+            });
+
+        }
+
+        /*
+        ========================
+        SPEECH TO TEXT
+        ========================
+        */
+
+        if (speechToText.length) {
+
+            var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+
+            if (SpeechRecognition) {
+
+                var recognition = new SpeechRecognition(),
+                    listening = false;
+
+                speechToText.on('click', function () {
+
+                    const $this = $(this);
+
+                    recognition.onspeechstart = function () {
+                        listening = true;
+                    };
+
+                    if (!listening) {
+                        recognition.start();
+                    }
+
+                    recognition.onerror = function () {
+                        listening = false;
+                    };
+
+                    recognition.onresult = function (event) {
+                        $this.closest('.form-send-message')
+                            .find('.message-input')
+                            .val(event.results[0][0].transcript);
+                    };
+
+                    recognition.onspeechend = function () {
+                        listening = false;
+                        recognition.stop();
+                    };
+
+                });
+
+            }
+
+        }
+
+        /*
+        ========================
+        TIME FORMAT
+        ========================
+        */
+
+        function formatTime(date) {
+
+          const d = new Date(date);
+
+          return d.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+        }
+
+        /*
+        ========================
+        INIT
+        ========================
+        */
+
+        loadChats();
+        loadContacts();
+    })();
 });

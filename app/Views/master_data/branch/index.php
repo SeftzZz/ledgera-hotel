@@ -81,6 +81,9 @@
 
 <script>
 'use strict';
+const token = window.jwtToken;
+const userId = window.userId;
+const branchId = window.branchId;
 
 $(function () {
 
@@ -188,7 +191,7 @@ $(function () {
             if (result.isConfirmed) {
 
                 $.ajax({
-                    url: "<?= base_url('branch/store') ?>",
+                    url: "<?= base_url('api/branches') ?>",
                     type: "POST",
                     data: formData,
                     processData: false,

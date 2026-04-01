@@ -33,7 +33,7 @@ class Filters extends BaseFilters
         'performance'   => PerformanceMetrics::class,
         'csrf'          => \CodeIgniter\Filters\CSRF::class,
         'toolbar'       => \CodeIgniter\Filters\DebugToolbar::class,
-        'jwt'           => \App\Filters\JWTAuthFilter::class,
+        'jwt'           => \App\Filters\JwtFilter::class,
         'cors'          => \CodeIgniter\Filters\Cors::class,
         'auth'          => \App\Filters\AuthFilter::class,
         'permission'    => \App\Filters\PermissionFilter::class

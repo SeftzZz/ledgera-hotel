@@ -19,50 +19,14 @@ class TransactionService
         $taxModel = new \App\Models\TaxCodeModel();
 
         // ==============================
-        // TAX CALCULATION
+        // VALIDATION
         // ==============================
-        $baseAmount = (float) $trx['amount'];
-        $taxAmount  = 0;
-        $tax        = null;
-
-        if (!empty($trx['tax_code_id'])) {
-
-            $tax = $taxModel->find($trx['tax_code_id']);
-
-            if (!$tax) {
-                throw new \Exception('Invalid tax selected.');
-            }
-
-            if (($trx['tax_mode'] ?? 'exclusive') === 'inclusive') {
-                $base = $baseAmount / (1 + ($tax['tax_rate'] / 100));
-                $taxAmount = $baseAmount - $base;
-                $baseAmount = $base;
-            } else {
-                $taxAmount = $baseAmount * ($tax['tax_rate'] / 100);
-            }
-
-            $taxAmount = round($taxAmount, 2);
+        if (empty($trx['payment_account_id']) || $trx['payment_account_id'] == 0) {
+            throw new \Exception('Payment account wajib diisi dan tidak boleh 0');
         }
 
-        // ==============================
-        // INSERT TRANSACTION (BASE ONLY)
-        // ==============================
-        $trxId = $trxModel->insert([
-            ...$trx,
-            'amount' => $baseAmount
-        ], true);
-
-        // ==============================
-        // SAVE TAX TO transaction_taxes
-        // ==============================
-        if ($taxAmount > 0 && $tax) {
-
-            $db->table('transaction_taxes')->insert([
-                'transaction_id' => $trxId,
-                'tax_code_id'    => $tax['id'],
-                'tax_base'       => $baseAmount,
-                'tax_amount'     => $taxAmount
-            ]);
+        if (empty($trx['trx_type'])) {
+            throw new \Exception('trx_type wajib diisi');
         }
 
         // ==============================
@@ -76,30 +40,133 @@ class TransactionService
             throw new \Exception("Mapping not found for trx_type: {$trx['trx_type']}");
         }
 
-        if (empty($trx['payment_account_id'])) {
-            throw new \Exception('Payment account not defined.');
+        // ==============================
+        // BASE VARIABLES
+        // ==============================
+        $grossAmount = (float) ($trx['gross_amount'] ?? $trx['amount']);
+        $baseAmount     = $grossAmount;
+        $taxAmount      = 0;
+        $serviceAmount  = 0;
+        $tax            = null;
+
+        // ==============================
+        // TAX CALCULATION (SINGLE SOURCE)
+        // ==============================
+        if (!empty($trx['tax_code_id'])) {
+
+            $tax = $taxModel->find($trx['tax_code_id']);
+
+            if (!$tax) {
+                throw new \Exception('Invalid tax selected.');
+            }
+
+            $rate = $tax['tax_rate'] / 100;
+
+            // =========================
+            // PPN
+            // =========================
+            if ($tax['tax_type'] === 'ppn') {
+
+                if (($trx['tax_mode'] ?? 'exclusive') === 'inclusive') {
+                    $baseAmount = $grossAmount / (1 + $rate);
+                    $taxAmount  = $grossAmount - $baseAmount;
+                } else {
+                    $taxAmount  = $baseAmount * $rate;
+                }
+            }
+
+            // =========================
+            // PB1 (HOTEL)
+            // =========================
+            elseif ($tax['tax_type'] === 'pb1') {
+
+                $serviceRate = 0.10;
+
+                if (($trx['tax_mode'] ?? 'exclusive') === 'inclusive') {
+
+                    $factor = 1 + $serviceRate + (1 + $serviceRate) * $rate;
+
+                    $baseAmount     = $grossAmount / $factor;
+                    $serviceAmount  = $baseAmount * $serviceRate;
+                    $taxAmount      = ($baseAmount + $serviceAmount) * $rate;
+
+                } else {
+
+                    $serviceAmount  = $baseAmount * $serviceRate;
+                    $taxAmount      = ($baseAmount + $serviceAmount) * $rate;
+                }
+            }
+
+            // =========================
+            // WITHHOLDING
+            // =========================
+            elseif ($tax['tax_type'] === 'withholding') {
+                $taxAmount = $baseAmount * $rate;
+            }
+
+            // =========================
+            // ROUNDING LOCK
+            // =========================
+            $baseAmount     = round($baseAmount, 2);
+            $serviceAmount  = round($serviceAmount, 2);
+            $taxAmount      = round($taxAmount, 2);
+
+            // =========================
+            // ANTI SELISIH
+            // =========================
+            if ($tax['tax_type'] === 'pb1') {
+                $diff = $grossAmount - ($baseAmount + $serviceAmount + $taxAmount);
+                $taxAmount += $diff;
+            } else {
+                $diff = $grossAmount - ($baseAmount + $taxAmount);
+                $taxAmount += $diff;
+            }
         }
 
+        // ==============================
+        // INSERT TRANSACTION
+        // ==============================
+        $insertAmount = $baseAmount;
         $journalLines = [];
+        $type = strtolower($trx['trx_type']);
+        
+        // 🔥 KHUSUS SALES → pakai GROSS
+        if (in_array($type, ['sales', 'sales_partial'])) {
+            $insertAmount = $grossAmount;
+        }
+
+        $trxId = $trxModel->insert([
+            ...$trx,
+            'amount'       => $insertAmount,
+            'gross_amount' => $grossAmount
+        ], true);
+
+        // ==============================
+        // SAVE TAX
+        // ==============================
+        if ($taxAmount > 0 && $tax) {
+            $db->table('transaction_taxes')->insert([
+                'transaction_id' => $trxId,
+                'tax_code_id'    => $tax['id'],
+                'tax_base'       => $baseAmount,
+                'tax_amount'     => $taxAmount
+            ]);
+        }
 
         // =====================================
         // EXPENSE
         // =====================================
-        $type = strtolower($trx['trx_type']);
-
         if (str_starts_with($type, 'expense')) {
 
-            // Debit Expense
             $journalLines[] = [
                 'account_id' => $map['debit_account_id'],
                 'debit'      => $baseAmount,
                 'credit'     => 0
             ];
 
-            // =========================
-            // PPN INPUT
-            // =========================
-            if ($taxAmount > 0 && $tax && $tax['tax_type'] === 'ppn' && $tax['tax_direction'] === 'input') {
+            $bankCredit = $baseAmount;
+
+            if ($tax && $tax['tax_type'] === 'ppn') {
 
                 $journalLines[] = [
                     'account_id' => $tax['coa_account_id'],
@@ -107,15 +174,11 @@ class TransactionService
                     'credit'     => 0
                 ];
 
-                $bankCredit = $baseAmount + $taxAmount;
+                $bankCredit += $taxAmount;
             }
 
-            // =========================
-            // WITHHOLDING (PPh21, PPh23)
-            // =========================
-            elseif ($taxAmount > 0 && $tax && $tax['tax_type'] === 'withholding') {
+            if ($tax && $tax['tax_type'] === 'withholding') {
 
-                // Credit Utang Pajak
                 $journalLines[] = [
                     'account_id' => $tax['coa_account_id'],
                     'debit'      => 0,
@@ -125,73 +188,244 @@ class TransactionService
                 $bankCredit = $baseAmount - $taxAmount;
             }
 
-            else {
-                $bankCredit = $baseAmount;
-            }
-
-            // Credit Bank
             $journalLines[] = [
                 'account_id' => $trx['payment_account_id'],
                 'debit'      => 0,
                 'credit'     => $bankCredit
             ];
         }
-        elseif (str_starts_with($type, 'revenue')) {
 
-            // Debit Bank total
-            $journalLines[] = [
-                'account_id' => $trx['payment_account_id'],
-                'debit'      => $baseAmount + $taxAmount,
-                'credit'     => 0
-            ];
+        // =====================================
+        // SALES / REVENUE
+        // =====================================
+        elseif (
+            $type === 'sales' ||
+            str_starts_with($type, 'sales_') ||
+            str_starts_with($type, 'revenue')
+        ) {
 
-            // Credit Revenue
-            $journalLines[] = [
-                'account_id' => $map['debit_account_id'],
-                'debit'      => 0,
-                'credit'     => $baseAmount
-            ];
+            // =========================
+            // PB1
+            // =========================
+            if ($tax && $tax['tax_type'] === 'pb1') {
 
-            // Credit PPN Keluaran
-            if ($taxAmount > 0 && $tax && $tax['tax_type'] === 'ppn' && $tax['tax_direction'] === 'output') {
+                // VALIDASI SERVICE ACCOUNT
+                if (empty($map['service_account_id'])) {
+                    throw new \Exception('service_account_id belum diset untuk trx_type sales');
+                }
+
+                $journalLines[] = [
+                    'account_id' => $trx['payment_account_id'],
+                    'debit'      => $grossAmount,
+                    'credit'     => 0
+                ];
+
+                // ROOM (main revenue)
+                $journalLines[] = [
+                    'account_id' => $map['credit_account_id'],
+                    'debit'      => 0,
+                    'credit'     => $baseAmount
+                ];
+
+                // SERVICE
+                if ($serviceAmount > 0) {
+                    $journalLines[] = [
+                        'account_id' => $map['service_account_id'],
+                        'debit'      => 0,
+                        'credit'     => $serviceAmount
+                    ];
+                }
+
+                // PB1
                 $journalLines[] = [
                     'account_id' => $tax['coa_account_id'],
                     'debit'      => 0,
                     'credit'     => $taxAmount
                 ];
             }
-        }
-        // =====================================
-        // WITHHOLDING TAX (PPh23 dll)
-        // =====================================
-        elseif ($taxAmount > 0 && $tax && $tax['tax_type'] === 'withholding') {
 
-            // Debit Expense
+            // =========================
+            // PPN
+            // =========================
+            elseif ($tax && $tax['tax_type'] === 'ppn') {
+
+                $journalLines[] = [
+                    'account_id' => $trx['payment_account_id'],
+                    'debit'      => $baseAmount + $taxAmount,
+                    'credit'     => 0
+                ];
+
+                $journalLines[] = [
+                    'account_id' => $map['credit_account_id'],
+                    'debit'      => 0,
+                    'credit'     => $baseAmount
+                ];
+
+                $journalLines[] = [
+                    'account_id' => $tax['coa_account_id'],
+                    'debit'      => 0,
+                    'credit'     => $taxAmount
+                ];
+            }
+
+            // =========================
+            // NO TAX
+            // =========================
+            else {
+
+                $journalLines[] = [
+                    'account_id' => $trx['payment_account_id'],
+                    'debit'      => $baseAmount,
+                    'credit'     => 0
+                ];
+
+                $journalLines[] = [
+                    'account_id' => $map['credit_account_id'],
+                    'debit'      => 0,
+                    'credit'     => $baseAmount
+                ];
+            }
+        }
+
+        // =====================================
+        // DEPOSIT REVENUE
+        // =====================================
+        elseif (
+            $type === 'sales_partial' ||
+            str_contains($type, '_partial')
+        ) {
+
+            // =========================
+            // PB1 LOGIC
+            // =========================
+            if ($tax && $tax['tax_type'] === 'pb1') {
+
+                if (empty($map['service_account_id'])) {
+                    throw new \Exception('service_account_id belum diset');
+                }
+
+                $total = (float) ($trx['gross_amount'] ?? $trx['amount']);
+                $paid  = (float) ($trx['paid_amount'] ?? 0);
+                $piutang = $total - $paid;
+
+                // =========================
+                // DEBIT CASH
+                // =========================
+                if ($paid > 0) {
+                    $journalLines[] = [
+                        'account_id' => $trx['payment_account_id'],
+                        'debit'      => $paid,
+                        'credit'     => 0
+                    ];
+                }
+
+                // =========================
+                // DEBIT PIUTANG
+                // =========================
+                if ($piutang > 0) {
+                    $journalLines[] = [
+                        'account_id' => $map['debit_account_id'], // piutang
+                        'debit'      => $piutang,
+                        'credit'     => 0
+                    ];
+                }
+
+                // =========================
+                // CREDIT ROOM
+                // =========================
+                $journalLines[] = [
+                    'account_id' => $map['credit_account_id'],
+                    'debit'      => 0,
+                    'credit'     => $baseAmount
+                ];
+
+                // =========================
+                // CREDIT SERVICE
+                // =========================
+                if ($serviceAmount > 0) {
+                    $journalLines[] = [
+                        'account_id' => $map['service_account_id'],
+                        'debit'      => 0,
+                        'credit'     => $serviceAmount
+                    ];
+                }
+
+                // =========================
+                // CREDIT PB1
+                // =========================
+                $journalLines[] = [
+                    'account_id' => $tax['coa_account_id'],
+                    'debit'      => 0,
+                    'credit'     => $taxAmount
+                ];
+            }
+
+            // =========================
+            // NON PB1
+            // =========================
+            else {
+
+                $total = (float) ($trx['gross_amount'] ?? $trx['amount']);
+                $paid  = (float) ($trx['paid_amount'] ?? 0);
+                $piutang = $total - $paid;
+
+                if ($paid > 0) {
+                    $journalLines[] = [
+                        'account_id' => $trx['payment_account_id'],
+                        'debit'      => $paid,
+                        'credit'     => 0
+                    ];
+                }
+
+                if ($piutang > 0) {
+                    $journalLines[] = [
+                        'account_id' => $map['debit_account_id'],
+                        'debit'      => $piutang,
+                        'credit'     => 0
+                    ];
+                }
+
+                $journalLines[] = [
+                    'account_id' => $map['credit_account_id'],
+                    'debit'      => 0,
+                    'credit'     => $baseAmount
+                ];
+
+                if ($taxAmount > 0 && $tax) {
+                    $journalLines[] = [
+                        'account_id' => $tax['coa_account_id'],
+                        'debit'      => 0,
+                        'credit'     => $taxAmount
+                    ];
+                }
+            }
+        }
+
+        elseif ($type === 'receive_payment') {
+
+            $amount = (float) $trx['amount'];
+
             $journalLines[] = [
-                'account_id' => $map['debit_account_id'],
-                'debit'      => $baseAmount,
+                'account_id' => $trx['payment_account_id'], // Kas
+                'debit'      => $amount,
                 'credit'     => 0
             ];
 
-            // Credit Utang Pajak
             $journalLines[] = [
-                'account_id' => $tax['coa_account_id'],
+                'account_id' => $map['credit_account_id'], // Piutang
                 'debit'      => 0,
-                'credit'     => $taxAmount
-            ];
-
-            // Credit Bank (net dibayar)
-            $journalLines[] = [
-                'account_id' => $trx['payment_account_id'],
-                'debit'      => 0,
-                'credit'     => $baseAmount - $taxAmount
+                'credit'     => $amount
             ];
         }
 
         // =====================================
-        // DEFAULT (capital, draw, dll)
+        // DEFAULT
         // =====================================
         else {
+
+            if ($taxAmount > 0) {
+                throw new \Exception("trx_type {$trx['trx_type']} tidak boleh menggunakan tax");
+            }
 
             $journalLines[] = [
                 'account_id' => $map['debit_account_id'],
@@ -205,6 +439,7 @@ class TransactionService
                 'credit'     => $baseAmount
             ];
         }
+
         // ==============================
         // CREATE JOURNAL
         // ==============================

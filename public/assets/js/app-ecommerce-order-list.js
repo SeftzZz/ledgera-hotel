@@ -23,23 +23,31 @@ $(function () {
 
   var dt_order_table = $('.datatables-order'),
     statusObj = {
-      1: { title: 'Dispatched', class: 'bg-label-warning' },
-      2: { title: 'Delivered', class: 'bg-label-success' },
-      3: { title: 'Out for Delivery', class: 'bg-label-primary' },
-      4: { title: 'Ready to Pickup', class: 'bg-label-info' }
+      1: { title: 'Still Pending', class: 'bg-label-warning' },
+      2: { title: 'Already Paid', class: 'bg-label-success' },
+      3: { title: 'Deposit Payment', class: 'bg-label-info' },
+      4: { title: 'Error', class: 'bg-label-danger' },
+      5: { title: 'Cancelled', class: 'bg-label-secondary' },
     },
     paymentObj = {
       1: { title: 'Paid', class: 'text-success' },
       2: { title: 'Pending', class: 'text-warning' },
-      3: { title: 'Failed', class: 'text-danger' },
-      4: { title: 'Cancelled', class: 'text-secondary' }
+      3: { title: 'Processing', class: 'text-info' },
+      4: { title: 'Failed', class: 'text-danger' },
+      5: { title: 'Cancelled', class: 'text-secondary' }
     };
 
   // E-commerce Products datatable
 
   if (dt_order_table.length) {
     var dt_products = dt_order_table.DataTable({
-      ajax: assetsPath + 'json/ecommerce-customer-order.json', // JSON file to add data
+      ajax: {
+        url: '/api/orders',
+        headers: {
+          Authorization: 'Bearer ' + window.jwtToken
+        },
+        dataSrc: 'data'
+      },
       columns: [
         // columns according to JSON
         { data: 'id' },
@@ -82,7 +90,11 @@ $(function () {
           render: function (data, type, full, meta) {
             var $order_id = full['order'];
             // Creates full output for row
-            var $row_output = '<a href="app-ecommerce-order-details.html"><span>#' + $order_id + '</span></a>';
+            var $row_output = `
+              <a href="/orders/detail/${full.id}">
+                <span>#${$order_id}</span>
+              </a>
+            `;
             return $row_output;
           }
         },
@@ -179,27 +191,57 @@ $(function () {
         {
           // Payment Method
           targets: -2,
-          render: function (data, type, full, meta) {
-            var $method = full['method'];
-            var $method_number = full['method_number'];
+          render: function (data, type, full) {
 
-            if ($method == 'paypal_logo') {
-              $method_number = '@gmail.com';
+            let method = full['method'];
+            let name = method.toUpperCase();
+
+            let iconList = [
+              'visa',
+              'mastercard',
+              'paypal',
+              'stripe'
+            ];
+
+            let output;
+
+            if (iconList.includes(method)) {
+
+              output = `
+                <img src="${assetsPath}img/icons/payments/${method}.png"
+                     class="me-2"
+                     width="16">
+              `;
+
+            } else {
+
+              let stateNum = Math.floor(Math.random() * 6);
+              let states = ['success','danger','warning','info','dark','primary','secondary'];
+              let state = states[stateNum];
+
+              let initials = name.match(/\b\w/g) || [];
+              initials = ((initials.shift() || '') + (initials.pop() || '')).toUpperCase();
+
+              output = `
+                <span class="avatar-initial rounded-2 bg-label-${state}">
+                  ${initials}
+                </span>
+              `;
             }
-            return (
-              '<div class="d-flex align-items-center text-nowrap">' +
-              '<img src="' +
-              assetsPath +
-              'img/icons/payments/' +
-              $method +
-              '.png" alt="' +
-              $method +
-              '"class="me-2" width="16">' +
-              '<span><i class="ti ti-dots me-1 mt-n1"></i>' +
-              $method_number +
-              '</span>' +
-              '</div>'
-            );
+
+            return `
+              <div class="d-flex justify-content-start align-items-center product-name">
+
+                <div class="avatar-wrapper">
+                  <div class="avatar me-2 rounded-2 bg-label-secondary">
+                    ${output}
+                  </div>
+                </div>
+
+                <span class="ms-1">${name}</span>
+
+              </div>
+            `;
           }
         },
         {
@@ -213,7 +255,7 @@ $(function () {
               '<div class="d-flex justify-content-sm-center align-items-sm-center">' +
               '<button class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="ti ti-dots-vertical"></i></button>' +
               '<div class="dropdown-menu dropdown-menu-end m-0">' +
-              '<a href="app-ecommerce-order-details.html" class="dropdown-item">View</a>' +
+              `<a href="/orders/detail/${full.id}" class="dropdown-item">View</a>` +
               '<a href="javascript:0;" class="dropdown-item delete-record">' +
               'Delete' +
               '</a>' +
@@ -426,4 +468,37 @@ $(function () {
     $('.dataTables_filter .form-control').removeClass('form-control-sm');
     $('.dataTables_length .form-select').removeClass('form-select-sm');
   }, 300);
+
+  async function loadOrderSummary() {
+
+    try {
+
+      $.ajax({
+
+        url: '/api/orders/summary',
+
+        headers: {
+          Authorization: 'Bearer ' + window.jwtToken
+        },
+
+        success: function(res){
+
+          $('#order_pending').text(res.data.pending);
+          $('#order_processing').text(res.data.processing);
+          $('#order_completed').text(res.data.completed);
+          $('#order_refunded').text(res.data.refunded);
+          $('#order_failed').text(res.data.failed);
+
+        }
+
+      });
+
+    }
+    catch(err){
+      console.error('order summary error',err);
+    }
+
+  }
+
+  loadOrderSummary();
 });

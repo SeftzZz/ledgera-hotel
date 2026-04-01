@@ -53,15 +53,17 @@ $(function () {
 
   if (dt_category_list_table.length) {
     var dt_category = dt_category_list_table.DataTable({
-      ajax: assetsPath + 'json/ecommerce-category-list.json', // JSON file to add data
+      ajax: {
+        url: '/api/categories',
+        headers: { Authorization: 'Bearer ' + window.jwtToken },
+        dataSrc: 'data'
+      },
       columns: [
-        // columns according to JSON
         { data: '' },
         { data: 'id' },
-        { data: 'categories' },
-        { data: 'total_products' },
-        { data: 'total_earnings' },
-        { data: '' }
+        { data: 'name' },
+        { data: 'items' },
+        { data: 'status' },
       ],
       columnDefs: [
         {
@@ -76,84 +78,73 @@ $(function () {
           }
         },
         {
-          // For Checkboxes
+          // Category Name
           targets: 1,
-          orderable: false,
-          searchable: false,
-          responsivePriority: 4,
-          checkboxes: true,
-          render: function () {
-            return '<input type="checkbox" class="dt-checkboxes form-check-input">';
-          },
-          checkboxes: {
-            selectAllRender: '<input type="checkbox" class="form-check-input">'
-          }
-        },
-        {
-          // Categories and Category Detail
-          targets: 2,
-          responsivePriority: 2,
-          render: function (data, type, full, meta) {
-            var $name = full['categories'],
-              $category_detail = full['category_detail'],
-              $image = full['cat_image'],
-              $id = full['id'];
-            if ($image) {
-              // For Product image
+          render: function (data, type, full) {
+
+            var $name = full.name;
+            var $icon = full.icon;
+            var $id = full.id;
+
+            if ($icon) {
+
               var $output =
-                '<img src="' +
-                assetsPath +
-                'img/ecommerce-images/' +
-                $image +
-                '" alt="Product-' +
-                $id +
-                '" class="rounded-2">';
+                '<img src="' + $icon + '" class="rounded-2">';
+
             } else {
-              // For Product badge
+
               var stateNum = Math.floor(Math.random() * 6);
-              var states = ['success', 'danger', 'warning', 'info', 'dark', 'primary', 'secondary'];
-              var $state = states[stateNum],
-                $name = full['category_detail'],
-                $initials = $name.match(/\b\w/g) || [];
+              var states = ['success','danger','warning','info','dark','primary','secondary'];
+              var $state = states[stateNum];
+
+              var $initials = $name.match(/\b\w/g) || [];
               $initials = (($initials.shift() || '') + ($initials.pop() || '')).toUpperCase();
-              $output = '<span class="avatar-initial rounded-2 bg-label-' + $state + '">' + $initials + '</span>';
+
+              var $output =
+                '<span class="avatar-initial rounded-2 bg-label-' + $state + '">' +
+                $initials +
+                '</span>';
+
             }
-            // Creates full output for Categories and Category Detail
-            var $row_output =
+
+            return (
               '<div class="d-flex align-items-center">' +
-              '<div class="avatar-wrapper me-2 rounded-2 bg-label-secondary">' +
-              '<div class="avatar">' +
-              $output +
-              '</div>' +
-              '</div>' +
-              '<div class="d-flex flex-column justify-content-center">' +
-              '<span class="text-body text-wrap fw-medium">' +
-              $name +
-              '</span>' +
-              '<span class="text-muted text-truncate mb-0 d-none d-sm-block"><small>' +
-              $category_detail +
-              '</small></span>' +
-              '</div>' +
-              '</div>';
-            return $row_output;
+                '<div class="avatar-wrapper me-2">' +
+                  '<div class="avatar">' +
+                    $output +
+                  '</div>' +
+                '</div>' +
+                '<div class="d-flex flex-column">' +
+                  '<span class="fw-medium">' + $name + '</span>' +
+                '</div>' +
+              '</div>'
+            );
+
           }
         },
         {
-          // Total products
-          targets: 3,
+          // Total items
+          targets: 2,
           responsivePriority: 3,
           render: function (data, type, full, meta) {
-            var $total_products = full['total_products'];
-            return '<div class="text-sm-end">' + $total_products + '</div>';
+            var $total_items = full['total_items'];
+            return '<div>' + $total_items + '</div>';
           }
         },
         {
-          // Total Earnings
-          targets: 4,
-          orderable: false,
-          render: function (data, type, full, meta) {
-            var $total_earnings = full['total_earnings'];
-            return "<div class='h6 mb-0 text-sm-end'>" + $total_earnings + '</div';
+          // Status
+          targets: 3,
+          render: function (data, type, full) {
+
+            var status = full.status;
+
+            var badge =
+              status == 'active'
+              ? '<span class="badge bg-label-success">Active</span>'
+              : '<span class="badge bg-label-secondary">Inactive</span>';
+
+            return badge;
+
           }
         },
         {
@@ -162,13 +153,19 @@ $(function () {
           title: 'Actions',
           searchable: false,
           orderable: false,
-          render: function (data, type, full, meta) {
+          render: function () {
+
             return (
-              '<div class="d-flex align-items-sm-center justify-content-sm-center">' +
-              '<button class="btn btn-sm btn-icon delete-record me-2"><i class="ti ti-trash"></i></button>' +
-              '<button class="btn btn-sm btn-icon"><i class="ti ti-edit"></i></button>' +
+              '<div class="d-flex align-items-center">' +
+                '<button class="btn btn-sm btn-icon delete-record me-2">' +
+                  '<i class="ti ti-trash"></i>' +
+                '</button>' +
+                '<button class="btn btn-sm btn-icon">' +
+                  '<i class="ti ti-edit"></i>' +
+                '</button>' +
               '</div>'
             );
+
           }
         }
       ],
@@ -250,42 +247,197 @@ $(function () {
   }, 300);
 });
 
-//For form validation
+// Category Form Script
 (function () {
-  const eCommerceCategoryListForm = document.getElementById('eCommerceCategoryListForm');
 
-  //Add New customer Form Validation
-  const fv = FormValidation.formValidation(eCommerceCategoryListForm, {
+  const form = document.getElementById('eCommerceCategoryListForm');
+
+  // stop jika form tidak ada
+  if (!form) {
+    return;
+  }
+
+  const fv = FormValidation.formValidation(form, {
+
     fields: {
-      categoryTitle: {
+
+      name: {
         validators: {
           notEmpty: {
-            message: 'Please enter category title'
+            message: 'Please enter category name'
+          },
+          stringLength: {
+            max: 100,
+            message: 'Category name must be less than 100 characters'
           }
         }
       },
-      slug: {
+
+      status: {
         validators: {
           notEmpty: {
-            message: 'Please enter slug'
+            message: 'Please select category status'
           }
         }
       }
+
     },
+
     plugins: {
+
       trigger: new FormValidation.plugins.Trigger(),
+
       bootstrap5: new FormValidation.plugins.Bootstrap5({
-        // Use this for enabling/changing valid/invalid class
         eleValidClass: 'is-valid',
-        rowSelector: function (field, ele) {
-          // field is the field name & ele is the field element
+        rowSelector: function () {
           return '.mb-3';
         }
       }),
+
       submitButton: new FormValidation.plugins.SubmitButton(),
-      // Submit the form when all fields are valid
-      // defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+
       autoFocus: new FormValidation.plugins.AutoFocus()
+
     }
+
   });
+
+  /*
+  =============================
+  SUBMIT FORM
+  =============================
+  */
+
+  document.addEventListener('DOMContentLoaded', function () {
+
+    const form = document.getElementById('eCommerceCategoryListForm');
+    if (!form) return;
+
+    const fv = FormValidation.formValidation(form, {
+
+      fields: {
+
+        name: {
+          validators: {
+            notEmpty: {
+              message: 'Please enter category name'
+            }
+          }
+        },
+
+        status: {
+          validators: {
+            notEmpty: {
+              message: 'Please select category status'
+            }
+          }
+        }
+
+      },
+
+      plugins: {
+
+        trigger: new FormValidation.plugins.Trigger(),
+
+        bootstrap5: new FormValidation.plugins.Bootstrap5({
+          eleValidClass: 'is-valid',
+          rowSelector: '.mb-3'
+        }),
+
+        submitButton: new FormValidation.plugins.SubmitButton(),
+
+        autoFocus: new FormValidation.plugins.AutoFocus()
+
+      }
+
+    });
+
+    /*
+    ========================
+    FORM VALID
+    ========================
+    */
+
+    fv.on('core.form.valid', function () {
+
+      console.log('submit triggered');
+
+      $.ajax({
+
+        url: '/api/categories/create',
+        type: 'POST',
+
+        headers: {
+          Authorization: 'Bearer ' + window.jwtToken
+        },
+
+        data: $(form).serialize(),
+
+        success: function () {
+
+          alert('Category saved');
+
+          $('.datatables-category-list').DataTable().ajax.reload();
+
+          const offcanvas = bootstrap.Offcanvas.getInstance(
+            document.getElementById('offcanvasEcommerceCategoryList')
+          );
+
+          if (offcanvas) offcanvas.hide();
+
+          form.reset();
+
+        },
+
+        error: function () {
+          alert('Failed to save category');
+        }
+
+      });
+
+    });
+
+  });
+
 })();
+
+
+/*
+=================================
+UPLOAD CATEGORY ICON
+=================================
+*/
+
+$('#iconUpload').change(function () {
+
+  var formData = new FormData();
+  formData.append('file', this.files[0]);
+
+  $.ajax({
+
+    url: '/api/upload/category',
+    type: 'POST',
+    data: formData,
+
+    processData: false,
+    contentType: false,
+
+    headers: {
+      Authorization: 'Bearer ' + window.jwtToken
+    },
+
+    success: function (res) {
+
+      $('#iconPath').val(res.data.path);
+
+    },
+
+    error: function () {
+
+      alert('Icon upload failed');
+
+    }
+
+  });
+
+});

@@ -7,7 +7,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-        <title><?= $title ?> | Ledgera</title>
+        <title><?= $title ?> | Accounting System</title>
 
         <meta name="description" content="hey work connects hospitality professionals with trusted hotels for flexible daily and casual job opportunities." />
 
@@ -35,10 +35,35 @@
         <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/node-waves/node-waves.css') ?>" />
         <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') ?>" />
         <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/typeahead-js/typeahead.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/apex-charts/apex-charts.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/swiper/swiper.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/bootstrap-select/bootstrap-select.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css') ?>" />
+
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/node-waves/node-waves.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/typeahead-js/typeahead.css') ?>" />
         <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/sweetalert2/sweetalert2.css') ?>" />
-       
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/quill/typography.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/quill/katex.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/quill/editor.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/select2/select2.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/dropzone/dropzone.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/flatpickr/flatpickr.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/tagify/tagify.css') ?>" />
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/@form-validation/form-validation.css') ?>" />
+
+        <!-- Page CSS -->
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/css/pages/cards-advance.css') ?>" />
+
+        <link rel="stylesheet" href="<?= base_url('assets/vendor/css/pages/app-chat.css') ?>" />
+
         <!-- Helpers -->
         <script src="<?= base_url('assets/vendor/js/helpers.js') ?>"></script>
+        <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+        <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
         <script src="<?= base_url('assets/js/config.js') ?>"></script>
     </head>
 
@@ -82,6 +107,8 @@
         <!-- / Layout wrapper -->
 
         <!-- Core JS -->
+        <!-- build:js assets/vendor/js/core.js -->
+
         <script src="<?= base_url('assets/vendor/libs/jquery/jquery.js') ?>"></script>
         <script src="<?= base_url('assets/vendor/libs/popper/popper.js') ?>"></script>
         <script src="<?= base_url('assets/vendor/js/bootstrap.js') ?>"></script>
@@ -91,15 +118,39 @@
         <script src="<?= base_url('assets/vendor/libs/i18n/i18n.js') ?>"></script>
         <script src="<?= base_url('assets/vendor/libs/typeahead-js/typeahead.js') ?>"></script>
         <script src="<?= base_url('assets/vendor/js/menu.js') ?>"></script>
+        <script src="<?= base_url('assets/vendor/libs/bootstrap-select/bootstrap-select.js') ?>"></script>
+        <script src="<?= base_url('assets/vendor/libs/select2/select2.js') ?>"></script>
+        <script src="<?= base_url('assets/vendor/libs/quill/katex.js') ?>"></script>
+        <script src="<?= base_url('assets/vendor/libs/quill/quill.js') ?>"></script>
+        <script src="<?= base_url('assets/vendor/libs/dropzone/dropzone.js') ?>"></script>
+        <script src="<?= base_url('assets/vendor/libs/jquery-repeater/jquery-repeater.js') ?>"></script>
+        <script src="<?= base_url('assets/vendor/libs/flatpickr/flatpickr.js') ?>"></script>
+        <script src="<?= base_url('assets/vendor/libs/tagify/tagify.js') ?>"></script>
+
         <!-- endbuild -->
 
+        <!-- Vendors JS -->
+        <script src="<?= base_url('assets/vendor/libs/apex-charts/apexcharts.js') ?>"></script>
+        <script src="<?= base_url('assets/vendor/libs/swiper/swiper.js') ?>"></script>
+        <script src="<?= base_url('assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js') ?>"></script>
+        <script src="<?= base_url('assets/vendor/libs/bootstrap-maxlength/bootstrap-maxlength.js') ?>"></script>
+        <script src="<?= base_url('assets/vendor/libs/sweetalert2/sweetalert2new.js') ?>"></script>
+        
         <!-- Main JS -->
         <script src="<?= base_url('assets/js/main.js') ?>"></script>
 
-        <!-- Vendors JS -->
-        <script src="<?= base_url('assets/vendor/libs/sweetalert2/sweetalert2new.js') ?>"></script>
+        <script src="<?= base_url('assets/js/forms-selects.js') ?>"></script>
         <?= $this->renderSection('scripts') ?>
         
         <!-- Page JS -->
+        <script>
+            window.jwtToken = "<?= session('jwt_token') ?>";
+            window.userId = "<?= session('user_id') ?>";
+            window.companyId = "<?= session('company_id') ?>";
+            window.companyName = "<?= session('company_name') ?>";
+            window.branchId = "<?= session('branch_id') ?>";
+            window.branchName = "<?= session('branch_name') ?>";
+            window.branchAddress = "<?= session('branch_address') ?>";
+        </script>
     </body>
 </html>

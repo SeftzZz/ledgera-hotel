@@ -26,7 +26,7 @@
                 <div class="modal-left">
                     <form action="<?= base_url('login') ?>" method="post">
                         <?= csrf_field() ?>
-                        <h1 class="modal-title">Welcome to Ledgera</h1>
+                        <h1 class="modal-title">Welcome</h1>
                         <p class="modal-desc">Please login</p>
 
                         <div class="input-block">

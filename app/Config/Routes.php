@@ -69,6 +69,54 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 });
 
 // =========================
+// ECOMMERCE
+// =========================
+$routes->get('api/branches','Api\Branches::index');
+$routes->get('api/items/branch/(:num)','Api\Items::branch/$1');
+
+$routes->get('api/promos','Api\Promos::index');
+$routes->get('api/categories','Api\Categories::index');
+$routes->get('api/items','Api\Items::index');
+
+$routes->group('items', ['filter' => 'auth'], function($routes) {
+
+    $routes->get('/', 'Items::index');
+    $routes->get('item-add', 'Items::itemAdd');
+    $routes->get('item-category', 'Items::itemCategory');
+
+});
+
+$routes->group('orders', ['filter' => 'auth'], function($routes) {
+
+    $routes->get('/', 'Orders::index');
+    $routes->get('detail/(:num)', 'Orders::detail/$1');
+    $routes->get('order-add', 'Orders::add');
+
+});
+
+$routes->group('customers', ['filter' => 'auth'], function($routes) {
+
+    $routes->get('/', 'Customers::index');
+    $routes->get('detail/(:num)', 'Customers::detail/$1');
+
+});
+
+$routes->group('chats', ['filter' => 'auth'], function($routes) {
+
+    $routes->get('/', 'Chats::index');
+    $routes->get('detail/(:num)', 'Chats::detail/$1');
+
+});
+
+// PREVENTIVE & MAINTENANCE
+$routes->group('maintenance', ['filter' => 'auth'], function($routes) {
+
+    $routes->get('/', 'Maintenance::index');
+    $routes->get('detail/(:num)', 'Maintenance::detail/$1');
+
+});
+
+// =========================
 // ACCOUNTING
 // =========================
 $routes->group('', ['filter' => 'auth'], function ($routes) {
@@ -156,6 +204,10 @@ $routes->post('opening-balance/save', 'OpeningBalanceController::save');
 $routes->get('trial-balance', 'TrialBalanceController::index');
 $routes->get('balance-sheet', 'BalanceSheetController::index');
 $routes->get('income-statement', 'IncomeStatementController::index');
+
+$routes->get('branches',              'Api\BranchController::index');
+$routes->post('branches',             'Api\BranchController::store');
+$routes->get('branches/(:num)',       'Api\BranchController::show/$1');
 
 // =========================
 // API – PUBLIC
@@ -257,4 +309,90 @@ $routes->group('api', ['filter' => 'jwt'], function ($routes) {
     // System
     $routes->get('system/health',       'Api\SystemController::health');
     $routes->get('system/permissions',  'Api\SystemController::permissions');
+
+    // ECOMMERCE
+    $routes->get('branches/(:num)/menu','Api\Branches::menu/$1');
+    $routes->get('branches/(:num)/hours','Api\Branches::hours/$1');
+    $routes->post('branches/(:num)/hours','Api\Branches::saveHours/$1');
+    $routes->post('branches/(:num)','Api\Branches::update/$1');
+
+    // CATEGORY
+    $routes->post('categories/create','Api\Categories::create');
+
+    // ITEMS
+    $routes->get('items/category/(:num)','Api\Items::category/$1');
+    $routes->get('items/branch/(:num)/category/(:num)','Api\Items::branchCategory/$1/$2');
+    $routes->post('items/create', 'Api\Items::create');
+    $routes->post('upload/product', 'Api\Upload::uploadProduct');
+
+    // CART
+    $routes->post('cart/create','Api\Cart::create');
+    $routes->post('cart/add','Api\Cart::add');
+    $routes->post('cart/remove','Api\Cart::remove');
+    $routes->post('cart/update','Api\Cart::update');
+    $routes->get('cart/(:num)','Api\Cart::get/$1');
+    $routes->get('cart/all/(:num)','Api\Cart::getAll/$1');
+
+    // ORDER
+    $routes->get('orders','Api\Orders::orders');
+    $routes->post('orders/checkout','Api\Orders::checkout');
+    $routes->get('orders/(:num)','Api\Orders::list/$1');
+    $routes->get('orders/detail/(:num)','Api\Orders::detail/$1');
+    $routes->post('orders/pay','Api\Orders::pay');
+    $routes->get('orders/summary','Api\Orders::summary');
+
+    // CUSTOMERS
+    $routes->get('customers','Api\Customers::index');
+    $routes->get('customers/(:num)','Api\Customers::show/$1');
+    $routes->get('customers/(:num)/orders','Api\Customers::orders/$1');
+    $routes->get('customers/(:num)/wallet','Api\Customers::wallet/$1');
+    $routes->get('customers/(:num)/points','Api\Customers::points/$1');
+    $routes->get('customers/(:num)/membership','Api\Customers::membership/$1');
+    $routes->get('customers/(:num)/referrals','Api\Customers::referrals/$1');
+    $routes->get('customers/(:num)/promos','Api\Customers::promos/$1');
+
+    // PAYMENT
+    $routes->post('payments/pay','Api\Payments::pay');
+
+    // WALLET
+    $routes->get('wallet/(:num)','Api\Wallet::balance/$1');
+    $routes->get('wallet/transactions','Api\Wallet::transactions');
+    $routes->post('wallet/topup','Api\Wallet::topup');
+
+    // LOYALTY
+    $routes->get('loyalty/rules','Api\Loyalty::rules');
+    $routes->get('loyalty/tiers','Api\Loyalty::tiers');
+    $routes->get('loyalty/(:num)','Api\Loyalty::status/$1');
+    $routes->get('loyalty/benefits/(:num)','Api\Loyalty::benefits/$1');
+    $routes->get('loyalty/rewards/(:num)','Api\Loyalty::rewards/$1');
+
+    // MEMBERSHIP
+    $routes->get('membership/history/(:num)','Api\Membership::history/$1');
+
+    // POINT
+    $routes->get('points/(:num)','Api\Points::balance/$1');
+    $routes->get('points/history/(:num)','Api\Points::history/$1');
+
+    // POINT RULES
+    $routes->get('point-rules/(:num)', 'Api\Points::pointRule/$1');
+    $routes->post('point-rules/(:num)', 'Api\Points::savePointRule/$1');
+
+    // VOUCHER
+    $routes->get('vouchers','Api\Vouchers::index');
+    $routes->post('vouchers/apply','Api\Vouchers::apply');
+    $routes->get('vouchers/list','Api\Vouchers::list');
+    $routes->post('vouchers/store','Api\Vouchers::store');
+    $routes->post('vouchers/update/(:num)','Api\Vouchers::update/$1');
+    $routes->delete('vouchers/delete/(:num)','Api\Vouchers::delete/$1');
+
+    // CHAT
+    $routes->post('chat/create','Api\Chat::create');
+    $routes->get('chat/(:num)','Api\Chat::list/$1');
+    $routes->get('chat/messages/(:num)','Api\Chat::messages/$1');
+    $routes->post('chat/send','Api\Chat::send');
+    $routes->get('chat/admin','Api\Chat::adminChats');
+    $routes->post('chat/create-admin','Api\Chat::adminCreate');
+
+    // MAINTENANCE
+    $routes->post('maintenance/create', 'Api\Maintenance::create');
 });

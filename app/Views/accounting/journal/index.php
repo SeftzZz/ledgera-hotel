@@ -141,9 +141,11 @@ $(function () {
                 // Urutkan: akun utama dulu, lalu akun pajak
                 let sorted = res.details.sort((a, b) => {
                     let aIsTax = a.account_name.toLowerCase().includes('ppn') || 
-                                 a.account_name.toLowerCase().includes('pph');
+                                 a.account_name.toLowerCase().includes('pph') || 
+                                 a.account_name.toLowerCase().includes('pb1');
                     let bIsTax = b.account_name.toLowerCase().includes('ppn') || 
-                                 b.account_name.toLowerCase().includes('pph');
+                                 b.account_name.toLowerCase().includes('pph') ||
+                                 b.account_name.toLowerCase().includes('pb1');
 
                     return aIsTax - bIsTax; // tax ke bawah
                 });
@@ -157,7 +159,8 @@ $(function () {
                     totalCredit += credit;
 
                     let isTax = d.account_name.toLowerCase().includes('ppn') ||
-                                d.account_name.toLowerCase().includes('pph');
+                                d.account_name.toLowerCase().includes('pph') ||
+                                d.account_name.toLowerCase().includes('pb1');
 
                     let style = isTax 
                         ? 'padding-left:25px; font-style:italic; color:#b8860b;' 
