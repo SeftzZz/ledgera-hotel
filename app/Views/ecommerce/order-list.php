@@ -15,7 +15,7 @@
                         <div
                           class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-3 pb-sm-0">
                           <div>
-                            <h4 class="mb-2" id="order_pending"></h4>
+                            <h4 class="mb-2" id="order_pending">0</h4>
                             <p class="mb-0 fw-medium">Pending</p>
                           </div>
                           <span class="avatar me-sm-4">

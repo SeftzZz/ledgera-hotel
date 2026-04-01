@@ -29,5 +29,4 @@ class CategoryModel extends BaseModel
       ->findAll();
 
   }
-
 }

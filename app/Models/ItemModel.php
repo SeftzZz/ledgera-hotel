@@ -109,12 +109,10 @@ class ItemModel extends Model
       return $this->db->table('branch_items')
         ->select('
           items.*,
-          variants.name as variant,
           branch_items.price,
           branch_items.stock
         ')
-        ->join('variants', 'variants.id = branch_items.variant_id')
-        ->join('items', 'items.id = variants.item_id')
+        ->join('items', 'items.id = branch_items.item_id', 'left')
         ->where('branch_items.branch_id', $branchId)
         ->where('items.category_id', $categoryId)
         ->where('branch_items.status', 'available')

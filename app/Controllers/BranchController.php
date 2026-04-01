@@ -45,9 +45,10 @@ class BranchController extends BaseController
 
         $orderColumns = [
             null,
+            null, // no
+            'companies.company_name',
             'branches.branch_code',
             'branches.branch_name',
-            'companies.company_name',
             null
         ];
 
@@ -92,12 +93,23 @@ class BranchController extends BaseController
 
             $action = '
                 <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-icon btn-primary btn-edit" data-id="'.$row['id'].'">
+                    <button class="btn btn-sm btn-icon btn-primary edit-record"
+                        data-id="'.$row['id'].'"
+                        data-company_id="'.$row['company_id'].'"
+                        data-branch_code="'.esc($row['branch_code']).'"
+                        data-branch_name="'.esc($row['branch_name']).'">
                         <i class="ti ti-pencil"></i>
                     </button>
-                    <button class="btn btn-sm btn-icon btn-danger btn-delete" data-id="'.$row['id'].'">
+
+                    <button class="btn btn-sm btn-icon btn-danger btn-delete"
+                        data-id="'.$row['id'].'">
                         <i class="ti ti-trash"></i>
                     </button>
+
+                    <a href="branch/ratio/'.$row['id'].'" class="btn btn-sm btn-icon btn-warning btn-ratio"
+                        data-id="'.$row['id'].'">
+                        <i class="ti ti-list"></i>
+                    </a>
                 </div>
             ';
 
@@ -118,4 +130,11 @@ class BranchController extends BaseController
         ]);
     }
 
+    public function ratio($id)
+    {
+        return view('master_data/branch/ratio', [
+            'title'     => 'Branch Ratio',
+            'branch_id' => $id
+        ]);
+    }
 }

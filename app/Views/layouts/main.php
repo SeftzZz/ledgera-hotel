@@ -151,6 +151,11 @@
             window.branchId = "<?= session('branch_id') ?>";
             window.branchName = "<?= session('branch_name') ?>";
             window.branchAddress = "<?= session('branch_address') ?>";
+            $.ajaxSetup({
+                headers: {
+                    Authorization: 'Bearer ' + window.jwtToken
+                }
+            });
         </script>
     </body>
 </html>

@@ -50,6 +50,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->get('/', 'BranchController::index');
         $routes->post('datatable', 'BranchController::datatable');
         $routes->post('store', 'BranchController::store');
+        $routes->get('ratio/(:num)', 'BranchController::ratio/$1');
     });
 
     // PARTNER
@@ -208,6 +209,7 @@ $routes->get('income-statement', 'IncomeStatementController::index');
 $routes->get('branches',              'Api\BranchController::index');
 $routes->post('branches',             'Api\BranchController::store');
 $routes->get('branches/(:num)',       'Api\BranchController::show/$1');
+$routes->get('branches/(:num)',       'Api\BranchController::show/$1');
 
 // =========================
 // API – PUBLIC
@@ -238,6 +240,11 @@ $routes->group('api', ['filter' => 'jwt'], function ($routes) {
     $routes->get('branches',              'Api\BranchController::index');
     $routes->post('branches',             'Api\BranchController::store');
     $routes->get('branches/(:num)',       'Api\BranchController::show/$1');
+    $routes->post('branches/update',      'Api\BranchController::update');
+    $routes->get('branches/ratio/(:num)', 'Api\BranchController::ratio/$1');
+    $routes->get('branches/target/(:num)', 'Api\BranchController::target/$1');
+    $routes->post('branches/ratio-spend',      'Api\BranchController::storeSpend');
+    $routes->post('branches/ratio-worker',      'Api\BranchController::storeWorker');
 
     // Fiscal Years
     $routes->get('fiscal-years',                   'Api\FiscalYearController::index');

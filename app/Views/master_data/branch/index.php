@@ -56,12 +56,167 @@
                                 <input type="text" name="branch_name" class="form-control" required>
                             </div>
                         </div>
+
+                        <h6 class="mb-3 mt-3">Target & Revenue Setting</h6>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Target Revenue *</label>
+                                <input type="number" name="target" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Room Revenue</label>
+                                <div class="input-group">
+                                    <input type="number" name="room_revenue" class="form-control">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div id="preview_room" class="form-text">
+                                  Rp 0
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">FB Revenue (%)</label>
+                                <div class="input-group">
+                                    <input type="number" name="fb_revenue" class="form-control">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div id="preview_fb" class="form-text">
+                                  Rp 0
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tax & Service (%)</label>
+                                <div class="input-group">
+                                    <input type="number" name="tax_service" class="form-control">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div id="preview_tax" class="form-text">
+                                  Rp 0
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Total Margin (%)</label>
+                                <div class="input-group">
+                                    <input type="number" name="total_margin" class="form-control">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div id="preview_margin" class="form-text">
+                                  Rp 0
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Save</button>
                     </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div class="modal fade" id="modalEditBranch" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <form id="formEditBranch">
+
+                    <input type="hidden" name="id" id="edit_id">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Branch</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Company *</label>
+                                <select name="company_id" id="edit_company_id" class="form-select" required>
+                                    <option value="">Select Company</option>
+                                    <?php foreach ($companies ?? [] as $company): ?>
+                                        <option value="<?= $company['id'] ?>">
+                                            <?= esc($company['company_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Branch Code *</label>
+                                <input type="text" name="branch_code" id="edit_branch_code" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Branch Name *</label>
+                                <input type="text" name="branch_name" id="edit_branch_name" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <h6 class="mb-3 mt-3">Target & Revenue Setting</h6>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Target Revenue *</label>
+                                <input type="number" name="target" id="edit_target" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Room Revenue</label>
+                                <div class="input-group">
+                                    <input type="number" name="room_revenue" id="edit_room_revenue" class="form-control">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div id="edit_preview_room" class="form-text">Rp 0</div>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">FB Revenue</label>
+                                <div class="input-group">
+                                    <input type="number" name="fb_revenue" id="edit_fb_revenue" class="form-control">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div id="edit_preview_fb" class="form-text">Rp 0</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tax & Service</label>
+                                <div class="input-group">
+                                    <input type="number" name="tax_service" id="edit_tax_service" class="form-control">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div id="edit_preview_tax" class="form-text">Rp 0</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Total Margin</label>
+                                <div class="input-group">
+                                    <input type="number" name="total_margin" id="edit_total_margin" class="form-control">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div id="edit_preview_margin" class="form-text">Rp 0</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+
                 </form>
             </div>
         </div>
@@ -225,6 +380,129 @@ $(function () {
         });
     });
 
+    $('.dtBranch tbody').on('click', '.edit-record', function () {
+
+        let id = $(this).data('id');
+
+        $.get(`<?= base_url('api/branches') ?>/${id}`, function (res) {
+
+            if (res.status) {
+
+                let d = res.data;
+
+                $('#edit_id').val(d.id);
+                $('#edit_company_id').val(d.company_id).trigger('change');
+                $('#edit_branch_code').val(d.branch_code);
+                $('#edit_branch_name').val(d.branch_name);
+
+                $('#edit_target').val(d.target);
+                $('#edit_room_revenue').val(d.room_revenue);
+                $('#edit_fb_revenue').val(d.fb_revenue);
+                $('#edit_tax_service').val(d.tax_service);
+                $('#edit_total_margin').val(d.total_margin);
+
+                calculateTarget('#formEditBranch ');
+
+                $('#modalEditBranch').modal('show');
+
+            } else {
+                Swal.fire('Error', res.message, 'error');
+            }
+        });
+    });
+
+    $('#formEditBranch').on('submit', function (e) {
+        e.preventDefault();
+
+        let formData = new FormData(this);
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+        Swal.fire({
+            title: 'Update branch?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, update'
+        }).then(result => {
+
+            if (result.isConfirmed) {
+
+                $.ajax({
+                    url: "<?= base_url('api/branches/update') ?>",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    dataType: 'json',
+                    success: function (res) {
+
+                        if (res.status) {
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Updated',
+                                text: res.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+
+                            $('#modalEditBranch').modal('hide');
+                            $('.dtBranch').DataTable().ajax.reload(null, false);
+
+                        } else {
+                            Swal.fire('Failed', res.message, 'error');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error', 'Server error', 'error');
+                    }
+                });
+            }
+        });
+    });
+
+    function formatRupiah(angka) {
+        return 'Rp ' + (angka || 0).toLocaleString('id-ID');
+    }
+
+    function calculateTarget(prefix = '') {
+
+        let isEdit = prefix.includes('formEditBranch');
+
+        let target = parseFloat($(prefix + '[name="target"]').val()) || 0;
+        let room   = parseFloat($(prefix + '[name="room_revenue"]').val()) || 0;
+        let fb     = parseFloat($(prefix + '[name="fb_revenue"]').val()) || 0;
+        let tax    = parseFloat($(prefix + '[name="tax_service"]').val()) || 0;
+        let margin = parseFloat($(prefix + '[name="total_margin"]').val()) || 0;
+
+        let roomVal   = target * room / 100;
+        let fbVal     = target * fb / 100;
+        let taxVal    = target * tax / 100;
+        let marginVal = target * margin / 100;
+
+        if (isEdit) {
+            $('#edit_preview_room').text(formatRupiah(roomVal));
+            $('#edit_preview_fb').text(formatRupiah(fbVal));
+            $('#edit_preview_tax').text(formatRupiah(taxVal));
+            $('#edit_preview_margin').text(formatRupiah(marginVal));
+        } else {
+            $('#preview_room').text(formatRupiah(roomVal));
+            $('#preview_fb').text(formatRupiah(fbVal));
+            $('#preview_tax').text(formatRupiah(taxVal));
+            $('#preview_margin').text(formatRupiah(marginVal));
+        }
+    }
+
+    // ADD
+    $(document).on('input', 
+        '#formAddBranch input', 
+        () => calculateTarget('')
+    );
+
+    // EDIT
+    $(document).on('input', 
+        '#formEditBranch input', 
+        () => calculateTarget('#formEditBranch ')
+    );
 });
 </script>
 

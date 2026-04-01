@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 01, 2026 at 03:38 PM
+-- Generation Time: Apr 01, 2026 at 10:36 PM
 -- Server version: 10.11.10-MariaDB-log
 -- PHP Version: 8.3.27
 
@@ -390,15 +390,16 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `name`, `icon`, `status`) VALUES
-(1, 'FB Product', NULL, 'active'),
-(2, 'FB Services', NULL, 'active'),
-(3, 'House Keeping', NULL, 'active'),
+(1, 'Kitchen / Culinary', NULL, 'active'),
+(2, 'Food & Beverage Service', NULL, 'active'),
+(3, 'Housekeeping', NULL, 'active'),
 (4, 'Front Office', NULL, 'active'),
-(5, 'Accounting', NULL, 'active'),
+(5, 'Finance', NULL, 'active'),
 (6, 'Human Resources', NULL, 'active'),
 (7, 'Sales & Marketing', NULL, 'active'),
-(8, 'Engineering & IT', NULL, 'active'),
-(9, 'POMEC', NULL, 'active');
+(8, 'IT', NULL, 'active'),
+(9, 'POMEC', NULL, 'active'),
+(10, 'Engineering', NULL, 'active');
 
 -- --------------------------------------------------------
 
@@ -1027,7 +1028,9 @@ INSERT INTO `journal_details` (`id`, `journal_id`, `account_id`, `debit`, `credi
 (238, 100, 55, 0.00, 900900.90, '2026-03-27 16:12:34'),
 (239, 100, 37, 0.00, 1090090.09, '2026-03-27 16:12:34'),
 (240, 101, 1, 20000000.00, 0.00, '2026-03-27 17:05:05'),
-(241, 101, 2, 0.00, 20000000.00, '2026-03-27 17:05:05');
+(241, 101, 2, 0.00, 20000000.00, '2026-03-27 17:05:05'),
+(242, 102, 29, 105000.00, 0.00, '2026-04-01 16:45:11'),
+(243, 102, 1, 0.00, 105000.00, '2026-04-01 16:45:11');
 
 -- --------------------------------------------------------
 
@@ -1139,7 +1142,8 @@ INSERT INTO `journal_headers` (`id`, `company_id`, `branch_id`, `fiscal_year_id`
 (98, 1, 2, 2, 'AUTO-97', '2026-03-25', NULL, 0.00, 3, 2026, 'posted', 0, NULL, NULL, '2026-03-27 12:34:55', '0000-00-00 00:00:00'),
 (99, 1, 2, 2, 'AUTO-98', '2026-03-25', NULL, 0.00, 3, 2026, 'posted', 0, NULL, NULL, '2026-03-27 12:35:11', '0000-00-00 00:00:00'),
 (100, 1, 3, 2, 'AUTO-99', '2026-03-27', NULL, 0.00, 3, 2026, 'posted', 0, NULL, NULL, '2026-03-27 16:12:34', '0000-00-00 00:00:00'),
-(101, 1, 2, 2, 'AUTO-100', '2026-03-27', NULL, 0.00, 3, 2026, 'draft', 0, NULL, NULL, '2026-03-27 17:05:05', '0000-00-00 00:00:00');
+(101, 1, 2, 2, 'AUTO-100', '2026-03-27', NULL, 0.00, 3, 2026, 'draft', 0, NULL, NULL, '2026-03-27 17:05:05', '0000-00-00 00:00:00'),
+(102, 1, 3, 2, 'AUTO-101', '2026-04-01', NULL, 0.00, 4, 2026, 'posted', 0, NULL, NULL, '2026-04-01 16:45:11', '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -1457,9 +1461,9 @@ CREATE TABLE `ratio_spend` (
   `id` int(11) NOT NULL,
   `hotel_id` int(11) DEFAULT NULL,
   `department_category` varchar(255) DEFAULT NULL,
-  `min_value` decimal(10,2) NOT NULL,
+  `min_value` decimal(10,2) NOT NULL DEFAULT 0.00,
   `max_value` decimal(10,2) NOT NULL,
-  `label` varchar(100) NOT NULL,
+  `label` varchar(100) NOT NULL DEFAULT 'OVER',
   `is_active` tinyint(1) DEFAULT 1,
   `sort_order` int(11) DEFAULT 1,
   `created_at` datetime DEFAULT current_timestamp(),
@@ -1471,14 +1475,18 @@ CREATE TABLE `ratio_spend` (
 --
 
 INSERT INTO `ratio_spend` (`id`, `hotel_id`, `department_category`, `min_value`, `max_value`, `label`, `is_active`, `sort_order`, `created_at`, `updated_at`) VALUES
-(12, 1, 'Front Office', 0.00, 1.00, 'BAD', 1, 1, '2026-02-27 11:32:52', NULL),
-(15, 1, 'Housekeeping', 0.00, 5.00, 'BAD', 1, 1, '2026-02-27 11:32:52', NULL),
-(18, 1, 'Food & Beverage Service', 0.00, 2.00, 'BAD', 1, 1, '2026-02-27 11:32:52', NULL),
-(21, 1, 'Kitchen / Culinary', 0.00, 23.00, 'BAD', 1, 1, '2026-02-27 11:32:52', NULL),
-(24, 1, 'Finance', 0.00, 2.00, 'BAD', 1, 1, '2026-02-27 11:32:52', NULL),
-(27, 1, 'Human Resources', 0.00, 1.00, 'BAD', 1, 1, '2026-02-27 11:32:52', NULL),
-(30, 1, 'Engineering', 0.00, 1.00, 'BAD', 1, 1, '2026-02-27 11:32:52', NULL),
-(33, 1, 'Sales & Marketing', 0.00, 2.00, 'BAD', 1, 1, '2026-02-24 03:40:13', NULL);
+(12, 3, 'Front Office', 0.00, 1.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(15, 3, 'Housekeeping', 0.00, 5.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(18, 3, 'Food & Beverage Service', 0.00, 2.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(21, 3, 'Kitchen / Culinary', 0.00, 23.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(24, 3, 'Finance', 0.00, 2.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(27, 3, 'Human Resources', 0.00, 1.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(30, 3, 'Engineering', 0.00, 1.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(33, 3, 'Sales & Marketing', 0.00, 2.00, 'OVER', 1, 1, '2026-02-24 03:40:13', NULL),
+(36, 3, 'IT', 0.00, 0.50, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(37, 3, 'POMEC', 0.00, 9.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(38, 3, 'FF&E', 0.00, 3.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(39, 3, 'Service', 0.00, 10.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL);
 
 -- --------------------------------------------------------
 
@@ -1504,35 +1512,38 @@ CREATE TABLE `ratio_worker` (
 --
 
 INSERT INTO `ratio_worker` (`id`, `hotel_id`, `department_category`, `min_value`, `max_value`, `label`, `is_active`, `sort_order`, `created_at`, `updated_at`) VALUES
-(1, 1, NULL, 0.00, 0.00, 'NO DATA', 1, 1, '2026-02-24 03:40:13', NULL),
-(2, 1, NULL, 0.00, 1.00, 'GOOD', 1, 2, '2026-02-24 03:40:13', NULL),
-(3, 1, NULL, 1.00, 4.00, 'AVERAGE', 1, 3, '2026-02-24 03:40:13', NULL),
-(4, 1, NULL, 4.00, 6.00, 'OVER', 1, 4, '2026-02-24 03:40:13', NULL),
-(5, 1, NULL, 6.00, 999.00, 'NOT OPTIMAL MAN POWER', 1, 5, '2026-02-24 03:40:13', NULL),
-(12, 1, 'Front Office', 0.00, 2.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
-(13, 1, 'Front Office', 3.00, 4.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
-(14, 1, 'Front Office', 4.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(15, 1, 'Housekeeping', 0.00, 3.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
-(16, 1, 'Housekeeping', 3.00, 5.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
-(17, 1, 'Housekeeping', 5.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(18, 1, 'Food & Beverage Service', 0.00, 2.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
-(19, 1, 'Food & Beverage Service', 2.00, 4.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
-(20, 1, 'Food & Beverage Service', 4.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(21, 1, 'Kitchen / Culinary', 0.00, 3.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
-(22, 1, 'Kitchen / Culinary', 3.00, 6.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
-(23, 1, 'Kitchen / Culinary', 6.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(24, 1, 'Finance', 0.00, 1.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
-(25, 1, 'Finance', 1.00, 3.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
-(26, 1, 'Finance', 3.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(27, 1, 'Human Resources', 0.00, 1.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
-(28, 1, 'Human Resources', 1.00, 4.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
-(29, 1, 'Human Resources', 4.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(30, 1, 'Engineering', 0.00, 1.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
-(31, 1, 'Engineering', 1.00, 3.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
-(32, 1, 'Engineering', 3.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(33, 1, 'Sales & Marketing', 0.00, 3.00, 'GOOD', 1, 1, '2026-02-24 03:40:13', NULL),
-(34, 1, 'Sales & Marketing', 3.00, 6.00, 'AVERAGE', 1, 2, '2026-02-24 03:40:13', NULL),
-(35, 1, 'Sales & Marketing', 6.00, 999.00, 'OVER', 1, 3, '2026-02-24 03:40:13', NULL);
+(1, 3, NULL, 0.00, 0.00, 'NO DATA', 1, 1, '2026-02-24 03:40:13', NULL),
+(2, 3, NULL, 0.00, 1.00, 'GOOD', 1, 2, '2026-02-24 03:40:13', NULL),
+(3, 3, NULL, 1.00, 4.00, 'AVERAGE', 1, 3, '2026-02-24 03:40:13', NULL),
+(4, 3, NULL, 4.00, 6.00, 'OVER', 1, 4, '2026-02-24 03:40:13', NULL),
+(5, 3, NULL, 6.00, 999.00, 'NOT OPTIMAL MAN POWER', 1, 5, '2026-02-24 03:40:13', NULL),
+(12, 3, 'Front Office', 0.00, 2.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
+(13, 3, 'Front Office', 3.00, 4.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(14, 3, 'Front Office', 4.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(15, 3, 'Housekeeping', 0.00, 3.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
+(16, 3, 'Housekeeping', 3.00, 5.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(17, 3, 'Housekeeping', 5.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(18, 3, 'Food & Beverage Service', 0.00, 2.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
+(19, 3, 'Food & Beverage Service', 2.00, 4.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(20, 3, 'Food & Beverage Service', 4.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(21, 3, 'Kitchen / Culinary', 0.00, 3.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
+(22, 3, 'Kitchen / Culinary', 3.00, 6.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(23, 3, 'Kitchen / Culinary', 6.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(24, 3, 'Finance', 0.00, 1.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
+(25, 3, 'Finance', 1.00, 3.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(26, 3, 'Finance', 3.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(27, 3, 'Human Resources', 0.00, 1.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
+(28, 3, 'Human Resources', 1.00, 4.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(29, 3, 'Human Resources', 4.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(30, 3, 'Engineering', 0.00, 1.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
+(31, 3, 'Engineering', 1.00, 3.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(32, 3, 'Engineering', 3.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(33, 3, 'Sales & Marketing', 0.00, 3.00, 'GOOD', 1, 1, '2026-02-24 03:40:13', NULL),
+(34, 3, 'Sales & Marketing', 3.00, 6.00, 'AVERAGE', 1, 2, '2026-02-24 03:40:13', NULL),
+(35, 3, 'Sales & Marketing', 6.00, 999.00, 'OVER', 1, 3, '2026-02-24 03:40:13', NULL),
+(36, 3, 'IT', 0.00, 1.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
+(37, 3, 'IT', 1.00, 4.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(38, 3, 'IT', 4.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL);
 
 -- --------------------------------------------------------
 
@@ -1775,7 +1786,8 @@ INSERT INTO `transactions` (`id`, `company_id`, `branch_id`, `trx_date`, `trx_ty
 (97, 1, 2, '2026-03-25', 'expense_payroll', 'EXP-PAYROLL', 38845833.00, '2026-03-27 12:34:55', 98, NULL, NULL, 0, 'draft', '2026-03-27 12:34:55'),
 (98, 1, 2, '2026-03-25', 'expense_pomec', 'EXP-POMEC', 10914012.00, '2026-03-27 12:35:11', 99, NULL, NULL, 0, 'draft', '2026-03-27 12:35:11'),
 (99, 1, 3, '2026-03-27', 'sales_catering', 'ORD20260327160946AEACC1', 9009009.01, '2026-03-27 16:12:34', 100, NULL, NULL, 0, 'draft', '2026-03-27 16:12:34'),
-(100, 1, 2, '2026-03-27', 'receive_payment', 'ORD2026032712083206FB60', 20000000.00, '2026-03-27 17:05:05', 101, NULL, NULL, 0, 'draft', '2026-03-27 17:05:05');
+(100, 1, 2, '2026-03-27', 'receive_payment', 'ORD2026032712083206FB60', 20000000.00, '2026-03-27 17:05:05', 101, NULL, NULL, 0, 'draft', '2026-03-27 17:05:05'),
+(101, 1, 3, '2026-04-01', 'expense_electric', 'EPX', 105000.00, '2026-04-01 16:45:11', 102, NULL, NULL, 0, 'draft', '2026-04-01 16:45:11');
 
 -- --------------------------------------------------------
 
@@ -1922,7 +1934,7 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `company_id`, `branch_id`, `role`, `name`, `email`, `phone`, `password`, `photo`, `is_active`, `last_login_at`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) VALUES
 (1, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-02-21 23:27:27', '2026-01-18 12:25:53', 1, '2026-02-21 23:27:27', NULL, NULL, NULL),
 (2, 1, 3, 'admin', 'Arya Seftian', 'yerblues6@gmail.com', '895330907220', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '2.png', 'active', '2026-03-27 16:36:19', '2026-01-18 18:59:55', 1, '2026-03-27 16:36:19', NULL, NULL, NULL),
-(3, 1, 3, 'admin', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '3.png', 'active', '2026-04-01 13:39:24', '2026-01-19 10:53:08', 1, '2026-04-01 13:39:24', NULL, NULL, NULL),
+(3, 1, 3, 'admin', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '3.png', 'active', '2026-04-01 19:15:36', '2026-01-19 10:53:08', 1, '2026-04-01 19:15:36', NULL, NULL, NULL),
 (9, 1, 3, '', 'Fazry', 'fazry@gmail.com', '9090900', '$2y$10$kZ7bWdcazHMWAXNLYck2ZOsRCHUq.9NKuaHz4RWkBmY4EwhP7KGJW', NULL, 'active', NULL, '2026-03-26 18:06:30', NULL, '2026-03-26 18:06:30', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
@@ -2693,7 +2705,7 @@ ALTER TABLE `cart_items`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `chats`
@@ -2777,13 +2789,13 @@ ALTER TABLE `journal_approvals`
 -- AUTO_INCREMENT for table `journal_details`
 --
 ALTER TABLE `journal_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=242;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=244;
 
 --
 -- AUTO_INCREMENT for table `journal_headers`
 --
 ALTER TABLE `journal_headers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
 
 --
 -- AUTO_INCREMENT for table `journal_taxes`
@@ -2855,13 +2867,13 @@ ALTER TABLE `point_transactions`
 -- AUTO_INCREMENT for table `ratio_spend`
 --
 ALTER TABLE `ratio_spend`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `ratio_worker`
 --
 ALTER TABLE `ratio_worker`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `refresh_tokens`
@@ -2903,7 +2915,7 @@ ALTER TABLE `tax_codes`
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
 
 --
 -- AUTO_INCREMENT for table `transaction_account_map`
