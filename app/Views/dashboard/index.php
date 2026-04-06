@@ -174,7 +174,7 @@
       </div>
     </div>
     <div class="card-body">
-      <div id="deliveryExceptionsChart-<?= $i ?>" class="pt-md-4"></div>
+        <div id="deliveryExceptionsChart-<?= $i ?>" class="pt-md-4"></div>     
     </div>
   </div>
 </div>
@@ -236,7 +236,9 @@
   window.dashboardData = {
     branchLabels: <?= json_encode($branchLabels) ?>,
     branchRevenue: <?= json_encode($branchRevenue) ?>,
-    branchExpense: <?= json_encode($branchExpense) ?>
+    branchExpense: <?= json_encode($branchExpense) ?>,
+    branchTargets: <?= json_encode($branchTargets) ?>,
+    branchSW: <?= json_encode(array_values($branchSW)) ?>
   };
 </script>
 <script src="<?= base_url('assets/js/app-logistics-dashboard.js' ) ?>"></script>

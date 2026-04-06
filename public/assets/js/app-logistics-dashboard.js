@@ -47,6 +47,8 @@
     const labels = window.dashboardData.branchLabels || [];
     const revenues = window.dashboardData.branchRevenue || [];
     const expenses = window.dashboardData.branchExpense || [];
+    const targets = window.dashboardData.branchTargets || [];
+    const sw = window.dashboardData.branchSW || [];
 
     if (!labels.length) {
       console.warn('Data chart kosong');
@@ -54,7 +56,6 @@
     }
 
     labels.forEach((branch, i) => {
-
       const el = document.querySelector(`#deliveryExceptionsChart-${i}`);
 
       if (!el) {
@@ -62,7 +63,7 @@
         return;
       }
 
-      // 🔥 data per branch
+      // data per branch
       const seriesData = [
         revenues[i] || 0,
         expenses[i] || 0
@@ -74,7 +75,7 @@
           parentHeightOffset: 0,
           type: 'donut'
         },
-        labels: ['Revenue', 'Expense'], // 🔥 override per branch
+        labels: ['Revenue', 'Expense'], //override per branch
         series: seriesData,
         colors: [
           chartColors?.donut?.series1 || '#28c76f',
@@ -111,6 +112,33 @@
           labels: {
             colors: typeof headingColor !== 'undefined' ? headingColor : '#6e6b7b',
             useSeriesColors: false
+          },
+          
+          // Persentase Revenue & Expense
+          formatter: function (seriesName, opts) {
+            const value = opts.w.globals.series[opts.seriesIndex];
+            const target = targets[i] || 0;
+            const totalSW = sw[i] || 0;
+
+            // ambil total expense pembagi dari localStorage
+            // const totalSW = parseFloat(localStorage.getItem('dashboard_total_sw') || 0);
+            
+            let percent = 0;
+
+            if (seriesName === 'Revenue') {
+              percent = target > 0
+                ? (value / target) * 100
+                : 0;
+            }
+
+            if (seriesName === 'Expense') {
+              percent = totalSW > 0
+                ? (value / totalSW) * 100
+                : 0;
+              // percent = totalSW;
+            }
+
+            return `${seriesName} (${percent.toFixed(2)}%)`;
           }
         },
         tooltip: {
