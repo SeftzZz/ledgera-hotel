@@ -150,7 +150,7 @@
 
                       <div class="col-md-4">
                         <label>Divisi</label>
-                        <input type="text" name="divisi" id="divisi" class="form-control" placeholder="Divisi">
+                        <input type="text" name="divisi" id="divisi" value="<?= session('category_name') ?>" disabled class="form-control" placeholder="Divisi">
                       </div>
 
                       <div class="col-md-4">

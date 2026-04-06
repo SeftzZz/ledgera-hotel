@@ -275,6 +275,12 @@ $(function () {
 
     $('#modalDetailPO').modal('show');
 
+    if (isLocked) {
+      $('#btnSavePO').closest('.modal-footer').hide();
+    } else {
+      $('#btnSavePO').closest('.modal-footer').show();
+    }
+
   });
 
 
@@ -462,36 +468,89 @@ $(function () {
       return;
     }
 
-    // =========================
-    // PAYLOAD
-    // =========================
     let payload = {
       pengajuan_id: $('#po_pengajuan_id').val(),
       nama: $('#po_nama').val(),
       divisi: $('#po_divisi').val(),
       jabatan: $('#po_jabatan').val(),
       tanggal: $('#po_tanggal').val(),
-      items: items // 🔥 WAJIB
+      items: items
     };
 
-    console.log('PAYLOAD:', payload); // debug
+    console.log('PAYLOAD:', payload);
 
-    const res = await fetch('/api/purchasing/save', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + window.jwtToken
-      },
-      body: JSON.stringify(payload)
-    });
+    try {
 
-    const json = await res.json();
+      // =========================
+      // 1. SAVE PO
+      // =========================
+      const res = await fetch('/api/purchasing/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + window.jwtToken
+        },
+        body: JSON.stringify(payload)
+      });
 
-    if (json.status) {
-      Swal.fire('Success', 'PO berhasil disimpan', 'success');
-      location.reload();
-    } else {
-      Swal.fire('Error', json.message || 'Gagal', 'error');
+      const json = await res.json();
+
+      if (!json.status) {
+        throw new Error(json.message || 'Gagal simpan PO');
+      }
+
+      // =========================
+      // 🔥 AMBIL ORDER ID
+      // =========================
+      const orderId = json.data?.order_id; // pastikan backend kirim ini
+
+      if (!orderId) {
+        throw new Error('Order ID tidak ditemukan dari response');
+      }
+
+      // =========================
+      // 2. PAYMENT UPDATE
+      // =========================
+      const deposit = 0; // bisa kamu ambil dari input kalau ada
+      const status = 'paid'; // atau 'partial' sesuai kebutuhan
+
+      const payRes = await fetch('/api/orders/pay', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + window.jwtToken
+        },
+        body: JSON.stringify({
+          order_id: orderId,
+          deposit: Number(deposit || 0),
+          status: status
+        })
+      });
+
+      const payJson = await payRes.json();
+
+      if (!payJson.status) {
+        throw new Error(payJson.message || 'Gagal update payment');
+      }
+
+      // =========================
+      // SUCCESS
+      // =========================
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: 'Purchase Order berhasil disimpan',
+        timer: 1500,
+        showConfirmButton: false
+      }).then(() => {
+        // location.reload();
+      });
+
+    } catch (err) {
+
+      console.error(err);
+
+      Swal.fire('Error', err.message || 'Terjadi kesalahan', 'error');
     }
 
   });

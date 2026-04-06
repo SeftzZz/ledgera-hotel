@@ -75,13 +75,36 @@ class Orders extends BaseApiController
 
     public function pay()
     {
+        $DEBUG = true;
+
+        function dd($label, $data) {
+            echo "\n===== DEBUG: $label =====\n";
+            var_dump($data);
+            echo "\n=========================\n";
+            die;
+        }
+
         $data = $this->request->getJSON(true);
 
         if (empty($data['order_id'])) {
             return $this->error('order_id required');
         }
 
+        $trxTypeInput = $data['trxType'] ?? null;
+
         $db = \Config\Database::connect();
+
+
+        // =========================
+        // 🔒 VALIDASI TENANT
+        // =========================
+        // if ($order['company_id'] != session('company_id')) {
+        //     return $this->error('Unauthorized company');
+        // }
+
+        // if ($order['branch_id'] != session('branch_id')) {
+        //     return $this->error('Unauthorized branch');
+        // }
 
         // =========================
         // GET ORDER
@@ -96,33 +119,45 @@ class Orders extends BaseApiController
         }
 
         // =========================
-        // 🔒 VALIDASI TENANT
-        // =========================
-        // if ($order['company_id'] != session('company_id')) {
-        //     return $this->error('Unauthorized company');
-        // }
-
-        // if ($order['branch_id'] != session('branch_id')) {
-        //     return $this->error('Unauthorized branch');
-        // }
-
-        // =========================
         // 🔥 AUTO TAX DARI ITEMS
         // =========================
         $orderItems = $db->table('order_items oi')
-            ->select('bi.tax_type')
+            ->select("
+                oi.item_id,
+                i.id as item_id_pos,
+                vi.id as vendor_item_id,
+                bi.tax_type,
+                i.category_id
+            ")
+            ->join('items i', 'i.id = oi.item_id', 'left')
+            ->join('vendor_items vi', 'vi.id = oi.item_id', 'left')
             ->join(
                 'branch_items bi',
-                'bi.item_id = oi.item_id AND bi.branch_id = ' . (int)session('branch_id'),
+                'bi.item_id = i.id AND bi.branch_id = ' . (int)$order['branch_id'],
                 'left'
             )
             ->where('oi.order_id', $order['id'])
             ->get()
             ->getResultArray();
 
+        foreach ($orderItems as &$item) {
+
+            if (!empty($item['item_id_pos'])) {
+                $item['source'] = 'items';
+            } elseif (!empty($item['vendor_item_id'])) {
+                $item['source'] = 'vendor_items';
+            } else {
+                $item['source'] = 'unknown';
+            }
+        }
+
         $taxType = null;
 
         foreach ($orderItems as $item) {
+
+            if ($item['source'] === 'vendor_items') {
+                continue;
+            }
 
             if ($item['tax_type'] === 'pb1') {
                 $taxType = 'pb1';
@@ -216,13 +251,8 @@ class Orders extends BaseApiController
         // =========================
         // 🔥 ACCOUNTING
         // =========================
-        $trxService = new \App\Services\TransactionService();
+        $trxService = new \App\Services\TransactionService();            
         $coaModel = new \App\Models\CoaModel();
-
-        $existingSales = $db->table('transactions')
-            ->where('reference_no', $order['order_number'])
-            ->whereIn('trx_type', ['sales', 'sales_partial'])
-            ->countAllResults();
 
         $kasAccount = $coaModel
             ->where('company_id', session('company_id'))
@@ -237,39 +267,106 @@ class Orders extends BaseApiController
         $paymentAccountId = $kasAccount['id'];
 
         // =========================
-        // 🔥 ACCOUNTING
+        // 🔥 DETERMINE trx_type (DYNAMIC)
         // =========================
-        $trxService = new \App\Services\TransactionService();
-        $coaModel = new \App\Models\CoaModel();
 
-        // =========================
-        // 🔥 AMBIL ITEM → trx_type
-        // =========================
-        $orderItems = $db->table('order_items oi')
-            ->select('bi.tax_type, i.category_id')
-            ->join('branch_items bi', 'bi.item_id = oi.item_id AND bi.branch_id = ' . (int)$order['branch_id'], 'left')
-            ->join('items i', 'i.id = oi.item_id', 'left')
-            ->where('oi.order_id', $order['id'])
+        // ambil category user (SOURCE OF TRUTH untuk vendor)
+        $user = $db->table('users')
+            ->select('category_id')
+            ->where('id', $order['user_id'])
             ->get()
-            ->getResultArray();
+            ->getRowArray();
 
-        // =========================
-        // 🔥 DETERMINE trx_type
-        // =========================
-        $trxType = 'sales'; // default (hotel fallback)
+        $categoryId = $user['category_id'] ?? 0;
 
-        if (!empty($orderItems)) {
+        // PRIORITAS 1: dari frontend (override manual)
+        if (!empty($trxTypeInput)) {
 
-            // contoh mapping sederhana (bisa kamu refine)
-            $categoryId = $orderItems[0]['category_id'];
+            $trxType = $trxTypeInput;
 
-            switch ($categoryId) {
-                case 1: $trxType = 'sales_food'; break;
-                case 2: $trxType = 'sales_beverage'; break;
-                case 3: $trxType = 'sales_shisha'; break;
-                case 4: $trxType = 'sales_catering'; break;
-                default: $trxType = 'sales_package'; break;
+        } else {
+
+            $trxType = 'expense_other'; // fallback aman
+
+            // =========================
+            // DETECT SOURCE
+            // =========================
+            $hasVendor = false;
+            $hasPOS = false;
+            $posCategoryId = null;
+
+            foreach ($orderItems as $item) {
+
+                if ($item['source'] === 'vendor_items') {
+                    $hasVendor = true;
+                }
+
+                if ($item['source'] === 'items') {
+                    $hasPOS = true;
+                    $posCategoryId = $item['category_id']; // ambil category item POS
+                }
             }
+
+            // =========================
+            // CASE 1: POS (SALES)
+            // =========================
+            if ($hasPOS && $posCategoryId) {
+
+                // ambil trx_type dari mapping category_trx_map
+                $trxMap = $db->table('category_trx_map')
+                    ->where('category_id', $posCategoryId)
+                    ->get()
+                    ->getResultArray();
+
+                foreach ($trxMap as $map) {
+
+                    // ambil trx_type yang ada di transaction_account_map
+                    $exists = $db->table('transaction_account_map')
+                        ->where('company_id', session('company_id'))
+                        ->where('trx_type', $map['trx_type'])
+                        ->countAllResults();
+
+                    if ($exists) {
+                        $trxType = $map['trx_type'];
+                        break;
+                    }
+                }
+            }
+
+            // =========================
+            // CASE 2: VENDOR (PURCHASE / EXPENSE)
+            // =========================
+            elseif ($hasVendor && $categoryId) {
+
+                $trxMaps = $db->table('category_trx_map')
+                    ->where('category_id', $categoryId)
+                    ->get()
+                    ->getResultArray();
+
+                foreach ($trxMaps as $map) {
+
+                    $exists = $db->table('transaction_account_map')
+                        ->where('company_id', session('company_id'))
+                        ->where('trx_type', $map['trx_type'])
+                        ->countAllResults();
+
+                    if ($exists) {
+                        $trxType = $map['trx_type'];
+                        break;
+                    }
+                }
+            }
+        }
+
+        // if ($DEBUG) dd('TRX TYPE', $trxType);
+
+        $trxExists = $db->table('transaction_account_map')
+            ->where('company_id', session('company_id'))
+            ->where('trx_type', $trxType)
+            ->countAllResults();
+
+        if (!$trxExists) {
+            return $this->error('trxType tidak valid: ' . $trxType);
         }
 
         // =========================
@@ -277,7 +374,10 @@ class Orders extends BaseApiController
         // =========================
         $existingSales = $db->table('transactions')
             ->where('reference_no', $order['order_number'])
-            ->like('trx_type', 'sales')
+            ->whereIn('trx_type', [
+                $trxType,
+                $trxType . '_partial'
+            ])
             ->countAllResults();
 
         // =========================

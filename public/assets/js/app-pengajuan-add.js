@@ -270,6 +270,13 @@ $(function () {
         throw new Error(pengajuanJson.message || 'Gagal simpan pengajuan');
       }
 
+      // 🔥 AMBIL PENGAJUAN ID
+      const pengajuanId = pengajuanJson?.id;
+
+      if (!pengajuanId) {
+        throw new Error('pengajuan_id tidak ditemukan');
+      }
+
       // =========================
       // 2. CREATE CART
       // =========================
@@ -327,9 +334,10 @@ $(function () {
         },
         body: JSON.stringify({
           cart_id: cartId,
-          order_number: 'PG-' + Date.now(),
+          order_number: 'PG-' + pengajuanId,
           payment_method: 'cash',
-          deposit: 0
+          deposit: 0,
+          pengajuan_id: pengajuanId
         })
       });
 
@@ -341,7 +349,11 @@ $(function () {
       Swal.fire({
         icon: 'success',
         title: 'Berhasil',
-        text: 'Pengajuan & Order berhasil dibuat'
+        text: 'Pengajuan berhasil dibuat',
+        timer: 1500,
+        showConfirmButton: false
+      }).then(() => {
+        // location.reload();
       });
 
       console.log('ORDER:', orderJson);

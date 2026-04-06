@@ -228,7 +228,8 @@ function formatRupiah(number){
         body: JSON.stringify({
           order_id: orderId,
           deposit: Number(deposit || 0),
-          status: status
+          status: status,
+          trxType: 'sales'
         })
       });
 
@@ -240,7 +241,7 @@ function formatRupiah(number){
 
       alert('Payment updated ✅');
 
-      location.reload();
+      // location.reload();
 
     } catch (err) {
 
