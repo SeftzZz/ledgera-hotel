@@ -8,6 +8,7 @@ writable/
 .env
 template.txt
 backup/
+*Zone.Identifier*
 
 */config/development
 */logs/log-*.php
