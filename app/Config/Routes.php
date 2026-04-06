@@ -58,6 +58,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->get('/', 'BusinessPartnerController::index');
         $routes->post('datatable', 'BusinessPartnerController::datatable');
         $routes->post('store', 'BusinessPartnerController::store');
+        $routes->get('detail/(:num)', 'BusinessPartnerController::detail/$1');
     });
 
     // TAX CODE
@@ -115,6 +116,38 @@ $routes->group('maintenance', ['filter' => 'auth'], function($routes) {
     $routes->get('/', 'Maintenance::index');
     $routes->get('detail/(:num)', 'Maintenance::detail/$1');
 
+});
+
+// =========================
+// STOCK & INVENTORY
+// =========================
+$routes->group('', ['filter' => 'auth'], function ($routes) {    
+    $routes->group('inventory', function ($routes) {
+        $routes->get('/', 'InventoryController::index');
+        $routes->get('pengajuan', 'InventoryController::pengajuan');
+        $routes->post('store', 'InventoryController::store'); // simpan pengajuan
+        $routes->post('datatable', 'InventoryController::datatable'); // list pengajuan (optional)
+        $routes->get('detail/(:num)', 'InventoryController::detail/$1');
+        $routes->get('pengajuan-detail/(:num)', 'InventoryController::pengajuan_detail/$1');
+    });
+
+    // TAX CODE
+    $routes->group('tax', function ($routes) {
+        $routes->get('/', 'TaxController::index');
+        $routes->post('datatable', 'TaxController::datatable');
+        $routes->post('store', 'TaxController::store');
+    });
+
+});
+
+// =========================
+// PURCHASING
+// =========================
+$routes->group('', ['filter' => 'auth'], function ($routes) {    
+    $routes->group('purchasing', function ($routes) {
+        $routes->get('/', 'Purchasing::index');
+        $routes->get('print/(:num)', 'Purchasing::print/$1');
+    });
 });
 
 // =========================
@@ -264,10 +297,24 @@ $routes->group('api', ['filter' => 'jwt'], function ($routes) {
     $routes->get('accounts/(:num)',     'Api\AccountController::show/$1');
     $routes->put('accounts/(:num)',     'Api\AccountController::update/$1');
 
-    // Business Partners
-    $routes->get('partners',            'Api\BusinessPartnerController::index');
-    $routes->post('partners',           'Api\BusinessPartnerController::store');
-    $routes->get('partners/(:num)',     'Api\BusinessPartnerController::show/$1');
+    // ======================
+    // PARTNERS (VENDOR)
+    // ======================
+    $routes->get('partners',              'Api\BusinessPartnerController::index');
+    $routes->post('partners',             'Api\BusinessPartnerController::store');
+    $routes->get('partners/(:num)',       'Api\BusinessPartnerController::show/$1');
+    $routes->put('partners/(:num)',       'Api\BusinessPartnerController::update/$1');
+    $routes->delete('partners/(:num)',    'Api\BusinessPartnerController::delete/$1');
+
+    // ======================
+    // PARTNER ITEMS 🔥
+    // ======================
+    $routes->get('partners/(:num)/items',        'Api\BusinessPartnerController::items/$1');
+    $routes->post('partners/items',              'Api\BusinessPartnerController::storeItem');
+    $routes->put('partners/items/(:num)',        'Api\BusinessPartnerController::updateItem/$1');
+    $routes->delete('partners/items/(:num)',     'Api\BusinessPartnerController::deleteItem/$1');
+    $routes->get('partners/items/(:num)',        'Api\BusinessPartnerController::showItem/$1');
+    $routes->get('partners/items',               'Api\BusinessPartnerController::allItems');
 
     // Transactions
     $routes->get('transactions',        'Api\TransactionController::index');
@@ -402,4 +449,16 @@ $routes->group('api', ['filter' => 'jwt'], function ($routes) {
 
     // MAINTENANCE
     $routes->post('maintenance/create', 'Api\Maintenance::create');
+
+    // INVENTORY
+    $routes->post('pengajuan', 'Api\InventoryController::store');
+    $routes->get('pengajuan', 'Api\InventoryController::index');
+    $routes->get('pengajuan/(:num)', 'Api\InventoryController::show/$1');
+    $routes->get('pengajuan/stats', 'Api\InventoryController::stats');
+
+    // PURCHASING
+    $routes->get('purchasing', 'Api\PurchasingController::index');
+    $routes->post('purchasing/generate/(:num)', 'Api\PurchasingController::generateFromPengajuan/$1');
+    $routes->get('purchasing/stats', 'Api\PurchasingController::stats');
+    $routes->post('purchasing/save', 'Api\PurchasingController::save');
 });

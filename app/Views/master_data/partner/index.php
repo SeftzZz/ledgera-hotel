@@ -46,9 +46,7 @@
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Type *</label>
                                 <select name="partner_type" class="form-select" required>
-                                    <option value="Customer">Customer</option>
-                                    <option value="Vendor">Vendor</option>
-                                    <option value="Supplier">Supplier</option>
+                                    <option selected value="Vendor">Vendor</option>
                                 </select>
                             </div>
                         </div>
@@ -96,12 +94,12 @@ $(function () {
                 }
             },
             columns: [
-                { data: null },
-                { data: 'no' },
-                { data: 'partner_code' },
-                { data: 'partner_name' },
-                { data: 'partner_type' },
-                { data: 'action' }
+              { data: null },
+              { data: null },
+              { data: 'kode' },
+              { data: 'name' },
+              { data: 'status' },
+              { data: 'action' }
             ],
             columnDefs: [
                 {
@@ -113,9 +111,19 @@ $(function () {
                     render: () => ''
                 },
                 {
-                    targets: 1,
-                    orderable: false,
-                    searchable: false
+                  targets: 1,
+                  render: function (data, type, full, meta) {
+                    return meta.row + meta.settings._iDisplayStart + 1;
+                  }
+                },
+                {
+                  targets: 4,
+                  render: function (data) {
+
+                    return data === 'Aktif'
+                      ? '<span class="badge bg-label-success">Aktif</span>'
+                      : '<span class="badge bg-label-danger">Non Aktif</span>';
+                  }
                 },
                 {
                     targets: -1,

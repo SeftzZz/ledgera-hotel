@@ -225,7 +225,7 @@
           <span class="menu-header-text" data-i18n="Stock & Inventory">Stock & Inventory</span>
         </li>
         <!-- stock & inventory menu start -->
-        <li class="menu-item <?= ($segment1=='items'||$segment1=='item-add'||$segment1=='item-category'||$segment1=='orders'||$segment1=='customers'||$segment1=='branches'||$segment1=='referrals'||$segment1=='vouchers')?'active open':'' ?>">
+        <li class="menu-item <?= ($segment1=='items'||$segment1=='item-add'||$segment1=='item-category'||$segment1=='orders'||$segment1=='customers'||$segment1=='branches'||$segment1=='referrals'||$segment1=='vouchers'||$segment1=='inventory'||$segment1=='pengajuan')?'active open':'' ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
             <i class="menu-icon tf-icons ti ti-list"></i>
             <div data-i18n="Inventory">Inventory</div>
@@ -234,21 +234,21 @@
           <ul class="menu-sub">
 
             <!-- STOCKS -->
-            <li class="menu-item <?= ($segment1=='items')?'open active':'' ?>">
+            <li class="menu-item <?= ($segment1=='inventory')?'open active':'' ?>">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <div data-i18n="Stocks">Stocks</div>
               </a>
 
               <ul class="menu-sub">
-                <li class="menu-item <?= ($segment1=='items' && $segment2=='')?'active':'' ?>">
-                  <a href="<?= base_url('items') ?>" class="menu-link">
-                    <div data-i18n="Inventory List">Inventory List</div>
+                <li class="menu-item <?= ($segment2=='pengajuan')?'active':'' ?>">
+                  <a href="<?= base_url('inventory/pengajuan') ?>" class="menu-link">
+                    <div data-i18n="Pengajuan Barang">Pengajuan Barang</div>
                   </a>
                 </li>
-
-                <li class="menu-item <?= ($segment2=='item-add')?'active':'' ?>">
-                  <a href="<?= base_url('items/item-add') ?>" class="menu-link">
-                    <div data-i18n="Pengajuan Barang">Pengajuan Barang</div>
+                
+                <li class="menu-item <?= ($segment1=='inventory' && $segment2=='')?'active':'' ?>">
+                  <a href="<?= base_url('inventory') ?>" class="menu-link">
+                    <div data-i18n="Inventory List">Inventory List</div>
                   </a>
                 </li>
 
@@ -264,8 +264,8 @@
           <span class="menu-header-text" data-i18n="Purchasing">Purchasing</span>
         </li>
         
-        <li class="menu-item <?= ($uri=='opening-balance')?'active':'' ?>">
-            <a href="<?= base_url('opening-balance') ?>" class="menu-link">
+        <li class="menu-item <?= ($uri=='purchasing')?'active':'' ?>">
+            <a href="<?= base_url('purchasing') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-list"></i>
                 <div>Purchasing</div>
             </a>
