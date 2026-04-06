@@ -165,7 +165,9 @@ class DashboardController extends BaseController
         */
         $branchData = $db->query("
             SELECT 
+                b.id,
                 b.branch_name,
+                COALESCE(bt.target,0) as target,
 
                 SUM(CASE 
                     WHEN coa.account_type='revenue' 
@@ -180,6 +182,8 @@ class DashboardController extends BaseController
                 END) AS expense
 
             FROM branches b
+
+            LEFT JOIN branches_target bt ON bt.branch_id = b.id
 
             LEFT JOIN journal_headers jh 
                 ON jh.branch_id = b.id
@@ -196,8 +200,63 @@ class DashboardController extends BaseController
 
             WHERE b.company_id = ?
 
-            GROUP BY b.id, b.branch_name
+            GROUP BY b.id, b.branch_name, bt.target
         ", [$companyId, $month, $year, $companyId])->getResultArray();
+
+        /*
+        ==============================
+        MAP TARGET PER BRANCH
+        ==============================
+        */
+        $targetMap = [];
+
+        foreach ($branchData as $row) {
+            $targetMap[(int)$row['id']] = (float) $row['target'];
+        }
+
+        /*
+        ==============================
+        GET RATIO PER BRANCH
+        ==============================
+        */
+        $ratioData = $db->query("
+            SELECT 
+                s.hotel_id,
+                SUM(s.max_value) AS total_spend,
+                SUM(COALESCE(w.min_value,0)) AS total_worker
+            FROM (
+                SELECT hotel_id, department_category, MAX(max_value) AS max_value
+                FROM ratio_spend
+                GROUP BY hotel_id, department_category
+            ) s
+            LEFT JOIN (
+                SELECT hotel_id, department_category, MAX(min_value) AS min_value
+                FROM ratio_worker
+                GROUP BY hotel_id, department_category
+            ) w 
+            ON w.hotel_id = s.hotel_id 
+            AND w.department_category = s.department_category
+            GROUP BY s.hotel_id
+        ")->getResultArray();
+
+        $swMap = [];
+
+        foreach ($ratioData as $r) {
+            $branchId = (int) $r['hotel_id'];
+
+            $totalSpend  = (float) $r['total_spend'];
+            $totalWorker = (float) $r['total_worker'];
+
+            $totalRatio = $totalSpend + $totalWorker;
+
+            $target = $targetMap[$branchId] ?? 0;
+
+            $valueSW = $target > 0
+                ? ($target * $totalRatio / 100)
+                : 0;
+
+            $swMap[$branchId] = $valueSW;
+        }
 
         /*
         ==============================
@@ -207,13 +266,17 @@ class DashboardController extends BaseController
         $branchLabels  = [];
         $branchRevenue = [];
         $branchExpense = [];
+        $branchTargets = [];
+        $branchSW = [];
 
         foreach ($branchData as $row) {
             $branchLabels[]  = $row['branch_name'];
             $branchRevenue[] = (float)$row['revenue'];
             $branchExpense[] = (float)$row['expense'];
+            $branchTargets[] = (float)$row['target'];
+            $id = $row['id'];
+            $branchSW[] = $swMap[$id] ?? 0;
         }
-
 
         /*
         ==============================
@@ -246,7 +309,9 @@ class DashboardController extends BaseController
             // BRANCH CHART
             'branchLabels'  => $branchLabels,
             'branchRevenue' => $branchRevenue,
-            'branchExpense' => $branchExpense
+            'branchExpense' => $branchExpense,
+            'branchTargets' => $branchTargets,
+            'branchSW' => $branchSW
         ]);
     }
 }
