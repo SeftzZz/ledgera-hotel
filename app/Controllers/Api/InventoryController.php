@@ -40,6 +40,7 @@ class InventoryController extends BaseController
             ->select('
               d.*, 
               vi.sparepart, 
+              vi.satuan,
               v.name as vendor_name,
               v.id as vendor_id,
               v.kode as vendor_kode

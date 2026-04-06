@@ -89,11 +89,6 @@
   </table>
 </div>
 
-<!-- ================= TOTAL ================= -->
-<div class="text-end mb-3">
-  <strong>Total: Rp <?= number_format($total) ?></strong>
-</div>
-
 <!-- ================= ITEMS ================= -->
 <table>
   <thead>
@@ -117,6 +112,11 @@
     <?php endforeach; ?>
   </tbody>
 </table>
+&nbsp;
+<!-- ================= TOTAL ================= -->
+<div class="text-end mt-3">
+  <strong>Total: Rp <?= number_format($total) ?></strong>
+</div>
 
 <script>
   window.onload = function () {

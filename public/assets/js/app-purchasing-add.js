@@ -250,6 +250,7 @@ $(function () {
           <td>${i}</td>
           <td>${item.sparepart}</td>
           <td>${item.qty}</td>
+          <td>${item.satuan}</td>
           <td>${item.vendor_name}</td>
           <td>
             <button 

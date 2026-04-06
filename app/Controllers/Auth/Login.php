@@ -53,10 +53,13 @@ class Login extends BaseController
             ->select('
                 users.*,
                 companies.company_name,
-                branches.*
+                branches.*,
+                categories.id,
+                categories.name as category_name,
             ')
             ->join('companies', 'companies.id = users.company_id', 'left')
             ->join('branches', 'branches.id = users.branch_id', 'left')
+            ->join('categories', 'categories.id = users.category_id', 'left')
             ->where('users.email', $email)
             ->where('users.is_active', 1)
             ->first();
@@ -90,6 +93,8 @@ class Login extends BaseController
             'branch_name'     => $user['branch_name'],
             'branch_address'  => $user['branch_address'],
             'branch_logo'     => $user['branch_logo'],
+            'category_id'     => $user['category_id'],
+            'category_name'   => $user['category_name'],
             'permissions'     => $permissions,
             'jwt_token'       => $token,
             'refresh_token'   => $refreshToken,
