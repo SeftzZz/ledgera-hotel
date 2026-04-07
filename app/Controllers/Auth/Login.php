@@ -84,6 +84,7 @@ class Login extends BaseController
             'user_id'         => $user['id'],
             'user_name'       => $user['name'],
             'user_email'      => $user['email'],
+            'user_role'       => $user['role'],
             'company_id'      => $user['company_id'],
             'company_name'    => $user['company_name'],
             'branch_id'       => $user['branch_id'],
