@@ -236,11 +236,23 @@ class PurchasingController extends BaseController
                 'status' => 'Proses'
             ]);
 
+        // ======================
+        // AMBIL ORDER ID
+        // ======================
+        $orderId = $db->table('form_pengajuan')
+            ->select('order_id')
+            ->where('id', $data['pengajuan_id'])
+            ->get()
+            ->getRowArray()['order_id'] ?? null;
+
         $db->transComplete();
 
         return $this->response->setJSON([
             'status'  => true,
-            'message' => 'Purchasing berhasil disimpan'
+            'message' => 'Purchasing berhasil disimpan',
+            'data'    => [
+                'order_id' => $orderId
+            ]
         ]);
     }
 }

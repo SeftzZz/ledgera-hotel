@@ -25,6 +25,7 @@
                       <th>No</th>
                       <th>Sparepart</th>
                       <th>Type</th>
+                      <th>Satuan</th>
                       <th>Harga</th>
                       <th>No Seri</th>
                       <th>Status</th>
@@ -87,6 +88,19 @@
                       </div>
 
                       <div class="row">
+
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Satuan</label>
+                          <select name="satuan" class="form-select" required>
+                            <option value="">Select Satuan</option>
+                            <option value="kg">Kg</option>
+                            <option value="bal">Bal</option>
+                            <option value="pack">Pack</option>
+                            <option value="pcs">Pcs</option>
+                            <option value="can">Can</option>
+                            <option value="galon">Galon</option>
+                          </select>
+                        </div>
 
                         <div class="col-md-6 mb-3">
                           <label class="form-label">Status</label>
@@ -206,6 +220,7 @@
                 { data: null },
                 { data: 'sparepart' },
                 { data: 'type' },
+                { data: 'satuan' },
                 { data: 'harga' },
                 { data: 'no_seri' },
                 { data: 'status' },
@@ -226,13 +241,19 @@
                   }
                 },
                 {
-                  targets: 4,
+                  targets: 3,
+                  render: function (data) {
+                    return data;
+                  }
+                },
+                {
+                  targets: 5,
                   render: function (data) {
                     return 'Rp ' + parseInt(data).toLocaleString('id-ID');
                   }
                 },
                 {
-                  targets: 6,
+                  targets: 7,
                   render: function (data) {
                     return data === 'Aktif'
                       ? '<span class="badge bg-label-success">Aktif</span>'

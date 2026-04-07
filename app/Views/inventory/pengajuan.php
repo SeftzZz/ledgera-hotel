@@ -150,7 +150,7 @@
 
                       <div class="col-md-4">
                         <label>Divisi</label>
-                        <input type="text" name="divisi" id="divisi" class="form-control" placeholder="Divisi">
+                        <input type="text" name="divisi" id="divisi" value="<?= session('category_name') ?>" disabled class="form-control" placeholder="Divisi">
                       </div>
 
                       <div class="col-md-4">
@@ -184,10 +184,19 @@
                                   </select>
                                 </div>
 
-                                <!-- QTY -->
+                                <!-- QTY + SATUAN -->
                                 <div class="col-md-4 col-12 mb-md-0 mb-3">
                                   <p class="mb-2 repeater-title">Qty</p>
-                                  <input type="number" name="qty" class="form-control" placeholder="0" value="1" min="1">
+                                  <div class="input-group">
+                                    <input
+                                      type="text"
+                                      name="qty"
+                                      class="form-control qty"
+                                      placeholder="1"
+                                      value="1"
+                                    />
+                                    <span class="input-group-text satuan-label"></span>
+                                  </div>
                                 </div>
 
                                 <!-- DELETE -->
@@ -286,6 +295,7 @@
                             <th>Nama Barang</th>
                             <th>Vendor</th>
                             <th>Qty</th>
+                            <th>Satuan</th>
                             <th>Harga</th>
                           </tr>
                         </thead>

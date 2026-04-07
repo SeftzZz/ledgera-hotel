@@ -112,6 +112,7 @@ $(function () {
               data-price="${item.harga}"
               data-vendor="${item.vendor_name}"
               data-sparepart="${item.sparepart}"
+              data-satuan="${item.satuan || ''}"
             >
               ${item.sparepart} (${item.vendor_name})
             </option>
@@ -126,6 +127,18 @@ $(function () {
       console.error(err);
     }
   }
+
+  $(document).on('change', '.vendor-item', function () {
+
+    const selected = $(this).find(':selected');
+
+    const satuan = selected.data('satuan') || '';
+
+    const row = $(this).closest('[data-repeater-item]');
+
+    row.find('.satuan-label').text(satuan);
+
+  });
 
   // =========================
   // INIT AWAL (LOAD 1st ROW)
@@ -167,7 +180,7 @@ $(function () {
   // =========================
   // SUBMIT
   // =========================
-  $('#btnSubmit').on('click', function () {
+  $('#btnSubmit').on('click', async function () {
 
     let items = [];
     let invalid = false;
@@ -178,23 +191,27 @@ $(function () {
 
       let vendor = row.find('.vendor-item').val();
 
-      let qty = row.find('[name="qty"]').val();
-      qty = qty ? parseInt(qty) : 0;
+      let qtyRaw = row.find('input[name$="[qty]"], input[name="qty"]').val();
 
-      if (isNaN(qty) || qty <= 0) qty = 1;
+      qtyRaw = (qtyRaw ?? '').toString().trim().replace(',', '.');
 
-      console.log('ROW:', { vendor, qty });
+      let qty = parseFloat(qtyRaw);
+      if (isNaN(qty)) qty = 0;
 
-      // reset error style
+      // reset error
       row.find('.vendor-item').removeClass('is-invalid');
-      row.find('[name="qty"]').removeClass('is-invalid');
+      row.find('.qty').removeClass('is-invalid');
 
-      // skip row kosong
       if (!vendor && qty === 0) return;
 
-      // validasi
       if (!vendor) {
         row.find('.vendor-item').addClass('is-invalid');
+        invalid = true;
+        return;
+      }
+
+      if (qty <= 0) {
+        row.find('.qty').addClass('is-invalid');
         invalid = true;
         return;
       }
@@ -210,20 +227,12 @@ $(function () {
     // VALIDASI GLOBAL
     // =========================
     if (invalid) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Input tidak valid',
-        text: 'Periksa kembali item dan qty'
-      });
+      Swal.fire('Error', 'Periksa kembali item dan qty', 'error');
       return;
     }
 
     if (items.length === 0) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Item kosong',
-        text: 'Silakan pilih minimal 1 item'
-      });
+      Swal.fire('Error', 'Minimal 1 item', 'error');
       return;
     }
 
@@ -232,51 +241,131 @@ $(function () {
       return;
     }
 
-    // =========================
-    // PAYLOAD
-    // =========================
-    let payload = {
-      branch_id: window.branchId,
-      nama: $('#nama').val(),
-      divisi: $('#divisi').val(),
-      jabatan: $('#jabatan').val(),
-      tanggal: $('#tanggal').val(),
-      items: items
-    };
-
-    // =========================
-    // SUBMIT
-    // =========================
     $('#btnSubmit').prop('disabled', true);
 
-    $.ajax({
-      url: '/api/pengajuan',
-      type: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + window.jwtToken
-      },
-      contentType: 'application/json',
-      data: JSON.stringify(payload),
+    try {
 
-      success: function (res) {
+      // =========================
+      // 1. SIMPAN PENGAJUAN
+      // =========================
+      const pengajuanRes = await fetch('/api/pengajuan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + window.jwtToken
+        },
+        body: JSON.stringify({
+          branch_id: window.branchId,
+          nama: $('#nama').val(),
+          divisi: $('#divisi').val(),
+          jabatan: $('#jabatan').val(),
+          tanggal: $('#tanggal').val(),
+          items: items
+        })
+      });
 
-        if (res.status) {
-          Swal.fire('Success', 'Pengajuan berhasil disimpan', 'success');
-          location.reload();
-        } else {
-          Swal.fire('Error', res.message || 'Gagal', 'error');
-          $('#btnSubmit').prop('disabled', false);
-        }
+      const pengajuanJson = await pengajuanRes.json();
 
-      },
-
-      error: function (err) {
-        console.error(err);
-        Swal.fire('Error', 'Terjadi kesalahan server', 'error');
-        $('#btnSubmit').prop('disabled', false);
+      if (!pengajuanJson.status) {
+        throw new Error(pengajuanJson.message || 'Gagal simpan pengajuan');
       }
 
-    });
+      // 🔥 AMBIL PENGAJUAN ID
+      const pengajuanId = pengajuanJson?.id;
+
+      if (!pengajuanId) {
+        throw new Error('pengajuan_id tidak ditemukan');
+      }
+
+      // =========================
+      // 2. CREATE CART
+      // =========================
+      const cartRes = await fetch('/api/cart/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + window.jwtToken
+        },
+        body: JSON.stringify({
+          branch_id: window.branchId,
+          name: $('#nama').val(),
+          email: window.userEmail
+        })
+      });
+
+      const cartJson = await cartRes.json();
+      const cartId = cartJson.data.cart_id;
+
+      // =========================
+      // 3. ADD ITEMS KE CART
+      // =========================
+      for (let item of items) {
+
+        // 🔥 ambil harga dari cache
+        const vendorItem = vendorItemsCache.find(v => v.id == item.vendor_item_id);
+
+        const price = vendorItem ? vendorItem.harga : 0;
+
+        await fetch('/api/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + window.jwtToken
+          },
+          body: JSON.stringify({
+            cart_id: cartId,
+            item_id: item.vendor_item_id,
+            quantity: item.qty,
+            price: Number(price),
+            date: $('#tanggal').val()
+          })
+        });
+
+      }
+
+      // =========================
+      // 4. CHECKOUT
+      // =========================
+      const orderRes = await fetch('/api/orders/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + window.jwtToken
+        },
+        body: JSON.stringify({
+          cart_id: cartId,
+          order_number: 'PG-' + pengajuanId,
+          payment_method: 'cash',
+          deposit: 0,
+          pengajuan_id: pengajuanId
+        })
+      });
+
+      const orderJson = await orderRes.json();
+
+      // =========================
+      // SUCCESS
+      // =========================
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: 'Pengajuan berhasil dibuat',
+        timer: 1500,
+        showConfirmButton: false
+      }).then(() => {
+        // location.reload();
+      });
+
+      console.log('ORDER:', orderJson);
+
+    } catch (err) {
+
+      console.error(err);
+
+      Swal.fire('Error', err.message || 'Terjadi kesalahan', 'error');
+
+      $('#btnSubmit').prop('disabled', false);
+    }
 
   });
 

@@ -15,12 +15,20 @@ use App\Models\VoucherModel;
 use App\Models\PointTransactionModel;
 use App\Models\UserMembershipModel;
 use App\Models\LoyaltyTierModel;
+use App\Models\PengajuanModel;
 
 class OrderService
 {
-
     public function checkout($data)
     {
+        $DEBUG = true;
+
+        function dd($label, $data) {
+            echo "\n===== DEBUG: $label =====\n";
+            var_dump($data);
+            echo "\n=========================\n";
+            die;
+        }
 
         $db = Database::connect();
         $db->transStart();
@@ -37,6 +45,7 @@ class OrderService
         $pointTxModel = new PointTransactionModel();
         $membershipModel = new UserMembershipModel();
         $tierModel = new LoyaltyTierModel();
+        $pengajuanModel = new PengajuanModel();
 
         $cartId = $data['cart_id'];
         $cart = $cartModel->find($cartId);
@@ -48,6 +57,15 @@ class OrderService
         $userId = $cart['user_id'];
         $orderNumber = $data['order_number'];
         $deposit = $data['deposit'] ?? 0;
+        $pengajuanId = $data['pengajuan_id'] ?? null;
+
+        // if ($DEBUG) dd('INPUT DATA', $data);
+
+        if(!$cart) {
+            throw new \Exception('Cart not found');
+        }
+
+        // if ($DEBUG) dd('CART DATA', $cart);
 
         if(empty($data['payment_method'])){
             throw new \Exception('Payment method required');
@@ -83,6 +101,13 @@ class OrderService
         {
             $subtotal += $item['price'] * $item['quantity'];
         }
+
+        // if ($DEBUG) {
+        //     dd('CART ITEMS', [
+        //         'items' => $items,
+        //         'subtotal' => $subtotal
+        //     ]);
+        // }
 
         /*
         ==========================
@@ -153,6 +178,14 @@ class OrderService
             $discount = $promoDiscount;
         }
 
+        // if ($DEBUG) {
+        //     dd('DISCOUNT', [
+        //         'promo' => $promoDiscount,
+        //         'voucher' => $voucherDiscount,
+        //         'final_discount' => $discount
+        //     ]);
+        // }
+
         /*
         ==========================
         FINAL TOTAL
@@ -211,6 +244,19 @@ class OrderService
             'status'        =>$paymentStatus
         ]);
 
+        // if ($DEBUG) {
+        //     dd('ORDER INSERT RESULT', [
+        //         'orderId' => $orderId,
+        //         'orderData' => [
+        //             'order_number' => $orderNumber,
+        //             'subtotal' => $subtotal,
+        //             'discount' => $discount,
+        //             'total' => $total
+        //         ]
+        //     ]);
+        // }
+        
+
         /*
         ==========================
         WALLET
@@ -241,6 +287,23 @@ class OrderService
 
         }
 
+        // if ($DEBUG) {
+        //     dd('WALLET', [
+        //         'wallet' => $wallet,
+        //         'walletUsed' => $walletUsed
+        //     ]);
+        // }
+
+        // if ($DEBUG) {
+        //     dd('TOTAL CALCULATION', [
+        //         'subtotal' => $subtotal,
+        //         'discount' => $discount,
+        //         'wallet_used' => $walletUsed,
+        //         'total' => $total,
+        //         'amountToPay' => $amountToPay
+        //     ]);
+        // }
+
         /*
         ==========================
         ORDER ITEMS
@@ -249,17 +312,23 @@ class OrderService
 
         $batch = [];
 
-        foreach($items as $item){
+        foreach ($items as $item) {
             $batch[] = [
-                'order_id'  => $orderId,
-                'item_id'   => $item['item_id'],
-                'quantity'  => $item['quantity'],
-                'price'     => $item['price'],
-                'created_at'=> $item['created_at']
+                'order_id'  => (int) $orderId,
+                'item_id'   => (int) $item['item_id'],
+                'quantity'  => (float) $item['quantity'],
+                'price'     => (float) $item['price'],
+                'created_at'=> date('Y-m-d H:i:s')
             ];
         }
 
-        $orderItemModel->insertBatch($batch);
+        $result = $db->table('order_items')->insertBatch($batch);
+
+        if (!$result) {
+            dd('FAILED ORDER ITEMS INSERT', [
+                'batch' => $batch
+            ]);
+        }
 
         /*
         ==========================
@@ -273,6 +342,14 @@ class OrderService
             'amount'=>$total,
             'status'=>$paymentStatus
         ]);
+
+        // if ($DEBUG) {
+        //     dd('PAYMENT', [
+        //         'method' => $data['payment_method'],
+        //         'amount' => $total,
+        //         'status' => $paymentStatus
+        //     ]);
+        // }
 
         /*
         ==========================
@@ -328,6 +405,13 @@ class OrderService
                 ->update();
         }
 
+        // if ($DEBUG) {
+        //     dd('POINT CALCULATION', [
+        //         'rule' => $rule,
+        //         'pointsEarned' => $pointsEarned
+        //     ]);
+        // }
+
         /*
         ==========================
         UPDATE MEMBERSHIP
@@ -373,15 +457,35 @@ class OrderService
 
         }
 
+        // if ($DEBUG) {
+        //     dd('MEMBERSHIP UPDATE', [
+        //         'membership' => $membership,
+        //         'newSpend' => $newSpend ?? 0,
+        //         'newPoints' => $newPoints ?? 0
+        //     ]);
+        // }
+
         /*
         ==========================
         UPDATE CART
         ==========================
         */
 
+        if($pengajuanId) {
+            $pengajuanModel->update($pengajuanId, [
+                'order_id' => $orderId
+            ]);
+        }
+
         $cartModel->update($cartId, [
             'status' => 'checked_out'
         ]);
+
+        // if ($DEBUG) {
+        //     dd('FINAL SUCCESS', [
+        //         'orderNumber' => $orderNumber
+        //     ]);
+        // }
 
         $db->transComplete();
 

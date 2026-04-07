@@ -303,7 +303,7 @@ $(function () {
 
       alert('Order berhasil: ' + orderJson.data.order_number);
 
-      location.reload(); // 🔥 clean reset
+      location.reload();
 
     } catch (err) {
       console.error(err);

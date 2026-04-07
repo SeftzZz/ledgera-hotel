@@ -488,6 +488,7 @@ $(function () {
             <td>${item.sparepart}</td>
             <td>${item.vendor_name || '-'}</td>
             <td>${item.qty}</td>
+            <td>${item.satuan}</td>
             <td>Rp ${Number(item.harga).toLocaleString()}</td>
           </tr>
         `;

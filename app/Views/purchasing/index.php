@@ -167,12 +167,6 @@
 
                       </div>
 
-                      <!-- ================= TOTAL ================= -->
-                      <div class="text-end mb-3">
-                        <strong>Total: </strong>
-                        <strong id="po_grand_total">Rp 0</strong>
-                      </div>
-
                       <!-- ================= ITEMS ================= -->
                       <table class="table table-bordered" id="po_items_table">
                         <thead>
@@ -180,6 +174,7 @@
                             <th>No</th>
                             <th>Barang</th>
                             <th>Qty</th>
+                            <th>Satuan</th>
                             <th>Vendor</th>
                             <th>Pilih</th>
                             <th>Harga</th>
@@ -187,6 +182,12 @@
                         </thead>
                         <tbody></tbody>
                       </table>
+
+                      <!-- ================= TOTAL ================= -->
+                      <div class="text-end mt-3">
+                        <strong>Total: </strong>
+                        <strong id="po_grand_total">Rp 0</strong>
+                      </div>
 
                     </form>
 

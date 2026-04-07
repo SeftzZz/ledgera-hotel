@@ -146,11 +146,13 @@
         <script>
             window.jwtToken = "<?= session('jwt_token') ?>";
             window.userId = "<?= session('user_id') ?>";
+            window.userEmail = "<?= session('user_email') ?>";
             window.companyId = "<?= session('company_id') ?>";
             window.companyName = "<?= session('company_name') ?>";
             window.branchId = "<?= session('branch_id') ?>";
             window.branchName = "<?= session('branch_name') ?>";
             window.branchAddress = "<?= session('branch_address') ?>";
+            window.categoryName = "<?= session('category_name') ?>";
             $.ajaxSetup({
                 headers: {
                     Authorization: 'Bearer ' + window.jwtToken
