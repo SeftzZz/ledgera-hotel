@@ -10,6 +10,15 @@ class TransactionService
 {
     public function create(array $trx): int
     {
+        $DEBUG = true;
+
+        function dd($label, $data) {
+            echo "\n===== DEBUG: $label =====\n";
+            var_dump($data);
+            echo "\n=========================\n";
+            die;
+        }
+
         $db = \Config\Database::connect();
         $db->transStart();
 
@@ -17,6 +26,30 @@ class TransactionService
         $mapModel = new TransactionAccountMapModel();
         $journal  = new JournalService();
         $taxModel = new \App\Models\TaxCodeModel();
+
+        // =========================
+        // VALIDASI INPUT
+        // =========================
+        if (empty($trx['branch_name'])) {
+            throw new \Exception('branch_name required');
+        }
+
+        // =========================
+        // 🔥 RESOLVE BRANCH BY NAME
+        // =========================
+        $branch = $db->table('branches')
+            ->where('LOWER(branch_name)', strtolower(trim($trx['branch_name'])))
+            ->get()
+            ->getRowArray();
+
+        if (!$branch) {
+            throw new \Exception("Branch tidak ditemukan: {$trx['branch_name']}");
+        }
+
+        $branchId = (int) $branch['id'];
+
+        // 🔥 override
+        $trx['branch_id'] = $branchId;
 
         // ==============================
         // VALIDATION
@@ -105,6 +138,13 @@ class TransactionService
             }
 
             // =========================
+            // PLATFORM FEE
+            // =========================
+            elseif ($tax['tax_type'] === 'fee') {
+                $taxAmount = $baseAmount * $rate;
+            }
+
+            // =========================
             // ROUNDING LOCK
             // =========================
             $baseAmount     = round($baseAmount, 2);
@@ -115,11 +155,15 @@ class TransactionService
             // ANTI SELISIH
             // =========================
             if ($tax['tax_type'] === 'pb1') {
+                
                 $diff = $grossAmount - ($baseAmount + $serviceAmount + $taxAmount);
                 $taxAmount += $diff;
-            } else {
+
+            } elseif (in_array($tax['tax_type'], ['ppn'])) {
+
                 $diff = $grossAmount - ($baseAmount + $taxAmount);
                 $taxAmount += $diff;
+
             }
         }
 
@@ -140,6 +184,14 @@ class TransactionService
             'amount'       => $insertAmount,
             'gross_amount' => $grossAmount
         ], true);
+
+        // if ($DEBUG) {
+        //     dd('INSERT ERROR', [
+        //         'trxId' => $trxId,
+        //         'errors' => $trxModel->errors(),
+        //         'data' => $trx
+        //     ]);
+        // }
 
         // ==============================
         // SAVE TAX
@@ -186,6 +238,18 @@ class TransactionService
                 ];
 
                 $bankCredit = $baseAmount - $taxAmount;
+
+            }
+
+            if ($tax && $tax['tax_type'] === 'fee') {
+
+                $journalLines[] = [
+                    'account_id' => $tax['coa_account_id'],
+                    'debit'      => $taxAmount,
+                    'credit'     => 0
+                ];
+
+                $bankCredit = $baseAmount + $taxAmount;
             }
 
             $journalLines[] = [

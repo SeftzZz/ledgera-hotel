@@ -27,7 +27,8 @@ class Purchasing extends BaseController
         $items = $db->table('form_pengajuan_detail d')
             ->select('
                 d.*, 
-                v.name as vendor_name
+                v.name as vendor_name,
+                vi.satuan,
             ')
             ->join('vendor_items vi', 'vi.id = d.vendor_item_id', 'left')
             ->join('vendors v', 'v.id = vi.vendor_id', 'left')

@@ -15,7 +15,7 @@
             <small><?= date('F', mktime(0,0,0,$month,1)) ?> <?= $year ?></small>
 
             <div class="row mt-4">
-                <div class="col-4">
+                <div class="col-6">
                     <h6 class="text-white">Revenue</h6>
                     <h4 class="text-white"><?= number_format($revenue,2) ?></h4>
                     <!-- COLLECTION RATE -->
@@ -29,7 +29,7 @@
                         <small><?= round($collectionRate,2) ?>%</small>
                     </div>
                 </div>
-                <div class="col-4">
+                <div class="col-6">
                     <h6 class="text-white">Expense</h6>
                     <h4 class="text-white"><?= number_format($expense,2) ?></h4>
                     <!-- COLLECTION RATE -->
@@ -42,10 +42,6 @@
                         </div>
                         <small><?= round($collectionRate,2) ?>%</small>
                     </div>
-                </div>
-                <div class="col-4">
-                    <h6 class="text-white">Net Profit</h6>
-                    <h4 class="text-white"><?= number_format($profit,2) ?></h4>
                 </div>
             </div>
         </div>
@@ -97,7 +93,132 @@
         </div>
     </div>
 </div>
+<!-- ========================= -->
+<!-- DEPARTMENT BUDGET -->
+<!-- ========================= -->
+<?php foreach ($departmentSummary as $dept): ?>
+<div class="col-lg-6 mb-4">
+    <div class="card h-100">
+        <div class="card-body">
 
+            <h5 class="mb-1 "><?= $dept['name'] ?></h5>
+            <small><?= date('F', mktime(0,0,0,$month,1)) ?> <?= $year ?></small>
+
+            <div class="row mt-4">
+
+                <div class="col-4">
+                    <h6 class="">Target</h6>
+                    <h4 class="">
+                        Rp <?= number_format($dept['target'],0,',','.') ?>
+                    </h4>
+                </div>
+
+                <div class="col-4">
+                    <h6 class="">Estimated Revenue</h6>
+                    <h4 class="">
+                        Rp <?= number_format($dept['estimated'],0,',','.') ?>
+                    </h4>
+                </div>
+
+                <div class="col-4">
+                    <h6 class="">Gap</h6>
+                    <h4 class="">
+                        Rp <?= number_format($dept['target'] - $dept['estimated'],0,',','.') ?>
+                    </h4>
+                </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6">
+                    <!-- SPEND RATIO -->
+                    <div class="mt-3">
+                        <small>Spend Ratio (<?= $dept['spend_ratio'] ?>%)</small>
+                        <div class="progress" style="height:6px;">
+                            <div class="progress-bar bg-success"
+                                 style="width: <?= $dept['spend_ratio'] ?>%">
+                            </div>
+                        </div>
+                        <small>
+                            Rp <?= number_format(($dept['target'] * $dept['spend_ratio'] / 100),0,',','.') ?>
+                        </small>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <!-- WORKER RATIO -->
+                    <div class="mt-3">
+                        <small>Worker Ratio (<?= $dept['worker_ratio'] ?>%)</small>
+                        <div class="progress" style="height:6px;">
+                            <div class="progress-bar bg-warning"
+                                 style="width: <?= $dept['worker_ratio'] ?>%">
+                            </div>
+                        </div>
+                        <small>
+                            Rp <?= number_format(($dept['target'] * $dept['worker_ratio'] / 100),0,',','.') ?>
+                        </small>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <!-- SPEND LIMIT BY ESTIMATED -->
+                    <div class="mt-3">
+                        <small>
+                            Spend Limit (By Estimated Revenue)
+                        </small>
+
+                        <div class="fw-bold fs-6 pt-1">
+                            <?= number_format(
+                                $dept['target'] > 0 
+                                    ? (($dept['estimated'] * $dept['spend_ratio'] / 100) / $dept['target']) * 100 
+                                    : 0
+                            ,2) ?>%
+                        </div>
+
+                        <div class="progress" style="height:6px;">
+                            <div class="progress-bar bg-danger"
+                                 style="width: <?= $dept['target'] > 0 
+                                    ? (($dept['estimated'] * $dept['spend_ratio'] / 100) / $dept['target']) * 100 
+                                    : 0 ?>%">
+                            </div>
+                        </div>
+
+                        <div class="fw-bold fs-6 pt-1">
+                            Rp <?= number_format(($dept['estimated'] * $dept['spend_ratio'] / 100),0,',','.') ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <!-- WORKER LIMIT BY ESTIMATED -->
+                    <div class="mt-3">
+                        <small>
+                            Worker Limit (By Estimated Revenue)
+                        </small>
+
+                        <div class="fw-bold fs-6 pt-1">
+                            <?= number_format(
+                                $dept['target'] > 0 
+                                    ? (($dept['estimated'] * $dept['worker_ratio'] / 100) / $dept['target']) * 100 
+                                    : 0
+                            ,2) ?>%
+                        </div>
+
+                        <div class="progress" style="height:6px;">
+                            <div class="progress-bar bg-warning"
+                                 style="width: <?= $dept['target'] > 0 
+                                    ? (($dept['estimated'] * $dept['worker_ratio'] / 100) / $dept['target']) * 100 
+                                    : 0 ?>%">
+                            </div>
+                        </div>
+
+                        <div class="fw-bold fs-6 pt-1">
+                            Rp <?= number_format(($dept['estimated'] * $dept['worker_ratio'] / 100),0,',','.') ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endforeach; ?>
 <!-- ========================= -->
 <!-- PROFIT OVERVIEW (MONTH) -->
 <!-- ========================= -->

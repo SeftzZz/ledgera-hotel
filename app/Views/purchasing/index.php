@@ -14,7 +14,7 @@
                     <div class="col-sm-6 col-lg-2">
                       <div class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-3 pb-sm-0">
                         <div>
-                          <h4 class="mb-2" id="pengajuan_pending">0</h4>
+                          <h4 class="mb-2" id="purchasing_pending">0</h4>
                           <p class="mb-0 fw-medium">Pengajuan</p>
                         </div>
                         <span class="avatar me-sm-4">
@@ -29,7 +29,7 @@
                     <div class="col-sm-6 col-lg-2">
                       <div class="d-flex justify-content-between align-items-start card-widget-2 border-end pb-3 pb-sm-0">
                         <div>
-                          <h4 class="mb-2" id="pengajuan_selesai">0</h4>
+                          <h4 class="mb-2" id="purchasing_selesai">0</h4>
                           <p class="mb-0 fw-medium">Selesai</p>
                         </div>
                         <span class="avatar p-2 me-lg-4">
@@ -44,7 +44,7 @@
                     <div class="col-sm-6 col-lg-2">
                       <div class="d-flex justify-content-between align-items-start card-widget-2 border-end pb-3 pb-sm-0">
                         <div>
-                          <h4 class="mb-2" id="pengajuan_proses">0</h4>
+                          <h4 class="mb-2" id="purchasing_proses">0</h4>
                           <p class="mb-0 fw-medium">Proses</p>
                         </div>
                         <span class="avatar p-2 me-lg-4">
@@ -59,7 +59,7 @@
                     <div class="col-sm-6 col-lg-2">
                       <div class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0 card-widget-3">
                         <div>
-                          <h4 class="mb-2" id="pengajuan_total">0</h4>
+                          <h4 class="mb-2" id="purchasing_total">0</h4>
                           <p class="mb-0 fw-medium">Total</p>
                         </div>
                         <span class="avatar p-2 me-sm-4">
@@ -74,7 +74,7 @@
                     <div class="col-sm-6 col-lg-2">
                       <div class="d-flex justify-content-between align-items-start">
                         <div>
-                          <h4 class="mb-2" id="pengajuan_today">0</h4>
+                          <h4 class="mb-2" id="purchasing_today">0</h4>
                           <p class="mb-0 fw-medium">Hari Ini</p>
                         </div>
                         <span class="avatar p-2">

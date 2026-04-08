@@ -97,10 +97,9 @@ class DashboardController extends BaseController
                 SUM(COALESCE(deposit,0)) as actual,
                 SUM(COALESCE(total_amount,0) - COALESCE(deposit,0)) as outstanding
             FROM orders
-            WHERE branch_id = ?
-              AND MONTH(created_at) = ?
+            WHERE MONTH(created_at) = ?
               AND YEAR(created_at) = ?
-        ", [$branchId, $month, $year])->getRowArray();
+        ", [$month, $year])->getRowArray();
 
 
         /*
@@ -280,6 +279,53 @@ class DashboardController extends BaseController
 
         /*
         ==============================
+        DEPARTMENT SUMMARY (FIXED)
+        ==============================
+        */
+        $departmentSummary = $db->query("
+            SELECT 
+                c.name,
+
+                COALESCE(rs.max_value,0) as spend_ratio,
+                COALESCE(rw.min_value,0) as worker_ratio
+
+            FROM categories c
+
+            LEFT JOIN (
+                SELECT department_category, MAX(max_value) as max_value
+                FROM ratio_spend
+                WHERE hotel_id = ?
+                GROUP BY department_category
+            ) rs 
+                ON rs.department_category = c.name
+
+            LEFT JOIN (
+                SELECT department_category, MAX(min_value) as min_value
+                FROM ratio_worker
+                WHERE hotel_id = ?
+                GROUP BY department_category
+            ) rw 
+                ON rw.department_category = c.name
+
+            WHERE c.status = 'active'
+        ", [$branchId, $branchId])->getResultArray();
+
+        $branchTarget = $targetMap[$branchId] ?? 0;
+
+        $departmentFinal = [];
+
+        foreach ($departmentSummary as $row) {
+            $departmentFinal[] = [
+                'name' => $row['name'],
+                'target' => $branchTarget,
+                'estimated' => $estimated,
+                'spend_ratio' => (float)$row['spend_ratio'],
+                'worker_ratio' => (float)$row['worker_ratio']
+            ];
+        }
+
+        /*
+        ==============================
         RETURN VIEW
         ==============================
         */
@@ -311,7 +357,9 @@ class DashboardController extends BaseController
             'branchRevenue' => $branchRevenue,
             'branchExpense' => $branchExpense,
             'branchTargets' => $branchTargets,
-            'branchSW' => $branchSW
+            'branchSW' => $branchSW,
+
+            'departmentSummary' => $departmentFinal,
         ]);
     }
 }

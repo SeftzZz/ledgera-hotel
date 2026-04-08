@@ -247,7 +247,8 @@ $(function () {
           branch_id: window.branchId,
           name: name,
           phone: phone,
-          email: email
+          email: email,
+          category: window.categoryName
         })
       });
 

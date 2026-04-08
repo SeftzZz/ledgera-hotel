@@ -50,11 +50,11 @@ $(function () {
       const json = await res.json();
 
       // 🔥 tetap pakai ID template lama (tidak diubah)
-      document.getElementById('pengajuan_pending').innerText = json.data.draft || 0;
-      document.getElementById('pengajuan_proses').innerText = json.data.process || 0;
-      document.getElementById('pengajuan_selesai').innerText = json.data.done || 0;
-      document.getElementById('pengajuan_total').innerText = json.data.total || 0;
-      document.getElementById('pengajuan_today').innerText = json.data.today || 0;
+      document.getElementById('purchasing_pending').innerText = json.data.pengajuan;
+      document.getElementById('purchasing_proses').innerText = json.data.proses;
+      document.getElementById('purchasing_selesai').innerText = json.data.selesai;
+      document.getElementById('purchasing_total').innerText = json.data.total;
+      document.getElementById('purchasing_today').innerText = json.data.today;
 
     } catch (err) {
       console.error(err);
@@ -272,6 +272,7 @@ $(function () {
 
     $('#po_items_table tbody').html(html);
     $('#po_grand_total').text('Rp ' + total.toLocaleString());
+    window.totalPayment = total;
 
     $('#modalDetailPO').modal('show');
 
@@ -374,6 +375,7 @@ $(function () {
     });
 
     $('#po_grand_total').text('Rp ' + total.toLocaleString());
+    window.totalPayment = total;
 
     rebuildVendorTable();
 
@@ -474,7 +476,8 @@ $(function () {
       divisi: $('#po_divisi').val(),
       jabatan: $('#po_jabatan').val(),
       tanggal: $('#po_tanggal').val(),
-      items: items
+      items: items,
+      total: window.totalPayment
     };
 
     console.log('PAYLOAD:', payload);
@@ -499,39 +502,39 @@ $(function () {
         throw new Error(json.message || 'Gagal simpan PO');
       }
 
-      // =========================
-      // 🔥 AMBIL ORDER ID
-      // =========================
-      const orderId = json.data?.order_id; // pastikan backend kirim ini
+      // // =========================
+      // // 🔥 AMBIL ORDER ID
+      // // =========================
+      // const orderId = json.data?.order_id; // pastikan backend kirim ini
 
-      if (!orderId) {
-        throw new Error('Order ID tidak ditemukan dari response');
-      }
+      // if (!orderId) {
+      //   throw new Error('Order ID tidak ditemukan dari response');
+      // }
 
-      // =========================
-      // 2. PAYMENT UPDATE
-      // =========================
-      const deposit = 0; // bisa kamu ambil dari input kalau ada
-      const status = 'paid'; // atau 'partial' sesuai kebutuhan
+      // // =========================
+      // // 2. PAYMENT UPDATE
+      // // =========================
+      // const deposit = 0; // bisa kamu ambil dari input kalau ada
+      // const status = 'paid'; // atau 'partial' sesuai kebutuhan
 
-      const payRes = await fetch('/api/orders/pay', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + window.jwtToken
-        },
-        body: JSON.stringify({
-          order_id: orderId,
-          deposit: Number(deposit || 0),
-          status: status
-        })
-      });
+      // const payRes = await fetch('/api/orders/pay', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     Authorization: 'Bearer ' + window.jwtToken
+      //   },
+      //   body: JSON.stringify({
+      //     order_id: orderId,
+      //     deposit: Number(deposit || 0),
+      //     status: status
+      //   })
+      // });
 
-      const payJson = await payRes.json();
+      // const payJson = await payRes.json();
 
-      if (!payJson.status) {
-        throw new Error(payJson.message || 'Gagal update payment');
-      }
+      // if (!payJson.status) {
+      //   throw new Error(payJson.message || 'Gagal update payment');
+      // }
 
       // =========================
       // SUCCESS

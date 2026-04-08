@@ -96,6 +96,7 @@
       <th>No</th>
       <th>Barang</th>
       <th>Qty</th>
+      <th>Satuan</th>
       <th>Vendor</th>
       <th>Harga</th>
     </tr>
@@ -106,6 +107,7 @@
       <td><?= $no++ ?></td>
       <td><?= $i['sparepart'] ?></td>
       <td><?= $i['qty'] ?></td>
+      <td><?= $i['satuan'] ?></td>
       <td><?= $i['vendor_name'] ?></td>
       <td>Rp <?= number_format($i['harga']) ?></td>
     </tr>
