@@ -229,7 +229,8 @@ function formatRupiah(number){
           order_id: orderId,
           deposit: Number(deposit || 0),
           status: status,
-          trxType: 'sales'
+          trxType: 'sales',
+          branch_name: window.branchName
         })
       });
 

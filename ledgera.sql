@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 06, 2026 at 09:37 PM
+-- Generation Time: Apr 09, 2026 at 02:13 AM
 -- Server version: 10.11.10-MariaDB-log
 -- PHP Version: 8.3.27
 
@@ -145,6 +145,7 @@ CREATE TABLE `branches` (
   `branch_name` varchar(100) DEFAULT NULL,
   `branch_address` varchar(255) DEFAULT NULL,
   `branch_logo` varchar(255) DEFAULT NULL,
+  `hotel_id` int(11) DEFAULT NULL,
   `target` decimal(12,2) NOT NULL,
   `room_revenue` decimal(12,2) NOT NULL,
   `fb_revenue` decimal(12,2) NOT NULL,
@@ -156,12 +157,12 @@ CREATE TABLE `branches` (
 -- Dumping data for table `branches`
 --
 
-INSERT INTO `branches` (`id`, `company_id`, `branch_code`, `branch_name`, `branch_address`, `branch_logo`, `target`, `room_revenue`, `fb_revenue`, `tax_service`, `total_margin`) VALUES
-(2, 1, 'ME', 'MidEast', 'Jl. Sancang No.8B 16128 Bogor', 'assets/img/logo-mideast.jpg', 0.00, 0.00, 0.00, 0, 0.00),
-(3, 1, 'SBH', 'Sahira Butik Hotel Paledang', 'Jl. Paledang No. 53 16122 Bogor West Java', 'assets/img/logo-sbh.png', 0.00, 0.00, 0.00, 0, 0.00),
-(4, 1, 'HW', 'HeyWork', '', '', 0.00, 0.00, 0.00, 0, 0.00),
-(5, 1, 'HM', 'HeyMeal', '', '', 0.00, 0.00, 0.00, 0, 0.00),
-(6, 1, 'SS', 'Salam Supply', '', '', 0.00, 0.00, 0.00, 0, 0.00);
+INSERT INTO `branches` (`id`, `company_id`, `branch_code`, `branch_name`, `branch_address`, `branch_logo`, `hotel_id`, `target`, `room_revenue`, `fb_revenue`, `tax_service`, `total_margin`) VALUES
+(2, 1, 'ME', 'MidEast', 'Jl. Sancang No.8B 16128 Bogor', 'assets/img/logo-mideast.jpg', NULL, 0.00, 0.00, 0.00, 0, 0.00),
+(3, 1, 'SBH', 'Sahira Butik Hotel Paledang', 'Jl. Paledang No. 53 16122 Bogor West Java', 'assets/img/logo-sbh.png', 1, 0.00, 0.00, 0.00, 0, 0.00),
+(4, 1, 'HW', 'HeyWork', '', '', 2, 0.00, 0.00, 0.00, 0, 0.00),
+(5, 1, 'HM', 'HeyMeal', '', '', NULL, 0.00, 0.00, 0.00, 0, 0.00),
+(6, 1, 'SS', 'Salam Supply', '', '', NULL, 0.00, 0.00, 0.00, 0, 0.00);
 
 -- --------------------------------------------------------
 
@@ -184,7 +185,7 @@ CREATE TABLE `branches_target` (
 --
 
 INSERT INTO `branches_target` (`id`, `branch_id`, `target`, `room_revenue`, `fb_revenue`, `tax_service`, `total_margin`) VALUES
-(2, 3, 350000000, 40, 60, 21, 79);
+(2, 3, 400000000, 40, 60, 21, 79);
 
 -- --------------------------------------------------------
 
@@ -198,7 +199,7 @@ CREATE TABLE `branch_items` (
   `item_id` bigint(20) DEFAULT NULL,
   `variant_id` bigint(1) DEFAULT NULL,
   `price` decimal(12,2) DEFAULT NULL,
-  `tax_type` enum('pb1','ppn','none') DEFAULT 'none',
+  `tax_type` enum('pb1','ppn','fee','none') DEFAULT 'none',
   `stock` int(11) DEFAULT 0,
   `status` enum('available','out_of_stock') DEFAULT 'available'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -232,7 +233,9 @@ INSERT INTO `branch_items` (`id`, `branch_id`, `item_id`, `variant_id`, `price`,
 (23, 2, 32, NULL, 0.00, 'pb1', 0, 'available'),
 (24, 2, 33, NULL, 0.00, 'pb1', 0, 'available'),
 (25, 2, 34, NULL, 0.00, 'pb1', 0, 'available'),
-(26, 2, 35, NULL, 0.00, 'pb1', 0, 'available');
+(26, 2, 35, NULL, 0.00, 'pb1', 0, 'available'),
+(27, 3, 36, NULL, 0.00, 'fee', 0, 'available'),
+(28, 3, 37, NULL, 0.00, 'fee', 0, 'available');
 
 -- --------------------------------------------------------
 
@@ -326,14 +329,6 @@ CREATE TABLE `carts` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `carts`
---
-
-INSERT INTO `carts` (`id`, `user_id`, `branch_id`, `status`, `created_at`) VALUES
-(1, 10, 3, 'checked_out', '2026-04-06 19:49:39'),
-(2, 3, 3, 'checked_out', '2026-04-06 19:52:13');
-
 -- --------------------------------------------------------
 
 --
@@ -348,14 +343,6 @@ CREATE TABLE `cart_items` (
   `price` decimal(15,2) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `cart_items`
---
-
-INSERT INTO `cart_items` (`id`, `cart_id`, `item_id`, `quantity`, `price`, `created_at`) VALUES
-(1, 1, 10, 2.00, 1000000.00, '2026-04-06 00:00:00'),
-(2, 2, 5, 15.00, 17500.00, '2026-04-06 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -403,9 +390,6 @@ CREATE TABLE `category_trx_map` (
 --
 
 INSERT INTO `category_trx_map` (`id`, `category_id`, `trx_type`) VALUES
-(1, 1, 'expense_kitchen'),
-(2, 1, 'expense_fuel_gas'),
-(3, 1, 'expense_cleaning'),
 (4, 2, 'expense_bar'),
 (5, 2, 'expense_shisha'),
 (6, 2, 'expense_catering'),
@@ -413,7 +397,7 @@ INSERT INTO `category_trx_map` (`id`, `category_id`, `trx_type`) VALUES
 (8, 3, 'expense_cleaning'),
 (9, 3, 'expense_floor'),
 (10, 3, 'expense_pest_control'),
-(11, 4, 'expense_operational'),
+(11, 4, 'expense_payroll'),
 (12, 5, 'expense_reimburse'),
 (13, 6, 'expense_hrd'),
 (14, 6, 'expense_payroll'),
@@ -425,7 +409,6 @@ INSERT INTO `category_trx_map` (`id`, `category_id`, `trx_type`) VALUES
 (20, 9, 'expense_maintenance'),
 (21, 10, 'expense_maintenance'),
 (22, 10, 'expense_fuel_gas'),
-(23, 1, 'sales_food'),
 (24, 2, 'sales_beverage'),
 (25, 2, 'sales_shisha'),
 (26, 3, 'sales_service'),
@@ -590,7 +573,8 @@ INSERT INTO `coa` (`id`, `company_id`, `account_code`, `account_name`, `account_
 (78, 1, '5225', 'Beban Cleaning Supply', 'expense', 18, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (79, 1, '5226', 'Beban Entertainment', 'expense', 18, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (80, 1, '5227', 'Beban Floor Operational', 'expense', 18, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
-(81, 1, '5228', 'Beban Reimburse Housebank', 'expense', 18, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL);
+(81, 1, '5228', 'Beban Reimburse Housebank', 'expense', 18, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(82, 1, '5229', 'Beban Platform Fee', 'expense', 18, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -693,13 +677,6 @@ CREATE TABLE `form_pengajuan` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `form_pengajuan`
---
-
-INSERT INTO `form_pengajuan` (`id`, `order_id`, `nama`, `divisi`, `jabatan`, `tanggal`, `status`, `created_at`, `updated_at`) VALUES
-(1, 2, 'Arya', 'Kitchen / Culinary', 'Admin', '06-04-2026', 'Proses', '2026-04-06 19:52:13', '2026-04-06 19:52:13');
-
 -- --------------------------------------------------------
 
 --
@@ -720,13 +697,6 @@ CREATE TABLE `form_pengajuan_detail` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `form_pengajuan_detail`
---
-
-INSERT INTO `form_pengajuan_detail` (`id`, `pengajuan_id`, `vendor_item_id`, `sparepart`, `kondisi`, `qty`, `harga`, `no_po`, `is_bon`, `is_delete`, `created_at`) VALUES
-(1, 1, 5, 'Beras Super Cianjur', '-', 15.00, 17500, 'SS/0426-0001', 0, 0, '2026-04-06 19:52:13');
-
 -- --------------------------------------------------------
 
 --
@@ -743,13 +713,6 @@ CREATE TABLE `form_purchasing` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `form_purchasing`
---
-
-INSERT INTO `form_purchasing` (`id`, `pengajuan_id`, `nama_po`, `divisi_po`, `jabatan_po`, `tanggal_po`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Admin', 'Purchasing', 'Admin', '2026-04-06', '2026-04-06 19:52:27', '2026-04-06 19:52:27');
 
 -- --------------------------------------------------------
 
@@ -785,39 +748,42 @@ CREATE TABLE `items` (
   `image` varchar(255) DEFAULT NULL,
   `price` decimal(12,2) DEFAULT NULL,
   `status` enum('available','unavailable') DEFAULT 'available',
-  `created_at` datetime DEFAULT current_timestamp()
+  `created_at` datetime DEFAULT current_timestamp(),
+  `code` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `items`
 --
 
-INSERT INTO `items` (`id`, `category_id`, `name`, `description`, `image`, `price`, `status`, `created_at`) VALUES
-(10, 4, 'FIT', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03'),
-(11, 4, 'Hotel Package', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03'),
-(12, 4, 'OTA', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03'),
-(14, 4, 'Website', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03'),
-(15, 4, 'MICE', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03'),
-(16, 4, 'Wedding', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03'),
-(17, 4, 'Extra Bed', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03'),
-(18, 4, 'Other Room Revenue', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03'),
-(19, 2, 'MICE', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50'),
-(20, 2, 'Wedding', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50'),
-(21, 2, 'Social Event', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50'),
-(22, 2, 'Rahisa Resto', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50'),
-(23, 2, 'Room Service', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50'),
-(24, 2, 'Banquet', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50'),
-(25, 2, 'Meeting Room Rental', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50'),
-(26, 2, 'Other', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50'),
-(27, 3, 'Laundry/Other', NULL, NULL, 0.00, 'available', '2026-03-24 16:17:44'),
-(28, 3, 'Business Center Rev.', NULL, NULL, 0.00, 'available', '2026-03-24 16:17:44'),
-(29, 3, 'Miscellaneous', NULL, NULL, 0.00, 'available', '2026-03-24 16:17:44'),
-(30, 1, 'Food', NULL, NULL, NULL, 'available', '2026-03-27 06:45:58'),
-(31, 1, 'Beverage', NULL, NULL, NULL, 'available', '2026-03-27 06:45:58'),
-(32, 1, 'Shisha', NULL, NULL, NULL, 'available', '2026-03-27 06:45:58'),
-(33, 1, 'Elqahua', NULL, NULL, NULL, 'available', '2026-03-27 06:45:58'),
-(34, 2, 'Catering', NULL, NULL, NULL, 'available', '2026-03-27 06:45:58'),
-(35, 2, 'Paket', NULL, NULL, NULL, 'available', '2026-03-27 06:45:58');
+INSERT INTO `items` (`id`, `category_id`, `name`, `description`, `image`, `price`, `status`, `created_at`, `code`) VALUES
+(10, 4, 'FIT', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', NULL),
+(11, 4, 'Hotel Package', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', NULL),
+(12, 4, 'OTA', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', NULL),
+(14, 4, 'Website', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', NULL),
+(15, 4, 'MICE', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', NULL),
+(16, 4, 'Wedding', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', NULL),
+(17, 4, 'Extra Bed', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', NULL),
+(18, 4, 'Other Room Revenue', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', NULL),
+(19, 2, 'MICE', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50', NULL),
+(20, 2, 'Wedding', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50', NULL),
+(21, 2, 'Social Event', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50', NULL),
+(22, 2, 'Rahisa Resto', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50', NULL),
+(23, 2, 'Room Service', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50', NULL),
+(24, 2, 'Banquet', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50', NULL),
+(25, 2, 'Meeting Room Rental', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50', NULL),
+(26, 2, 'Other', NULL, NULL, 0.00, 'available', '2026-03-24 16:16:50', NULL),
+(27, 3, 'Laundry/Other', NULL, NULL, 0.00, 'available', '2026-03-24 16:17:44', NULL),
+(28, 3, 'Business Center Rev.', NULL, NULL, 0.00, 'available', '2026-03-24 16:17:44', NULL),
+(29, 3, 'Miscellaneous', NULL, NULL, 0.00, 'available', '2026-03-24 16:17:44', NULL),
+(30, 1, 'Food', NULL, NULL, NULL, 'available', '2026-03-27 06:45:58', NULL),
+(31, 1, 'Beverage', NULL, NULL, NULL, 'available', '2026-03-27 06:45:58', NULL),
+(32, 1, 'Shisha', NULL, NULL, NULL, 'available', '2026-03-27 06:45:58', NULL),
+(33, 1, 'Elqahua', NULL, NULL, NULL, 'available', '2026-03-27 06:45:58', NULL),
+(34, 2, 'Catering', NULL, NULL, NULL, 'available', '2026-03-27 06:45:58', NULL),
+(35, 2, 'Paket', NULL, NULL, NULL, 'available', '2026-03-27 06:45:58', NULL),
+(36, 4, 'Request Daily Worker', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', 'daily_worker'),
+(37, 4, 'Request Casual', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', 'casual');
 
 -- --------------------------------------------------------
 
@@ -850,18 +816,6 @@ CREATE TABLE `journal_details` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `journal_details`
---
-
-INSERT INTO `journal_details` (`id`, `journal_id`, `account_id`, `debit`, `credit`, `created_at`) VALUES
-(1, 1, 1, 2000000.00, 0.00, '2026-04-06 19:49:48'),
-(2, 1, 41, 0.00, 1638001.64, '2026-04-06 19:49:48'),
-(3, 1, 42, 0.00, 163800.16, '2026-04-06 19:49:48'),
-(4, 1, 37, 0.00, 198198.20, '2026-04-06 19:49:48'),
-(5, 2, 3, 262500.00, 0.00, '2026-04-06 19:52:27'),
-(6, 2, 1, 0.00, 262500.00, '2026-04-06 19:52:27');
-
 -- --------------------------------------------------------
 
 --
@@ -886,14 +840,6 @@ CREATE TABLE `journal_headers` (
   `created_at` datetime DEFAULT current_timestamp(),
   `deleted_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `journal_headers`
---
-
-INSERT INTO `journal_headers` (`id`, `company_id`, `branch_id`, `fiscal_year_id`, `journal_no`, `journal_date`, `description`, `total_amount`, `period_month`, `period_year`, `status`, `is_locked`, `reversal_of`, `reverse_date`, `created_at`, `deleted_at`) VALUES
-(1, 1, 3, 2, 'AUTO-1', '2026-04-06', NULL, 0.00, 4, 2026, 'posted', 0, NULL, NULL, '2026-04-06 19:49:48', '0000-00-00 00:00:00'),
-(2, 1, 3, 2, 'AUTO-2', '2026-04-06', NULL, 0.00, 4, 2026, 'posted', 0, NULL, NULL, '2026-04-06 19:52:27', '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -1016,14 +962,6 @@ CREATE TABLE `orders` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `orders`
---
-
-INSERT INTO `orders` (`id`, `order_number`, `user_id`, `branch_id`, `cart_id`, `subtotal`, `discount`, `wallet_used`, `deposit`, `total_amount`, `status`, `created_at`) VALUES
-(1, 'ORD20260406194925530537', 10, 3, 1, 2000000.00, 0.00, 0.00, 2000000.00, 2000000.00, 'paid', '2026-04-06 19:49:39'),
-(2, 'PG-1', 3, 3, 2, 262500.00, 0.00, 0.00, 262500.00, 262500.00, 'paid', '2026-04-06 19:52:13');
-
 -- --------------------------------------------------------
 
 --
@@ -1038,14 +976,6 @@ CREATE TABLE `order_items` (
   `price` decimal(12,2) NOT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `order_items`
---
-
-INSERT INTO `order_items` (`id`, `order_id`, `item_id`, `quantity`, `price`, `created_at`) VALUES
-(1, 1, 10, 2.00, 1000000.00, '2026-04-06 19:49:39'),
-(2, 2, 5, 15.00, 17500.00, '2026-04-06 19:52:13');
 
 -- --------------------------------------------------------
 
@@ -1062,14 +992,6 @@ CREATE TABLE `payments` (
   `transaction_ref` varchar(255) DEFAULT NULL,
   `paid_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `payments`
---
-
-INSERT INTO `payments` (`id`, `order_id`, `payment_method`, `amount`, `status`, `transaction_ref`, `paid_at`) VALUES
-(1, 1, 'cash', 2000000.00, 'paid', NULL, '2026-04-06 19:49:48'),
-(2, 2, 'cash', 262500.00, 'paid', NULL, '2026-04-06 19:52:27');
 
 -- --------------------------------------------------------
 
@@ -1147,14 +1069,6 @@ CREATE TABLE `point_transactions` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `point_transactions`
---
-
-INSERT INTO `point_transactions` (`id`, `user_id`, `points`, `type`, `reference_type`, `reference_id`, `created_at`) VALUES
-(1, 10, 200, 'earn', 'order', 1, '2026-04-06 19:49:39'),
-(2, 3, 26, 'earn', 'order', 2, '2026-04-06 19:52:13');
-
 -- --------------------------------------------------------
 
 --
@@ -1179,15 +1093,15 @@ CREATE TABLE `ratio_spend` (
 --
 
 INSERT INTO `ratio_spend` (`id`, `hotel_id`, `department_category`, `min_value`, `max_value`, `label`, `is_active`, `sort_order`, `created_at`, `updated_at`) VALUES
-(12, 3, 'Front Office', 0.00, 1.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(15, 3, 'Housekeeping', 0.00, 5.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(18, 3, 'Food & Beverage Service', 0.00, 2.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(21, 3, 'Kitchen / Culinary', 0.00, 23.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(24, 3, 'Finance', 0.00, 2.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(12, 3, 'Front Office', 0.00, 0.50, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(15, 3, 'Housekeeping', 0.00, 4.30, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(18, 3, 'Food & Beverage Service', 0.00, 1.50, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(21, 3, 'Kitchen / Culinary', 0.00, 21.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(24, 3, 'Finance', 0.00, 1.30, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (27, 3, 'Human Resources', 0.00, 1.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(30, 3, 'Engineering', 0.00, 1.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(30, 3, 'Engineering', 0.00, 1.80, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (33, 3, 'Sales & Marketing', 0.00, 2.00, 'OVER', 1, 1, '2026-02-24 03:40:13', NULL),
-(36, 3, 'IT', 0.00, 0.50, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(36, 3, 'IT', 0.00, 0.40, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (37, 3, 'POMEC', 0.00, 9.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (38, 3, 'FF&E', 0.00, 3.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (39, 3, 'Service', 0.00, 10.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL);
@@ -1222,32 +1136,32 @@ INSERT INTO `ratio_worker` (`id`, `hotel_id`, `department_category`, `min_value`
 (4, 3, NULL, 4.00, 6.00, 'OVER', 1, 4, '2026-02-24 03:40:13', NULL),
 (5, 3, NULL, 6.00, 999.00, 'NOT OPTIMAL MAN POWER', 1, 5, '2026-02-24 03:40:13', NULL),
 (12, 3, 'Front Office', 0.00, 2.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
-(13, 3, 'Front Office', 3.00, 4.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
-(14, 3, 'Front Office', 4.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(15, 3, 'Housekeeping', 0.00, 3.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
-(16, 3, 'Housekeeping', 3.00, 5.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
-(17, 3, 'Housekeeping', 5.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(13, 3, 'Front Office', 2.00, 5.30, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(14, 3, 'Front Office', 5.30, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(15, 3, 'Housekeeping', 0.00, 1.80, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
+(16, 3, 'Housekeeping', 1.80, 3.80, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(17, 3, 'Housekeeping', 3.80, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (18, 3, 'Food & Beverage Service', 0.00, 2.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
-(19, 3, 'Food & Beverage Service', 2.00, 4.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
-(20, 3, 'Food & Beverage Service', 4.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(19, 3, 'Food & Beverage Service', 2.00, 3.50, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(20, 3, 'Food & Beverage Service', 3.50, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (21, 3, 'Kitchen / Culinary', 0.00, 3.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
-(22, 3, 'Kitchen / Culinary', 3.00, 6.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
-(23, 3, 'Kitchen / Culinary', 6.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(22, 3, 'Kitchen / Culinary', 3.00, 4.50, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(23, 3, 'Kitchen / Culinary', 4.50, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (24, 3, 'Finance', 0.00, 1.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
 (25, 3, 'Finance', 1.00, 3.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
 (26, 3, 'Finance', 3.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (27, 3, 'Human Resources', 0.00, 1.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
-(28, 3, 'Human Resources', 1.00, 4.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
-(29, 3, 'Human Resources', 4.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(28, 3, 'Human Resources', 1.00, 8.20, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(29, 3, 'Human Resources', 8.20, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (30, 3, 'Engineering', 0.00, 1.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
-(31, 3, 'Engineering', 1.00, 3.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
-(32, 3, 'Engineering', 3.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(31, 3, 'Engineering', 1.00, 3.20, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(32, 3, 'Engineering', 3.20, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (33, 3, 'Sales & Marketing', 0.00, 3.00, 'GOOD', 1, 1, '2026-02-24 03:40:13', NULL),
-(34, 3, 'Sales & Marketing', 3.00, 6.00, 'AVERAGE', 1, 2, '2026-02-24 03:40:13', NULL),
-(35, 3, 'Sales & Marketing', 6.00, 999.00, 'OVER', 1, 3, '2026-02-24 03:40:13', NULL),
+(34, 3, 'Sales & Marketing', 3.00, 4.10, 'AVERAGE', 1, 2, '2026-02-24 03:40:13', NULL),
+(35, 3, 'Sales & Marketing', 4.10, 999.00, 'OVER', 1, 3, '2026-02-24 03:40:13', NULL),
 (36, 3, 'IT', 0.00, 1.00, 'GOOD', 1, 1, '2026-02-27 11:32:52', NULL),
-(37, 3, 'IT', 1.00, 4.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
-(38, 3, 'IT', 4.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL);
+(37, 3, 'IT', 1.00, 3.00, 'AVERAGE', 1, 1, '2026-02-27 11:32:52', NULL),
+(38, 3, 'IT', 3.00, 999.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL);
 
 -- --------------------------------------------------------
 
@@ -1359,7 +1273,7 @@ CREATE TABLE `tax_codes` (
   `id` int(11) NOT NULL,
   `tax_code` varchar(20) DEFAULT NULL,
   `tax_name` varchar(100) DEFAULT NULL,
-  `tax_type` enum('ppn','withholding','pb1') DEFAULT NULL,
+  `tax_type` enum('ppn','withholding','pb1','fee') DEFAULT NULL,
   `tax_rate` decimal(5,2) DEFAULT NULL,
   `is_active` tinyint(4) DEFAULT 1,
   `deleted_at` datetime NOT NULL,
@@ -1380,7 +1294,8 @@ INSERT INTO `tax_codes` (`id`, `tax_code`, `tax_name`, `tax_type`, `tax_rate`, `
 (3, 'PPN11', 'PPN 11%', 'ppn', 11.00, 1, '0000-00-00 00:00:00', 1, 'output', 24, 0, 1),
 (4, 'PPh21', 'PPh 21', 'withholding', 5.00, 1, '0000-00-00 00:00:00', 1, NULL, 25, 0, 0),
 (5, 'PB1', 'PB1 11%', 'pb1', 11.00, 1, '0000-00-00 00:00:00', 1, 'input', 37, 0, 1),
-(6, 'PB1', 'PB1 11%', 'pb1', 11.00, 1, '0000-00-00 00:00:00', 1, 'output', 37, 0, 1);
+(6, 'PB1', 'PB1 11%', 'pb1', 11.00, 1, '0000-00-00 00:00:00', 1, 'output', 37, 0, 1),
+(8, 'FEE10', 'Platform Fee 10%', 'fee', 10.00, 1, '0000-00-00 00:00:00', 1, 'output', 82, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -1404,14 +1319,6 @@ CREATE TABLE `transactions` (
   `status` enum('draft','submitted','approved','posted','rejected') DEFAULT 'draft',
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `transactions`
---
-
-INSERT INTO `transactions` (`id`, `company_id`, `branch_id`, `trx_date`, `trx_type`, `reference_no`, `amount`, `created_at`, `journal_id`, `debit_account_id`, `credit_account_id`, `payment_account_id`, `status`, `updated_at`) VALUES
-(1, 1, 3, '2026-04-06', 'sales', 'ORD20260406194925530537', 2000000.00, '2026-04-06 19:49:48', 1, NULL, NULL, 0, 'draft', '2026-04-06 19:49:48'),
-(2, 1, 3, '2026-04-06', 'expense_kitchen', 'PG-1', 262500.00, '2026-04-06 19:52:27', 2, NULL, NULL, 0, 'draft', '2026-04-06 19:52:27');
 
 -- --------------------------------------------------------
 
@@ -1455,7 +1362,7 @@ INSERT INTO `transaction_account_map` (`id`, `company_id`, `trx_type`, `debit_ac
 (20, 1, 'sales_package_partial', 2, 54, 55, '2026-03-27 11:55:44'),
 (21, 1, 'sales_elqahua', 1, 56, 55, '2026-03-27 12:20:48'),
 (22, 1, 'sales_elqahua_partial', 2, 56, 55, '2026-03-27 12:20:48'),
-(23, 1, 'sales_service', 1, 55, NULL, '2026-03-27 12:20:48'),
+(23, 1, 'sales_service', 1, 55, 42, '2026-03-27 12:20:48'),
 (24, 1, 'sales_service_partial', 2, 55, NULL, '2026-03-27 12:20:48'),
 (25, 1, 'expense_kitchen', 60, 1, NULL, '2026-03-27 12:21:48'),
 (26, 1, 'expense_bar', 3, 1, NULL, '2026-03-27 12:21:48'),
@@ -1496,13 +1403,6 @@ CREATE TABLE `transaction_taxes` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `transaction_taxes`
---
-
-INSERT INTO `transaction_taxes` (`id`, `transaction_id`, `tax_code_id`, `tax_base`, `tax_amount`, `created_at`) VALUES
-(1, 1, 6, 1638001.64, 198198.20, '2026-04-06 19:49:48');
-
 -- --------------------------------------------------------
 
 --
@@ -1535,11 +1435,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `company_id`, `branch_id`, `category_id`, `role`, `name`, `email`, `phone`, `password`, `photo`, `is_active`, `last_login_at`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) VALUES
-(1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-04-06 19:51:53', '2026-01-18 12:25:53', 1, '2026-04-06 19:51:53', NULL, NULL, NULL),
+(1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-04-09 00:26:28', '2026-01-18 12:25:53', 1, '2026-04-09 00:26:28', NULL, NULL, NULL),
 (2, 1, 3, 0, 'admin', 'Arya Seftian', 'yerblues6@gmail.com', '895330907220', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '2.png', 'active', '2026-04-06 14:49:54', '2026-01-18 18:59:55', 1, '2026-04-06 14:49:54', NULL, NULL, NULL),
 (3, 1, 3, 1, 'admin', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '3.png', 'active', '2026-04-06 13:51:18', '2026-01-19 10:53:08', 1, '2026-04-06 13:51:18', NULL, NULL, NULL),
-(9, 1, 3, 0, '', 'Fazry', 'fazry@gmail.com', '9090900', '$2y$10$kZ7bWdcazHMWAXNLYck2ZOsRCHUq.9NKuaHz4RWkBmY4EwhP7KGJW', NULL, 'active', NULL, '2026-03-26 18:06:30', NULL, '2026-03-26 18:06:30', NULL, NULL, NULL),
-(10, 0, 3, 0, '', 'Gista', 'xx@gmail.com', '1111', '$2y$10$v/satPLBOf1yHiisKQnF/Obffx7.PfZtxH6omKTKD5ujX2aRnlFJi', NULL, 'active', NULL, '2026-04-02 16:21:01', NULL, '2026-04-02 16:21:01', NULL, NULL, NULL);
+(17, 1, 3, 5, '', 'Yend Hendriyana', 'yend.hendriyana@gmail.com', '-', '$2y$10$vNXrV5jLsJ3MSMAv2GKWj.A.3D4kYEHnquRemDW/okF.AjBm6UMcG', NULL, 'active', NULL, '2026-04-08 15:28:02', NULL, '2026-04-08 15:28:02', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1576,8 +1475,15 @@ CREATE TABLE `user_points` (
 --
 
 INSERT INTO `user_points` (`id`, `user_id`, `points`) VALUES
-(1, 3, 726),
-(2, 10, 200);
+(1, 3, 778),
+(2, 10, 200),
+(3, 11, 545),
+(4, 12, 752),
+(5, 13, 1000),
+(6, 14, 192),
+(7, 15, 192),
+(8, 16, 192),
+(9, 17, 428);
 
 -- --------------------------------------------------------
 
@@ -2270,7 +2176,7 @@ ALTER TABLE `branches_target`
 -- AUTO_INCREMENT for table `branch_items`
 --
 ALTER TABLE `branch_items`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `branch_opening_hours`
@@ -2294,13 +2200,13 @@ ALTER TABLE `business_partners`
 -- AUTO_INCREMENT for table `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `cart_items`
 --
 ALTER TABLE `cart_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -2330,7 +2236,7 @@ ALTER TABLE `chat_messages`
 -- AUTO_INCREMENT for table `coa`
 --
 ALTER TABLE `coa`
-  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
+  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
 
 --
 -- AUTO_INCREMENT for table `coa_opening_balances`
@@ -2354,19 +2260,19 @@ ALTER TABLE `fiscal_years`
 -- AUTO_INCREMENT for table `form_pengajuan`
 --
 ALTER TABLE `form_pengajuan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `form_pengajuan_detail`
 --
 ALTER TABLE `form_pengajuan_detail`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `form_purchasing`
 --
 ALTER TABLE `form_purchasing`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `inventori`
@@ -2378,7 +2284,7 @@ ALTER TABLE `inventori`
 -- AUTO_INCREMENT for table `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `journal_approvals`
@@ -2390,13 +2296,13 @@ ALTER TABLE `journal_approvals`
 -- AUTO_INCREMENT for table `journal_details`
 --
 ALTER TABLE `journal_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `journal_headers`
 --
 ALTER TABLE `journal_headers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `journal_taxes`
@@ -2432,19 +2338,19 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `permissions`
@@ -2462,7 +2368,7 @@ ALTER TABLE `point_rules`
 -- AUTO_INCREMENT for table `point_transactions`
 --
 ALTER TABLE `point_transactions`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `ratio_spend`
@@ -2510,13 +2416,13 @@ ALTER TABLE `sub_ledgers`
 -- AUTO_INCREMENT for table `tax_codes`
 --
 ALTER TABLE `tax_codes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `transaction_account_map`
@@ -2528,13 +2434,13 @@ ALTER TABLE `transaction_account_map`
 -- AUTO_INCREMENT for table `transaction_taxes`
 --
 ALTER TABLE `transaction_taxes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `user_memberships`
@@ -2546,7 +2452,7 @@ ALTER TABLE `user_memberships`
 -- AUTO_INCREMENT for table `user_points`
 --
 ALTER TABLE `user_points`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `variants`

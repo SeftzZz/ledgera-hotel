@@ -493,7 +493,10 @@ class OrderService
             throw new \Exception('checked out failed');
         }
 
-        return $orderNumber;
+        return [
+            'order_id'     => $orderId,
+            'order_number' => $orderNumber
+        ];
 
     }
 

@@ -13,14 +13,40 @@ class Cart extends BaseApiController
     {
         $data = $this->request->getJSON(true);
 
-        if (!isset($data['branch_id'])) {
-            return $this->error('branch_id required');
-        }
-
         $db = \Config\Database::connect();
 
         $userModel = new \App\Models\UserModel();
         $cartModel = new \App\Models\CartModel();
+
+        // =========================
+        // VALIDASI INPUT (DUAL MODE)
+        // =========================
+        if (empty($data['branch_id']) && empty($data['hotel_id'])) {
+            return $this->error('branch_id or hotel_id required');
+        }
+
+        // =========================
+        // 🔥 RESOLVE BRANCH_ID
+        // =========================
+        if (!empty($data['branch_id'])) {
+
+            // ✅ dari Ledgera
+            $branchId = $data['branch_id'];
+
+        } else {
+
+            // ✅ dari HeyWork → mapping hotel → branch
+            $branch = $db->table('branches')
+                ->where('hotel_id', $data['hotel_id'])
+                ->get()
+                ->getRowArray();
+
+            if (!$branch) {
+                return $this->error('Branch mapping not found');
+            }
+
+            $branchId = $branch['id'];
+        }
 
         // =========================
         // GET INPUT CUSTOMER
@@ -28,9 +54,28 @@ class Cart extends BaseApiController
         $name  = $data['name'] ?? null;
         $email = $data['email'] ?? null;
         $phone = $data['phone'] ?? null;
+        $skill_category = $data['category'] ?? null;
 
         if (!$email) {
             return $this->error('Email required');
+        }
+
+        // =========================
+        // 🔥 VALIDASI SKILL CATEGORY
+        // =========================
+        if (!$skill_category) {
+            return $this->error('skill_category required');
+        }
+
+        $category = $db->table('categories')
+            ->select('id, name')
+            ->where('LOWER(name)', strtolower(trim($skill_category)))
+            ->where('status', 'active')
+            ->get()
+            ->getRowArray();
+
+        if (!$category) {
+            return $this->error('Invalid skill_category');
         }
 
         // =========================
@@ -50,13 +95,14 @@ class Cart extends BaseApiController
             // CREATE USER BARU
             // =========================
             $userId = $userModel->insert([
-                'branch_id' => $data['branch_id'],
-                'name'      => $name,
-                'email'     => $email,
-                'phone'     => $phone,
-                'password'  => password_hash('123456', PASSWORD_DEFAULT), // default
-                'role'      => 'customer',
-                'status'    => 'active'
+                'branch_id'   => $branchId,
+                'category_id' => $category['id'],
+                'name'        => $name,
+                'email'       => $email,
+                'phone'       => $phone,
+                'password'    => password_hash('123456', PASSWORD_DEFAULT),
+                'role'        => 'customer',
+                'status'      => 'active'
             ]);
         }
 
@@ -65,7 +111,7 @@ class Cart extends BaseApiController
         // =========================
         $cartId = $cartModel->insert([
             'user_id'   => $userId,
-            'branch_id' => $data['branch_id'],
+            'branch_id' => $branchId,
             'status'    => 'active'
         ]);
 

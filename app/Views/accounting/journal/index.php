@@ -142,10 +142,12 @@ $(function () {
                 let sorted = res.details.sort((a, b) => {
                     let aIsTax = a.account_name.toLowerCase().includes('ppn') || 
                                  a.account_name.toLowerCase().includes('pph') || 
-                                 a.account_name.toLowerCase().includes('pb1');
+                                 a.account_name.toLowerCase().includes('pb1') || 
+                                 a.account_name.toLowerCase().includes('fee');
                     let bIsTax = b.account_name.toLowerCase().includes('ppn') || 
                                  b.account_name.toLowerCase().includes('pph') ||
-                                 b.account_name.toLowerCase().includes('pb1');
+                                 b.account_name.toLowerCase().includes('pb1') ||
+                                 b.account_name.toLowerCase().includes('fee');
 
                     return aIsTax - bIsTax; // tax ke bawah
                 });
@@ -160,7 +162,8 @@ $(function () {
 
                     let isTax = d.account_name.toLowerCase().includes('ppn') ||
                                 d.account_name.toLowerCase().includes('pph') ||
-                                d.account_name.toLowerCase().includes('pb1');
+                                d.account_name.toLowerCase().includes('pb1') ||
+                                d.account_name.toLowerCase().includes('fee');
 
                     let style = isTax 
                         ? 'padding-left:25px; font-style:italic; color:#b8860b;' 

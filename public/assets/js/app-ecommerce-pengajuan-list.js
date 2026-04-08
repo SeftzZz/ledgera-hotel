@@ -90,7 +90,7 @@ $(function () {
               <a href="javascript:void(0);" 
                  class="btn-detail" 
                  data-id="${full.id}">
-                <span>#PGJ-${full.id}</span>
+                <span>#PG-${full.id}</span>
               </a>
             `;
           }

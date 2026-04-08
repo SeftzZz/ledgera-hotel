@@ -340,6 +340,21 @@
             }
 
             // =====================================
+            // FEE
+            // =====================================
+            else if (taxType === 'fee') {
+
+                if (mode === 'inclusive') {
+                    base = amount / (1 + rateDecimal);
+                    taxAmount = amount - base;
+                } else {
+                    taxAmount = base * rateDecimal;
+                }
+
+                total = base + taxAmount;
+            }
+
+            // =====================================
             // 🔥 ROUNDING (DISPLAY ONLY)
             // =====================================
             let baseRounded = Math.round(base);

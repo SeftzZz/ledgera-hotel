@@ -198,6 +198,39 @@ class PurchasingController extends BaseController
             ]);
         }
 
+        $service = new \App\Services\TransactionService();
+        $coaModel = new \App\Models\CoaModel();
+
+        // =========================
+        // 🔥 GET COMPANY FROM BRANCH
+        // =========================
+        $branch = $db->table('branches')
+            ->select('id, company_id')
+            ->where('id', session('branch_id'))
+            ->get()
+            ->getRowArray();
+
+        if (!$branch) {
+            return $this->error('Branch tidak ditemukan');
+        }
+
+        $companyId = $branch['company_id'];
+
+        // =========================
+        // GET CASH ACCOUNT
+        // =========================
+        $kasAccount = $coaModel
+            ->where('company_id', $companyId)
+            ->where('account_code', '1101')
+            ->where('is_active', 1)
+            ->first();
+
+        if (!$kasAccount) {
+            return $this->error('Akun Kas (1101) tidak ditemukan');
+        }
+
+        $paymentAccountId = $kasAccount['id'];
+
         // ======================
         // INSERT HEADER PO
         // ======================
@@ -236,14 +269,17 @@ class PurchasingController extends BaseController
                 'status' => 'Proses'
             ]);
 
-        // ======================
-        // AMBIL ORDER ID
-        // ======================
-        $orderId = $db->table('form_pengajuan')
-            ->select('order_id')
-            ->where('id', $data['pengajuan_id'])
-            ->get()
-            ->getRowArray()['order_id'] ?? null;
+        $branchId = $branch['id'];
+
+        $trxId = $service->create([
+            'company_id'         => $companyId,
+            'branch_id'          => $branchId > 0 ? $branchId : null,
+            'trx_date'           => $data['tanggal'],
+            'trx_type'           => 'purchase_inventory',
+            'reference_no'       => 'PG-'.$data['pengajuan_id'],
+            'amount'             => (float) $data['total'],
+            'payment_account_id' => $paymentAccountId
+        ]);
 
         $db->transComplete();
 
@@ -251,7 +287,7 @@ class PurchasingController extends BaseController
             'status'  => true,
             'message' => 'Purchasing berhasil disimpan',
             'data'    => [
-                'order_id' => $orderId
+                'order_id' => $trxId
             ]
         ]);
     }

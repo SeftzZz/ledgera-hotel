@@ -114,12 +114,25 @@ class JournalController extends BaseController
 
     public function post($id)
     {
+        $db = \Config\Database::connect();
+
+        // =========================
+        // GET JOURNAL
+        // =========================
         $journal = $this->headerModel->find($id);
 
         if (!$journal) {
             return $this->response->setJSON([
                 'status' => false,
                 'message' => 'Journal not found'
+            ]);
+        }
+
+        // 🔒 ANTI LOOP (AUTO JOURNAL)
+        if (!empty($journal['from_journal'])) {
+            return $this->response->setJSON([
+                'status' => true,
+                'message' => 'Auto journal skipped'
             ]);
         }
 
@@ -130,9 +143,143 @@ class JournalController extends BaseController
             ]);
         }
 
+        // =========================
+        // 🔥 AMBIL DETAILS
+        // =========================
+        $details = $db->table('journal_details')
+            ->where('journal_id', $id)
+            ->get()
+            ->getResultArray();
+
+        if (!$details) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Journal has no details'
+            ]);
+        }
+
+        // =========================
+        // 🔥 DETECT PLATFORM FEE (ACCOUNT 82)
+        // =========================
+        $platformFeeAmount = 0;
+
+        foreach ($details as $d) {
+            if ((int)$d['account_id'] === 82) {
+                $platformFeeAmount += (float)$d['debit'];
+            }
+        }
+
+        // =========================
+        // 🔥 RESOLVE BRANCH → HOTEL (HEYWORK)
+        // =========================
+        $branch = $db->table('branches')
+            ->select('id, hotel_id')
+            ->where('id', 4)
+            ->get()
+            ->getRowArray();
+
+        if (!$branch) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Branch not found'
+            ]);
+        }
+
+        // =========================
+        // 🔥 DETECT PAYMENT ACCOUNT (DINAMIS)
+        // =========================
+        $paymentAccountId = null;
+
+        foreach ($details as $d) {
+            // cari credit selain account 82 (biasanya kas/bank)
+            if ((int)$d['account_id'] !== 82 && (float)$d['credit'] > 0) {
+                $paymentAccountId = $d['account_id'];
+                break;
+            }
+        }
+
+        // fallback
+        if (!$paymentAccountId && !empty($journal['payment_account_id'])) {
+            $paymentAccountId = $journal['payment_account_id'];
+        }
+
+        // =========================
+        // 🔥 UPDATE STATUS POSTED
+        // =========================
         $this->headerModel->update($id, [
-            'status' => 'posted'
+            'status'    => 'posted',
+            'posted_at' => date('Y-m-d H:i:s'),
+            'posted_by' => session()->get('user_id')
         ]);
+
+        // =========================
+        // 🔥 AUTO CREATE TRANSACTION (HEYWORK CONTEXT)
+        // =========================
+        if ($platformFeeAmount > 0) {
+
+            $service = new \App\Services\TransactionService();
+
+            $service->create([
+                'company_id'         => $journal['company_id'],
+                'branch_id'          => 4,
+                'branch_name'        => 'HeyWork',
+                'trx_date'           => $journal['journal_date'],
+                'trx_type'           => 'sales_service',
+                'reference_no'       => $journal['journal_no'],
+                'amount'             => $platformFeeAmount,
+
+                // 🔥 dinamis
+                'payment_account_id' => $paymentAccountId,
+
+                'tax_code_id'        => null,
+                'tax_mode'           => 'exclusive',
+
+                // 🔥 anti loop
+                'from_journal'       => true
+            ]);
+
+            $category = $db->table('categories')
+                ->select('id, name')
+                ->where('name', 'IT')
+                ->where('status', 'active')
+                ->get()
+                ->getRowArray();
+
+            // =========================
+            // CEK USER BY EMAIL
+            // =========================
+            $user = $userModel
+                ->where('branch_id', 4)
+                ->where('category_id', $category['id'])
+                ->first();
+
+            if ($user) {
+
+                $userId = $user['id'];
+
+            } else {
+
+                // =========================
+                // CREATE USER BARU
+                // =========================
+                $userId = $userModel->insert([
+                    'branch_id'   => 4,
+                    'category_id' => $category['id'],
+                    'name'        => 'User IT',
+                    'email'       => 'it@heywork.id',
+                    'phone'       => '081234567890',
+                    'password'    => password_hash('123456', PASSWORD_DEFAULT),
+                    'role'        => 'customer',
+                    'status'      => 'active'
+                ]);
+            }
+
+            $cartId = $cartModel->insert([
+                'user_id'   => $userId,
+                'branch_id' => $branchId,
+                'status'    => 'active'
+            ]);
+        }
 
         return $this->response->setJSON([
             'status' => true,

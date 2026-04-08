@@ -19,9 +19,7 @@ class Orders extends BaseApiController
 
         $order = $service->checkout($data);
 
-        return $this->success([
-            'order_number'=>$order
-        ]);
+        return $this->success($order);
     }
 
     public function list($userId)
@@ -98,7 +96,7 @@ class Orders extends BaseApiController
         // =========================
         // 🔒 VALIDASI TENANT
         // =========================
-        // if ($order['company_id'] != session('company_id')) {
+        // if ($order['company_id'] != $companyId) {
         //     return $this->error('Unauthorized company');
         // }
 
@@ -117,6 +115,21 @@ class Orders extends BaseApiController
         if (!$order) {
             return $this->error('Order not found');
         }
+
+        // =========================
+        // 🔥 GET COMPANY FROM BRANCH
+        // =========================
+        $branch = $db->table('branches')
+            ->select('company_id')
+            ->where('id', $order['branch_id'])
+            ->get()
+            ->getRowArray();
+
+        if (!$branch) {
+            return $this->error('Branch tidak ditemukan');
+        }
+
+        $companyId = $branch['company_id'];
 
         // =========================
         // 🔥 AUTO TAX DARI ITEMS
@@ -151,6 +164,8 @@ class Orders extends BaseApiController
             }
         }
 
+        // if ($DEBUG) dd('ORDER DATA', $orderItems);
+
         $taxType = null;
 
         foreach ($orderItems as $item) {
@@ -167,6 +182,10 @@ class Orders extends BaseApiController
             if ($item['tax_type'] === 'ppn') {
                 $taxType = 'ppn';
             }
+
+            if ($item['tax_type'] === 'fee') {
+                $taxType = 'fee';
+            }
         }
 
         // =========================
@@ -177,7 +196,7 @@ class Orders extends BaseApiController
         if ($taxType) {
 
             $tax = $db->table('tax_codes')
-                ->where('company_id', session('company_id'))
+                ->where('company_id', $companyId)
                 ->where('tax_type', $taxType)
                 ->where('tax_direction', 'output')
                 ->where('is_active', 1)
@@ -254,8 +273,11 @@ class Orders extends BaseApiController
         $trxService = new \App\Services\TransactionService();            
         $coaModel = new \App\Models\CoaModel();
 
+        // =========================
+        // 🔥 GET CASH ACCOUNT
+        // =========================
         $kasAccount = $coaModel
-            ->where('company_id', session('company_id'))
+            ->where('company_id', $companyId)
             ->where('account_code', '1101')
             ->where('is_active', 1)
             ->first();
@@ -322,7 +344,7 @@ class Orders extends BaseApiController
 
                     // ambil trx_type yang ada di transaction_account_map
                     $exists = $db->table('transaction_account_map')
-                        ->where('company_id', session('company_id'))
+                        ->where('company_id', $companyId)
                         ->where('trx_type', $map['trx_type'])
                         ->countAllResults();
 
@@ -346,7 +368,7 @@ class Orders extends BaseApiController
                 foreach ($trxMaps as $map) {
 
                     $exists = $db->table('transaction_account_map')
-                        ->where('company_id', session('company_id'))
+                        ->where('company_id', $companyId)
                         ->where('trx_type', $map['trx_type'])
                         ->countAllResults();
 
@@ -361,7 +383,7 @@ class Orders extends BaseApiController
         // if ($DEBUG) dd('TRX TYPE', $trxType);
 
         $trxExists = $db->table('transaction_account_map')
-            ->where('company_id', session('company_id'))
+            ->where('company_id', $companyId)
             ->where('trx_type', $trxType)
             ->countAllResults();
 
@@ -384,7 +406,7 @@ class Orders extends BaseApiController
         // GET CASH ACCOUNT
         // =========================
         $kasAccount = $coaModel
-            ->where('company_id', session('company_id'))
+            ->where('company_id', $companyId)
             ->where('account_code', '1101')
             ->where('is_active', 1)
             ->first();
@@ -404,8 +426,9 @@ class Orders extends BaseApiController
             if ($depositInput > 0 && $status !== 'paid') {
 
                 $trxService->create([
-                    'company_id'         => session('company_id'),
+                    'company_id'         => $companyId,
                     'branch_id'          => $order['branch_id'], // 🔥 FIX
+                    'branch_name'        => $data['branch_name'], // 🔥 FIX
                     'trx_date'           => date('Y-m-d'),
 
                     'trx_type'           => $trxType . '_partial', // 🔥 DINAMIS
@@ -426,8 +449,9 @@ class Orders extends BaseApiController
             elseif ($status === 'paid') {
 
                 $trxService->create([
-                    'company_id'         => session('company_id'),
+                    'company_id'         => $companyId,
                     'branch_id'          => $order['branch_id'], // 🔥 FIX
+                    'branch_name'        => $data['branch_name'], // 🔥 FIX
                     'trx_date'           => date('Y-m-d'),
 
                     'trx_type'           => $trxType, // 🔥 DINAMIS
@@ -452,8 +476,9 @@ class Orders extends BaseApiController
             if ($depositInput > 0) {
 
                 $trxService->create([
-                    'company_id'         => session('company_id'),
+                    'company_id'         => $companyId,
                     'branch_id'          => $order['branch_id'],
+                    'branch_name'        => $data['branch_name'], // 🔥 FIX
                     'trx_date'           => date('Y-m-d'),
 
                     'trx_type'           => 'receive_payment',

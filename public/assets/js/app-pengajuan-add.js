@@ -277,71 +277,72 @@ $(function () {
         throw new Error('pengajuan_id tidak ditemukan');
       }
 
-      // =========================
-      // 2. CREATE CART
-      // =========================
-      const cartRes = await fetch('/api/cart/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + window.jwtToken
-        },
-        body: JSON.stringify({
-          branch_id: window.branchId,
-          name: $('#nama').val(),
-          email: window.userEmail
-        })
-      });
+      // // =========================
+      // // 2. CREATE CART
+      // // =========================
+      // const cartRes = await fetch('/api/cart/create', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     Authorization: 'Bearer ' + window.jwtToken
+      //   },
+      //   body: JSON.stringify({
+      //     branch_id: window.branchId,
+      //     name: $('#nama').val(),
+      //     email: window.userEmail,
+      //     category: window.categoryName
+      //   })
+      // });
 
-      const cartJson = await cartRes.json();
-      const cartId = cartJson.data.cart_id;
+      // const cartJson = await cartRes.json();
+      // const cartId = cartJson.data.cart_id;
 
-      // =========================
-      // 3. ADD ITEMS KE CART
-      // =========================
-      for (let item of items) {
+      // // =========================
+      // // 3. ADD ITEMS KE CART
+      // // =========================
+      // for (let item of items) {
 
-        // 🔥 ambil harga dari cache
-        const vendorItem = vendorItemsCache.find(v => v.id == item.vendor_item_id);
+      //   // 🔥 ambil harga dari cache
+      //   const vendorItem = vendorItemsCache.find(v => v.id == item.vendor_item_id);
 
-        const price = vendorItem ? vendorItem.harga : 0;
+      //   const price = vendorItem ? vendorItem.harga : 0;
 
-        await fetch('/api/cart/add', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer ' + window.jwtToken
-          },
-          body: JSON.stringify({
-            cart_id: cartId,
-            item_id: item.vendor_item_id,
-            quantity: item.qty,
-            price: Number(price),
-            date: $('#tanggal').val()
-          })
-        });
+      //   await fetch('/api/cart/add', {
+      //     method: 'POST',
+      //     headers: {
+      //       'Content-Type': 'application/json',
+      //       Authorization: 'Bearer ' + window.jwtToken
+      //     },
+      //     body: JSON.stringify({
+      //       cart_id: cartId,
+      //       item_id: item.vendor_item_id,
+      //       quantity: item.qty,
+      //       price: Number(price),
+      //       date: $('#tanggal').val()
+      //     })
+      //   });
 
-      }
+      // }
 
-      // =========================
-      // 4. CHECKOUT
-      // =========================
-      const orderRes = await fetch('/api/orders/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + window.jwtToken
-        },
-        body: JSON.stringify({
-          cart_id: cartId,
-          order_number: 'PG-' + pengajuanId,
-          payment_method: 'cash',
-          deposit: 0,
-          pengajuan_id: pengajuanId
-        })
-      });
+      // // =========================
+      // // 4. CHECKOUT
+      // // =========================
+      // const orderRes = await fetch('/api/orders/checkout', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     Authorization: 'Bearer ' + window.jwtToken
+      //   },
+      //   body: JSON.stringify({
+      //     cart_id: cartId,
+      //     order_number: 'PG-' + pengajuanId,
+      //     payment_method: 'cash',
+      //     deposit: 0,
+      //     pengajuan_id: pengajuanId
+      //   })
+      // });
 
-      const orderJson = await orderRes.json();
+      // const orderJson = await orderRes.json();
 
       // =========================
       // SUCCESS
