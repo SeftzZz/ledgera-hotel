@@ -128,7 +128,7 @@ class JournalController extends BaseController
             ]);
         }
 
-        // 🔒 ANTI LOOP (AUTO JOURNAL)
+        // 🔒 ANTI LOOP
         if (!empty($journal['from_journal'])) {
             return $this->response->setJSON([
                 'status' => true,
@@ -144,7 +144,7 @@ class JournalController extends BaseController
         }
 
         // =========================
-        // 🔥 AMBIL DETAILS
+        // DETAILS
         // =========================
         $details = $db->table('journal_details')
             ->where('journal_id', $id)
@@ -159,52 +159,47 @@ class JournalController extends BaseController
         }
 
         // =========================
-        // 🔥 DETECT PLATFORM FEE (ACCOUNT 82)
+        // DETECT ACCOUNT
         // =========================
         $platformFeeAmount = 0;
+        $depositAmount     = 0;
 
         foreach ($details as $d) {
+
+            // 🔥 82 = platform fee
             if ((int)$d['account_id'] === 82) {
                 $platformFeeAmount += (float)$d['debit'];
+            }
+
+            // 🔥 55 = deposit
+            if ((int)$d['account_id'] === 55) {
+                $depositAmount += (float)$d['credit'];
             }
         }
 
         // =========================
-        // 🔥 RESOLVE BRANCH → HOTEL (HEYWORK)
+        // BRANCH
         // =========================
-        $branch = $db->table('branches')
-            ->select('id, hotel_id')
-            ->where('id', 4)
-            ->get()
-            ->getRowArray();
-
-        if (!$branch) {
-            return $this->response->setJSON([
-                'status' => false,
-                'message' => 'Branch not found'
-            ]);
-        }
+        $branchId = $journal['branch_id'];
 
         // =========================
-        // 🔥 DETECT PAYMENT ACCOUNT (DINAMIS)
+        // PAYMENT ACCOUNT
         // =========================
         $paymentAccountId = null;
 
         foreach ($details as $d) {
-            // cari credit selain account 82 (biasanya kas/bank)
             if ((int)$d['account_id'] !== 82 && (float)$d['credit'] > 0) {
                 $paymentAccountId = $d['account_id'];
                 break;
             }
         }
 
-        // fallback
         if (!$paymentAccountId && !empty($journal['payment_account_id'])) {
             $paymentAccountId = $journal['payment_account_id'];
         }
 
         // =========================
-        // 🔥 UPDATE STATUS POSTED
+        // UPDATE STATUS
         // =========================
         $this->headerModel->update($id, [
             'status'    => 'posted',
@@ -213,12 +208,18 @@ class JournalController extends BaseController
         ]);
 
         // =========================
-        // 🔥 AUTO CREATE TRANSACTION (HEYWORK CONTEXT)
+        // 🔥 AUTO CREATE FEE → ORDER
         // =========================
         if ($platformFeeAmount > 0) {
 
-            $service = new \App\Services\TransactionService();
+            $service      = new \App\Services\TransactionService();
+            $orderService = new \App\Services\OrderService();
+            $userModel    = new \App\Models\UserModel();
+            $cartModel    = new \App\Models\CartModel();
 
+            // =========================
+            // TRANSACTION
+            // =========================
             $service->create([
                 'company_id'         => $journal['company_id'],
                 'branch_id'          => 4,
@@ -227,58 +228,124 @@ class JournalController extends BaseController
                 'trx_type'           => 'sales_service',
                 'reference_no'       => $journal['journal_no'],
                 'amount'             => $platformFeeAmount,
-
-                // 🔥 dinamis
                 'payment_account_id' => $paymentAccountId,
-
                 'tax_code_id'        => null,
                 'tax_mode'           => 'exclusive',
-
-                // 🔥 anti loop
                 'from_journal'       => true
             ]);
 
+            // =========================
+            // CATEGORY IT
+            // =========================
             $category = $db->table('categories')
-                ->select('id, name')
                 ->where('name', 'IT')
                 ->where('status', 'active')
                 ->get()
                 ->getRowArray();
 
             // =========================
-            // CEK USER BY EMAIL
+            // USER
             // =========================
             $user = $userModel
                 ->where('branch_id', 4)
                 ->where('category_id', $category['id'])
                 ->first();
 
-            if ($user) {
+            $userId = $user ? $user['id'] : $userModel->insert([
+                'branch_id'   => 4,
+                'category_id' => $category['id'],
+                'name'        => 'User IT',
+                'email'       => 'it@heywork.id',
+                'password'    => password_hash('123456', PASSWORD_DEFAULT),
+                'role'        => 'customer',
+                'status'      => 'active'
+            ]);
 
-                $userId = $user['id'];
-
-            } else {
-
-                // =========================
-                // CREATE USER BARU
-                // =========================
-                $userId = $userModel->insert([
-                    'branch_id'   => 4,
-                    'category_id' => $category['id'],
-                    'name'        => 'User IT',
-                    'email'       => 'it@heywork.id',
-                    'phone'       => '081234567890',
-                    'password'    => password_hash('123456', PASSWORD_DEFAULT),
-                    'role'        => 'customer',
-                    'status'      => 'active'
-                ]);
-            }
-
+            // =========================
+            // CART
+            // =========================
             $cartId = $cartModel->insert([
                 'user_id'   => $userId,
-                'branch_id' => $branchId,
+                'branch_id' => 4,
                 'status'    => 'active'
+            ], true);
+
+            // =========================
+            // ITEM
+            // =========================
+            $item = $db->table('items')
+                ->where('category_id', $category['id'])
+                ->orderBy('id', 'ASC')
+                ->get()
+                ->getRow();
+
+            if (!$item) {
+                return $this->error('Item IT tidak ditemukan');
+            }
+
+            // =========================
+            // CART ITEM
+            // =========================
+            $db->table('cart_items')->insert([
+                'cart_id'  => $cartId,
+                'item_id'  => $item->id,
+                'quantity' => 1,
+                'price'    => $platformFeeAmount
             ]);
+
+            // =========================
+            // ORDER NUMBER = LINK
+            // =========================
+            $orderNumber = $journal['journal_no']; // 🔥 penting
+
+            // =========================
+            // CHECKOUT
+            // =========================
+            $order = $orderService->checkout([
+                'cart_id'        => $cartId,
+                'user_id'        => $userId,
+                'order_number'   => $orderNumber,
+                'payment_method' => 'cash',
+                'branch_id'      => 4
+            ]);
+        }
+
+        // =========================
+        // 🔥 UPDATE DEPOSIT (ACCOUNT 55)
+        // =========================
+        if ($depositAmount != 0) {
+
+            $trx = $db->table('transactions')
+                ->where('journal_id', $id)
+                ->get()
+                ->getRowArray();
+
+            if (!$trx) {
+                return $this->error('Transaction tidak ditemukan');
+            }
+
+            $order = $db->table('orders')
+                ->where('order_number', $trx['reference_no'])
+                ->get()
+                ->getRowArray();
+
+            if (!$order) {
+                return $this->error('Order tidak ditemukan dari reference');
+            }
+
+            $db->table('orders')
+                ->where('id', $order['id'])
+                ->update([
+                    'deposit' => $depositAmount,
+                    'status'  => 'paid'
+                ]);
+
+            $db->table('payments')
+                ->where('order_id', $order['id'])
+                ->update([
+                    'status'  => 'paid',
+                    'paid_at' => date('Y-m-d H:i:s')
+                ]);
         }
 
         return $this->response->setJSON([

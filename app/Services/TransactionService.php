@@ -10,15 +10,6 @@ class TransactionService
 {
     public function create(array $trx): int
     {
-        $DEBUG = true;
-
-        function dd($label, $data) {
-            echo "\n===== DEBUG: $label =====\n";
-            var_dump($data);
-            echo "\n=========================\n";
-            die;
-        }
-
         $db = \Config\Database::connect();
         $db->transStart();
 
@@ -184,14 +175,6 @@ class TransactionService
             'amount'       => $insertAmount,
             'gross_amount' => $grossAmount
         ], true);
-
-        // if ($DEBUG) {
-        //     dd('INSERT ERROR', [
-        //         'trxId' => $trxId,
-        //         'errors' => $trxModel->errors(),
-        //         'data' => $trx
-        //     ]);
-        // }
 
         // ==============================
         // SAVE TAX

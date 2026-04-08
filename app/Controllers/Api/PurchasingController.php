@@ -274,6 +274,7 @@ class PurchasingController extends BaseController
         $trxId = $service->create([
             'company_id'         => $companyId,
             'branch_id'          => $branchId > 0 ? $branchId : null,
+            'branch_name'        => $data['branch_name'],
             'trx_date'           => $data['tanggal'],
             'trx_type'           => 'purchase_inventory',
             'reference_no'       => 'PG-'.$data['pengajuan_id'],
