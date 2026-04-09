@@ -477,7 +477,8 @@ $(function () {
       jabatan: $('#po_jabatan').val(),
       tanggal: $('#po_tanggal').val(),
       items: items,
-      total: window.totalPayment
+      total: window.totalPayment,
+      branch_name: window.branchName
     };
 
     console.log('PAYLOAD:', payload);

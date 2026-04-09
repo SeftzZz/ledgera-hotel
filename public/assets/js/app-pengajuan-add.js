@@ -357,7 +357,7 @@ $(function () {
         // location.reload();
       });
 
-      console.log('ORDER:', orderJson);
+      // console.log('ORDER:', orderJson);
 
     } catch (err) {
 
