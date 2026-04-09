@@ -178,6 +178,91 @@ class JournalController extends BaseController
         }
 
         // =========================
+        // 🔥 LOAD COA MAP
+        // =========================
+        $coaList = $db->table('coa')
+            ->select('id, account_name, parent_id, account_type')
+            ->get()
+            ->getResultArray();
+
+        $coaMap = [];
+        foreach ($coaList as $c) {
+            $coaMap[$c['id']] = $c;
+        }
+
+        // =========================
+        // 🔥 HELPER: TRACE ROOT
+        // =========================
+        $getRootType = function($accountId) use ($coaMap) {
+
+            $visited = [];
+
+            while (isset($coaMap[$accountId])) {
+
+                if (in_array($accountId, $visited)) break;
+                $visited[] = $accountId;
+
+                $coa = $coaMap[$accountId];
+
+                if (empty($coa['parent_id'])) {
+                    return $coa['account_type']; // 🔥 pakai account_type
+                }
+
+                $accountId = $coa['parent_id'];
+            }
+
+            return null;
+        };
+
+        // =========================
+        // 🔥 DETECT ACCOUNT
+        // =========================
+        $inventoryAccounts = [];
+        $expenseAccounts   = [];
+
+        foreach ($details as $d) {
+
+            $accountId = (int)$d['account_id'];
+
+            // 🔥 skip tetap
+            if (in_array($accountId, [82, 55])) continue;
+
+            if (!isset($coaMap[$accountId])) continue;
+
+            $coa = $coaMap[$accountId];
+            $rootType = $getRootType($accountId);
+
+            // =========================
+            // INVENTORY (ASSET)
+            // =========================
+            if ($rootType === 'asset') {
+
+                // hanya yang benar2 persediaan
+                if (stripos($coa['account_name'], 'persediaan') !== false) {
+                    $inventoryAccounts[] = [
+                        'account_id'   => $accountId,
+                        'account_name' => $coa['account_name'],
+                        'debit'        => $d['debit'],
+                        'credit'       => $d['credit']
+                    ];
+                }
+            }
+
+            // =========================
+            // EXPENSE
+            // =========================
+            if ($rootType === 'expense') {
+
+                $expenseAccounts[] = [
+                    'account_id'   => $accountId,
+                    'account_name' => $coa['account_name'],
+                    'debit'        => $d['debit'],
+                    'credit'       => $d['credit']
+                ];
+            }
+        }
+
+        // =========================
         // BRANCH
         // =========================
         $branchId = $journal['branch_id'];
@@ -348,6 +433,127 @@ class JournalController extends BaseController
                 ]);
         }
 
+        // =========================
+        // 🔥 GET TRANSACTION
+        // =========================
+        $trx = $db->table('transactions')
+            ->where('journal_id', $id)
+            ->get()
+            ->getRowArray();
+
+        $pengajuan = null;
+        $pengajuanId = null;
+        $pengajuanDetails = [];
+
+        if ($trx && !empty($trx['reference_no'])) {
+
+            // ambil PG-6 → 6
+            if (preg_match('/PG-(\d+)/', $trx['reference_no'], $match)) {
+
+                $pengajuanId = (int)$match[1];
+
+                // =========================
+                // HEADER PENGAJUAN
+                // =========================
+                $pengajuan = $db->table('form_pengajuan')
+                    ->where('id', $pengajuanId)
+                    ->get()
+                    ->getRowArray();
+
+                // =========================
+                // DETAIL
+                // =========================
+                $pengajuanDetails = $db->table('form_pengajuan_detail')
+                    ->where('pengajuan_id', $pengajuanId)
+                    ->get()
+                    ->getResultArray();
+            }
+        }
+
+        $formPurchasing = $db->table('form_purchasing')
+            ->where('pengajuan_id', $pengajuanId)
+            ->orderBy('id', 'DESC')
+            ->get()
+            ->getRowArray();
+
+        $formPurchasingId = $formPurchasing['id'] ?? 0;
+
+        if (!$formPurchasingId) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Form purchasing tidak ditemukan'
+            ]);
+        }
+
+        if (!empty($pengajuanId)) {
+            $db->table('form_pengajuan')
+                ->where('id', $pengajuanId)
+                ->update([
+                    'status' => 'Selesai',
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+        }
+
+        // ambil vendor_id
+        $vendorItemIds = array_column($pengajuanDetails, 'vendor_item_id');
+
+        $vendorItems = $db->table('vendor_items')
+            ->whereIn('id', $vendorItemIds)
+            ->get()
+            ->getResultArray();
+
+        $vendorMap = [];
+        foreach ($vendorItems as $v) {
+            $vendorMap[$v['id']] = $v;
+        }
+
+        if (empty($pengajuanDetails)) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Detail pengajuan tidak ditemukan'
+            ]);
+        }
+
+        foreach ($pengajuanDetails as $item) {
+
+            if (!isset($vendorMap[$item['vendor_item_id']])) {
+                continue; // atau throw error
+            }
+
+            $vendorId = $vendorMap[$item['vendor_item_id']]['vendor_id'] ?? 0;
+
+            $existing = $db->table('inventori')
+                ->where('vendor_item_id', $item['vendor_item_id'])
+                ->where('form_purchasing_id', $formPurchasingId)
+                ->where('sparepart', $item['sparepart'])
+                ->where('is_delete', 0)
+                ->get()
+                ->getRowArray();
+
+            if ($existing) {
+
+                $db->table('inventori')
+                    ->where('id', $existing['id'])
+                    ->set('qty', 'qty + ' . (int)$item['qty'], false)
+                    ->update();
+
+            } else {
+
+                $db->table('inventori')->insert([
+                    'vendor_id'          => $vendorId,
+                    'vendor_item_id'     => $item['vendor_item_id'],
+                    'sparepart'          => $item['sparepart'],
+                    'kondisi'            => $item['kondisi'],
+                    'qty'                => (int)$item['qty'],
+                    'is_used'            => 0,
+                    'is_delete'          => 0,
+                    'form_purchasing_id' => $formPurchasingId,
+                    'created_at'         => date('Y-m-d H:i:s'),
+                    'updated_at'         => date('Y-m-d H:i:s')
+                ]);
+            }
+        }
+
         return $this->response->setJSON([
             'status' => true,
             'message' => 'Journal posted successfully'
@@ -400,5 +606,28 @@ class JournalController extends BaseController
             'header'  => $header,
             'details' => $details
         ]);
+    }
+
+    function getRootAccountType($accountId, $coaMap)
+    {
+        $visited = [];
+
+        while (isset($coaMap[$accountId])) {
+
+            // 🔒 anti infinite loop
+            if (in_array($accountId, $visited)) break;
+            $visited[] = $accountId;
+
+            $coa = $coaMap[$accountId];
+
+            // kalau sudah root (tidak punya parent)
+            if (empty($coa['parent_id'])) {
+                return strtolower($coa['account_name']); 
+            }
+
+            $accountId = $coa['parent_id'];
+        }
+
+        return null;
     }
 }

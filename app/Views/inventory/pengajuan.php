@@ -177,7 +177,7 @@
                               <div class="row w-100 p-3">
 
                                 <!-- ITEM -->
-                                <div class="col-md-4 col-12 mb-md-0 mb-3">
+                                <div class="col-md-3 col-12 mb-md-0 mb-3">
                                   <p class="mb-2 repeater-title">Nama Barang</p>
                                   <select name="vendor_item_id" class="form-select vendor-item">
                                     <option value="">Pilih Item</option>
@@ -185,7 +185,7 @@
                                 </div>
 
                                 <!-- QTY + SATUAN -->
-                                <div class="col-md-4 col-12 mb-md-0 mb-3">
+                                <div class="col-md-3 col-12 mb-md-0 mb-3">
                                   <p class="mb-2 repeater-title">Qty</p>
                                   <div class="input-group">
                                     <input
@@ -199,8 +199,17 @@
                                   </div>
                                 </div>
 
+                                <div class="col-md-3 col-12 mb-md-0 mb-3">
+                                  <p class="mb-2 repeater-title">Tujuan</p>
+                                  <select name="purpose" class="form-select purpose">
+                                    <option value="">Pilih Tujuan</option>
+                                    <option value="inventory">Inventory</option>
+                                    <option value="expense">Expense</option>
+                                  </select>
+                                </div>
+
                                 <!-- DELETE -->
-                                <div class="col-md-4 col-12 d-flex align-items-end">
+                                <div class="col-md-3 col-12 d-flex align-items-end">
                                   <button type="button" data-repeater-delete class="btn btn-danger w-100">
                                     <i class="ti ti-trash"></i>
                                   </button>

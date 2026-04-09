@@ -190,6 +190,7 @@ $(function () {
       let row = $(this);
 
       let vendor = row.find('.vendor-item').val();
+      let purpose = row.find('.purpose').val(); // 🔥 FIX
 
       let qtyRaw = row.find('input[name$="[qty]"], input[name="qty"]').val();
 
@@ -201,9 +202,14 @@ $(function () {
       // reset error
       row.find('.vendor-item').removeClass('is-invalid');
       row.find('.qty').removeClass('is-invalid');
+      row.find('.purpose').removeClass('is-invalid');
 
-      if (!vendor && qty === 0) return;
+      // skip row kosong
+      if (!vendor && qty === 0 && !purpose) return;
 
+      // =========================
+      // VALIDASI PER ROW
+      // =========================
       if (!vendor) {
         row.find('.vendor-item').addClass('is-invalid');
         invalid = true;
@@ -216,9 +222,16 @@ $(function () {
         return;
       }
 
+      if (!purpose) {
+        row.find('.purpose').addClass('is-invalid');
+        invalid = true;
+        return;
+      }
+
       items.push({
         vendor_item_id: Number(vendor),
-        qty: qty
+        qty: qty,
+        purpose: purpose
       });
 
     });
@@ -227,7 +240,7 @@ $(function () {
     // VALIDASI GLOBAL
     // =========================
     if (invalid) {
-      Swal.fire('Error', 'Periksa kembali item dan qty', 'error');
+      Swal.fire('Error', 'Periksa kembali item, qty, dan tujuan', 'error');
       return;
     }
 
@@ -277,73 +290,6 @@ $(function () {
         throw new Error('pengajuan_id tidak ditemukan');
       }
 
-      // // =========================
-      // // 2. CREATE CART
-      // // =========================
-      // const cartRes = await fetch('/api/cart/create', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     Authorization: 'Bearer ' + window.jwtToken
-      //   },
-      //   body: JSON.stringify({
-      //     branch_id: window.branchId,
-      //     name: $('#nama').val(),
-      //     email: window.userEmail,
-      //     category: window.categoryName
-      //   })
-      // });
-
-      // const cartJson = await cartRes.json();
-      // const cartId = cartJson.data.cart_id;
-
-      // // =========================
-      // // 3. ADD ITEMS KE CART
-      // // =========================
-      // for (let item of items) {
-
-      //   // 🔥 ambil harga dari cache
-      //   const vendorItem = vendorItemsCache.find(v => v.id == item.vendor_item_id);
-
-      //   const price = vendorItem ? vendorItem.harga : 0;
-
-      //   await fetch('/api/cart/add', {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //       Authorization: 'Bearer ' + window.jwtToken
-      //     },
-      //     body: JSON.stringify({
-      //       cart_id: cartId,
-      //       item_id: item.vendor_item_id,
-      //       quantity: item.qty,
-      //       price: Number(price),
-      //       date: $('#tanggal').val()
-      //     })
-      //   });
-
-      // }
-
-      // // =========================
-      // // 4. CHECKOUT
-      // // =========================
-      // const orderRes = await fetch('/api/orders/checkout', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     Authorization: 'Bearer ' + window.jwtToken
-      //   },
-      //   body: JSON.stringify({
-      //     cart_id: cartId,
-      //     order_number: 'PG-' + pengajuanId,
-      //     payment_method: 'cash',
-      //     deposit: 0,
-      //     pengajuan_id: pengajuanId
-      //   })
-      // });
-
-      // const orderJson = await orderRes.json();
-
       // =========================
       // SUCCESS
       // =========================
@@ -354,10 +300,8 @@ $(function () {
         timer: 1500,
         showConfirmButton: false
       }).then(() => {
-        // location.reload();
+        location.reload();
       });
-
-      // console.log('ORDER:', orderJson);
 
     } catch (err) {
 

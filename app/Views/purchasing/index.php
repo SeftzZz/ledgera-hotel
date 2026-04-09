@@ -175,6 +175,7 @@
                             <th>Barang</th>
                             <th>Qty</th>
                             <th>Satuan</th>
+                            <th>Purpose</th>
                             <th>Vendor</th>
                             <th>Pilih</th>
                             <th>Harga</th>

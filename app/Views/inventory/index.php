@@ -3,127 +3,113 @@
           <?= $this->section('content') ?>
 
           <div class="container-xxl flex-grow-1 container-p-y">
-            
-            <div class="row">
-              <div class="col-lg-12">
+            <!-- Order List Widget -->
 
-                <div class="card">
+            <div class="card mb-4">
+              <div class="card-widget-separator-wrapper">
+                <div class="card-body card-widget-separator">
+                  <div class="row gy-4 gy-sm-1">
 
-                  <div class="card-body">
-
-                    <!-- HEADER -->
-                    <div class="row mb-4">
-                      <div class="col-md-6">
-                        <h4 class="mb-2">Form Pengajuan Barang</h4>
-                        <p class="mb-0"><?= session('branch_name') ?></p>
-                        <small><?= session('branch_address') ?></small>
-                      </div>
-
-                      <div class="col-md-6 text-end">
-                        <input type="date" id="tanggal" class="form-control w-auto d-inline" value="<?= date('Y-m-d') ?>">
-                      </div>
-                    </div>
-
-                    <hr>
-
-                    <!-- INFO PEMOHON -->
-                    <div class="row mb-4">
-
-                      <div class="col-md-4">
-                        <label>Nama</label>
-                        <input type="text" id="nama" class="form-control" placeholder="Nama Pemohon">
-                      </div>
-
-                      <div class="col-md-4">
-                        <label>Divisi</label>
-                        <input type="text" id="divisi" class="form-control" placeholder="Divisi">
-                      </div>
-
-                      <div class="col-md-4">
-                        <label>Jabatan</label>
-                        <input type="text" id="jabatan" class="form-control" placeholder="Jabatan">
-                      </div>
-
-                    </div>
-
-                    <hr>
-
-                    <!-- ITEM LIST -->
-                    <form id="formPengajuan" class="source-item">
-
-                      <div data-repeater-list="items">
-
-                        <div data-repeater-item class="repeater-wrapper mb-3">
-
-                          <div class="row border rounded p-3">
-
-                            <div class="col-md-3">
-                              <label>Item (Vendor)</label>
-                              <select class="form-select vendor-item">
-                                <option value="">Pilih Item</option>
-                              </select>
-                            </div>
-
-                            <div class="col-md-2">
-                              <label>Sparepart</label>
-                              <input type="text" name="sparepart" class="form-control">
-                            </div>
-
-                            <div class="col-md-1">
-                              <label>Qty</label>
-                              <input type="number" name="qty" class="form-control" value="1">
-                            </div>
-
-                            <div class="col-md-2">
-                              <label>Harga</label>
-                              <input type="number" name="harga" class="form-control">
-                            </div>
-
-                            <div class="col-md-2">
-                              <label>Kondisi</label>
-                              <input type="text" name="kondisi" class="form-control">
-                            </div>
-
-                            <div class="col-md-1">
-                              <label>Bon</label>
-                              <select name="is_bon" class="form-select">
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                              </select>
-                            </div>
-
-                            <div class="col-md-1 d-flex align-items-end">
-                              <button data-repeater-delete type="button" class="btn btn-danger">
-                                <i class="ti ti-trash"></i>
-                              </button>
-                            </div>
-
-                          </div>
-
+                    <!-- TOTAL ITEM -->
+                    <div class="col-sm-6 col-lg-2">
+                      <div class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0">
+                        <div>
+                          <h4 class="mb-2" id="inventory_total">0</h4>
+                          <p class="mb-0 fw-medium">Total Items</p>
                         </div>
-
+                        <span class="avatar me-sm-4">
+                          <span class="avatar-initial bg-label-primary rounded">
+                            <i class="ti-md ti ti-database text-body"></i>
+                          </span>
+                        </span>
                       </div>
+                    </div>
 
-                      <button type="button" data-repeater-create class="btn btn-primary mt-3">
-                        <i class="ti ti-plus"></i> Tambah Item
-                      </button>
+                    <!-- STOK TERSEDIA -->
+                    <div class="col-sm-6 col-lg-2">
+                      <div class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0">
+                        <div>
+                          <h4 class="mb-2" id="inventory_available">0</h4>
+                          <p class="mb-0 fw-medium">Stok Tersedia</p>
+                        </div>
+                        <span class="avatar p-2 me-lg-4">
+                          <span class="avatar-initial bg-label-success rounded">
+                            <i class="ti-md ti ti-check text-body"></i>
+                          </span>
+                        </span>
+                      </div>
+                    </div>
 
-                    </form>
+                    <!-- STOK HABIS -->
+                    <div class="col-sm-6 col-lg-2">
+                      <div class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0">
+                        <div>
+                          <h4 class="mb-2" id="inventory_empty">0</h4>
+                          <p class="mb-0 fw-medium">Stok Habis</p>
+                        </div>
+                        <span class="avatar p-2 me-lg-4">
+                          <span class="avatar-initial bg-label-danger rounded">
+                            <i class="ti-md ti ti-alert-triangle text-body"></i>
+                          </span>
+                        </span>
+                      </div>
+                    </div>
 
-                    <hr>
+                    <!-- STOK RENDAH -->
+                    <div class="col-sm-6 col-lg-2">
+                      <div class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0">
+                        <div>
+                          <h4 class="mb-2" id="inventory_low">0</h4>
+                          <p class="mb-0 fw-medium">Stok Rendah</p>
+                        </div>
+                        <span class="avatar p-2 me-sm-4">
+                          <span class="avatar-initial bg-label-warning rounded">
+                            <i class="ti-md ti ti-alert-circle text-body"></i>
+                          </span>
+                        </span>
+                      </div>
+                    </div>
 
-                    <!-- SUBMIT -->
-                    <button id="btnSubmit" class="btn btn-success w-100 mt-3">
-                      Submit Pengajuan
-                    </button>
+                    <!-- HARI INI -->
+                    <div class="col-sm-6 col-lg-2">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                          <h4 class="mb-2" id="inventory_today">0</h4>
+                          <p class="mb-0 fw-medium">Masuk Hari Ini</p>
+                        </div>
+                        <span class="avatar p-2">
+                          <span class="avatar-initial bg-label-info rounded">
+                            <i class="ti-md ti ti-calendar text-body"></i>
+                          </span>
+                        </span>
+                      </div>
+                    </div>
 
                   </div>
-
                 </div>
-
               </div>
             </div>
 
+            <!-- Order List Table -->
+            <div class="card">
+              <div class="card-datatable table-responsive">
+                <table class="datatables-pengajuan table border-top">
+                  <thead>
+                    <tr>
+                      <th></th> <!-- responsive -->
+                      <th></th> <!-- checkbox -->
+                      <th>Nama Barang</th>
+                      <th>Qty Masuk</th>
+                      <th>Terpakai</th>
+                      <th>Sisa Stok</th>
+                      <th>Satuan</th>
+                      <th>Vendor</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
           </div>
 
           <?= $this->endSection() ?>
@@ -134,68 +120,5 @@
               <script src="<?= base_url('assets/vendor/libs/cleavejs/cleave.js') ?>"></script>
               <script src="<?= base_url('assets/vendor/libs/cleavejs/cleave-phone.js') ?>"></script>
               <script src="<?= base_url('assets/vendor/libs/jquery-repeater/jquery-repeater.js') ?>"></script>
-              <script>
-              $('#btnSubmit').on('click', function () {
-
-                let items = [];
-
-                $('[data-repeater-item]').each(function () {
-
-                  let row = $(this);
-
-                  items.push({
-                    vendor_item_id: row.find('.vendor-item').val(),
-                    sparepart: row.find('[name="sparepart"]').val(),
-                    qty: row.find('[name="qty"]').val(),
-                    harga: row.find('[name="harga"]').val(),
-                    kondisi: row.find('[name="kondisi"]').val(),
-                    is_bon: row.find('[name="is_bon"]').val()
-                  });
-
-                });
-
-                let payload = {
-                  nama: $('#nama').val(),
-                  divisi: $('#divisi').val(),
-                  jabatan: $('#jabatan').val(),
-                  tanggal: $('#tanggal').val(),
-                  items: items
-                };
-
-                $.ajax({
-                  url: '/api/pengajuan',
-                  type: 'POST',
-                  headers: {
-                    Authorization: 'Bearer ' + window.jwtToken
-                  },
-                  contentType: 'application/json',
-                  data: JSON.stringify(payload),
-                  success: function (res) {
-
-                    if (res.status) {
-                      Swal.fire('Success', 'Pengajuan berhasil disimpan', 'success');
-                      location.reload();
-                    } else {
-                      Swal.fire('Error', res.message, 'error');
-                    }
-
-                  }
-                });
-
-              });
-              
-              $(document).on('change', '.vendor-item', function () {
-
-                let selected = $(this).find(':selected');
-
-                let harga = selected.data('harga');
-                let sparepart = selected.text();
-
-                let row = $(this).closest('[data-repeater-item]');
-
-                row.find('[name="harga"]').val(harga);
-                row.find('[name="sparepart"]').val(sparepart);
-
-              });
-              </script>
+              <script src="<?= base_url('assets/js/app-inventory-list.js') ?>"></script>
           <?= $this->endSection() ?>

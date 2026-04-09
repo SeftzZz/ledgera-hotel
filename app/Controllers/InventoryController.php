@@ -9,8 +9,7 @@ class InventoryController extends BaseController
     public function index()
     {
         return view('inventory/index', [
-            'title' => 'Form Pengajuan',
-            'order_number' => 'PGJ-' . date('ymdHis')
+            'title' => 'Inventory List',
         ]);
     }
 

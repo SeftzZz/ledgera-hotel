@@ -271,16 +271,66 @@ class PurchasingController extends BaseController
 
         $branchId = $branch['id'];
 
-        $trxId = $service->create([
-            'company_id'         => $companyId,
-            'branch_id'          => $branchId > 0 ? $branchId : null,
-            'branch_name'        => $data['branch_name'],
-            'trx_date'           => $data['tanggal'],
-            'trx_type'           => 'purchase_inventory',
-            'reference_no'       => 'PG-'.$data['pengajuan_id'],
-            'amount'             => (float) $data['total'],
-            'payment_account_id' => $paymentAccountId
-        ]);
+        $inventoryTotal = 0;
+        $expenseTotal   = 0;
+
+        $detailIds = array_column($data['items'], 'detail_id');
+
+        $detailsMap = $db->table('form_pengajuan_detail')
+            ->whereIn('id', $detailIds)
+            ->get()
+            ->getResultArray();
+
+        $detailMap = [];
+        foreach ($detailsMap as $d) {
+            $detailMap[$d['id']] = $d;
+        }
+
+        foreach ($data['items'] as $item) {
+
+            $detail = $detailMap[$item['detail_id']] ?? null;
+            if (!$detail) continue;
+
+            $purpose = $detail['purpose'] ?? 'inventory';
+            $qty     = (float) $detail['qty'];
+            $harga   = (float) $item['harga'];
+
+            $subtotal = $qty * $harga;
+
+            if ($purpose === 'inventory') {
+                $inventoryTotal += $subtotal;
+            } else {
+                $expenseTotal += $subtotal;
+            }
+        }
+
+        if ($inventoryTotal > 0) {
+
+            $trxId = $service->create([
+                'company_id'         => $companyId,
+                'branch_id'          => $branchId,
+                'branch_name'        => $data['branch_name'],
+                'trx_date'           => $data['tanggal'],
+                'trx_type'           => 'purchase_inventory',
+                'reference_no'       => 'PG-'.$data['pengajuan_id'],
+                'amount'             => $inventoryTotal,
+                'payment_account_id' => $paymentAccountId
+            ]);
+        }
+
+        if ($expenseTotal > 0) {
+
+            $trxId = $service->create([
+                'company_id'         => $companyId,
+                'branch_id'          => $branchId,
+                'branch_name'        => $data['branch_name'],
+                'trx_date'           => $data['tanggal'],
+                'trx_type'           => 'expense_kitchen',
+                'reference_no'       => 'PG-'.$data['pengajuan_id'],
+                'amount'             => $expenseTotal,
+                'payment_account_id' => $paymentAccountId
+            ]);
+        }
 
         $db->transComplete();
 

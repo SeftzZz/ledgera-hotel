@@ -245,12 +245,14 @@ $(function () {
           data-item-id="${item.vendor_item_id}"
           data-harga="${item.harga}"
           data-sparepart="${item.sparepart}"
+          data-purpose="${item.purpose}"
           data-vendor-kode="${item.vendor_kode}"
         >
           <td>${i}</td>
           <td>${item.sparepart}</td>
           <td>${item.qty}</td>
           <td>${item.satuan}</td>
+          <td>${item.purpose}</td>
           <td>${item.vendor_name}</td>
           <td>
             <button 
@@ -503,40 +505,6 @@ $(function () {
         throw new Error(json.message || 'Gagal simpan PO');
       }
 
-      // // =========================
-      // // 🔥 AMBIL ORDER ID
-      // // =========================
-      // const orderId = json.data?.order_id; // pastikan backend kirim ini
-
-      // if (!orderId) {
-      //   throw new Error('Order ID tidak ditemukan dari response');
-      // }
-
-      // // =========================
-      // // 2. PAYMENT UPDATE
-      // // =========================
-      // const deposit = 0; // bisa kamu ambil dari input kalau ada
-      // const status = 'paid'; // atau 'partial' sesuai kebutuhan
-
-      // const payRes = await fetch('/api/orders/pay', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     Authorization: 'Bearer ' + window.jwtToken
-      //   },
-      //   body: JSON.stringify({
-      //     order_id: orderId,
-      //     deposit: Number(deposit || 0),
-      //     status: status
-      //   })
-      // });
-
-      // const payJson = await payRes.json();
-
-      // if (!payJson.status) {
-      //   throw new Error(payJson.message || 'Gagal update payment');
-      // }
-
       // =========================
       // SUCCESS
       // =========================
@@ -547,7 +515,7 @@ $(function () {
         timer: 1500,
         showConfirmButton: false
       }).then(() => {
-        // location.reload();
+        location.reload();
       });
 
     } catch (err) {

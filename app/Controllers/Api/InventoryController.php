@@ -120,6 +120,7 @@ class InventoryController extends BaseController
                 'kondisi'        => '-', // default
                 'qty'            => $item['qty'],
                 'harga'          => $vendorItem['harga'],
+                'purpose'        => $item['purpose'],
                 'is_bon'         => 0,
                 'is_delete'      => 0
             ]);
@@ -152,6 +153,110 @@ class InventoryController extends BaseController
                 'selesai'   => $selesai,
                 'total'     => $total,
                 'today'     => $today
+            ]
+        ]);
+    }
+
+    public function inventoryList()
+    {
+        $db = \Config\Database::connect();
+
+        $data = $db->table('inventori i')
+            ->select('
+                i.vendor_item_id,
+                i.sparepart,
+                SUM(i.qty) as total_qty,
+                SUM(i.is_used) as total_used,
+                (SUM(i.qty) - SUM(i.is_used)) as stock_available,
+                vi.satuan,
+                v.name as vendor_name
+            ')
+            ->join('vendor_items vi', 'vi.id = i.vendor_item_id', 'left')
+            ->join('vendors v', 'v.id = i.vendor_id', 'left')
+            ->where('i.is_delete', 0)
+            ->groupBy('i.vendor_item_id')
+            ->orderBy('i.sparepart', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        return $this->response->setJSON([
+            'status' => true,
+            'data'   => $data
+        ]);
+    }
+
+    public function inventoryStats()
+    {
+        $db = \Config\Database::connect();
+
+        // =========================
+        // TOTAL ITEM (distinct barang)
+        // =========================
+        $totalItems = $db->table('inventori')
+            ->select('COUNT(DISTINCT vendor_item_id) as total')
+            ->where('is_delete', 0)
+            ->get()
+            ->getRow()
+            ->total ?? 0;
+
+        // =========================
+        // STOK HABIS
+        // =========================
+        $stokHabis = $db->query("
+            SELECT COUNT(*) as total FROM (
+                SELECT vendor_item_id, SUM(qty) - SUM(is_used) as sisa
+                FROM inventori
+                WHERE is_delete = 0
+                GROUP BY vendor_item_id
+                HAVING sisa <= 0
+            ) x
+        ")->getRow()->total ?? 0;
+
+        // =========================
+        // STOK RENDAH (<=10)
+        // =========================
+        $stokLow = $db->query("
+            SELECT COUNT(*) as total FROM (
+                SELECT vendor_item_id, SUM(qty) - SUM(is_used) as sisa
+                FROM inventori
+                WHERE is_delete = 0
+                GROUP BY vendor_item_id
+                HAVING sisa > 0 AND sisa <= 10
+            ) x
+        ")->getRow()->total ?? 0;
+
+        // =========================
+        // STOK TERSEDIA (>0)
+        // =========================
+        $available = $db->query("
+            SELECT COUNT(*) as total FROM (
+                SELECT vendor_item_id, SUM(qty) - SUM(is_used) as sisa
+                FROM inventori
+                WHERE is_delete = 0
+                GROUP BY vendor_item_id
+                HAVING sisa > 0
+            ) x
+        ")->getRow()->total ?? 0;
+
+        // =========================
+        // MASUK HARI INI
+        // =========================
+        $today = $db->table('inventori')
+            ->where('is_delete', 0)
+            ->where('DATE(created_at)', date('Y-m-d'))
+            ->countAllResults();
+
+        // =========================
+        // RESPONSE
+        // =========================
+        return $this->response->setJSON([
+            'status' => true,
+            'data' => [
+                'total_items' => (int)$totalItems,
+                'available'   => (int)$available,
+                'stok_habis'  => (int)$stokHabis,
+                'stok_low'    => (int)$stokLow,
+                'today'       => (int)$today
             ]
         ]);
     }
