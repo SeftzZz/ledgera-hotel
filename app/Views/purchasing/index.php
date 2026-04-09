@@ -128,7 +128,7 @@
 
                         <!-- ================= HEADER ================= -->
                         <div class="col-md-6">
-                          <table class="table">
+                          <table class="table table-bordered">
                             <tr>
                               <td>Nama</td>
                               <td><input type="text" id="po_nama" class="form-control"></td>
@@ -145,6 +145,12 @@
                               <td>Tanggal</td>
                               <td>
                                 <input type="date" id="po_tanggal" class="form-control">
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>DP</td>
+                              <td>
+                                <input type="number" id="po_dp" class="form-control">
                               </td>
                             </tr>
                           </table>
@@ -168,7 +174,7 @@
                       </div>
 
                       <!-- ================= ITEMS ================= -->
-                      <table class="table table-bordered" id="po_items_table">
+                      <table class="table table-bordered mt-3" id="po_items_table">
                         <thead>
                           <tr>
                             <th>No</th>

@@ -239,7 +239,8 @@ class PurchasingController extends BaseController
             'nama_po'      => $data['nama'] ?? '',
             'divisi_po'    => $data['divisi'] ?? '',
             'jabatan_po'   => $data['jabatan'] ?? '',
-            'tanggal_po'   => $data['tanggal'] ?? date('d-m-Y')
+            'tanggal_po'   => $data['tanggal'] ?? date('d-m-Y'),
+            'dp_po'        => $data['deposit'] ?? '',
         ]);
 
         // ======================
@@ -304,32 +305,68 @@ class PurchasingController extends BaseController
             }
         }
 
+        $dp = (float) ($data['deposit'] ?? 0);
+
         if ($inventoryTotal > 0) {
 
-            $trxId = $service->create([
-                'company_id'         => $companyId,
-                'branch_id'          => $branchId,
-                'branch_name'        => $data['branch_name'],
-                'trx_date'           => $data['tanggal'],
-                'trx_type'           => 'purchase_inventory',
-                'reference_no'       => 'PG-'.$data['pengajuan_id'],
-                'amount'             => $inventoryTotal,
-                'payment_account_id' => $paymentAccountId
-            ]);
+            if ($dp > 0 && $dp < $inventoryTotal) {
+
+                $trxId = $service->create([
+                    'company_id'         => $companyId,
+                    'branch_id'          => $branchId,
+                    'branch_name'        => $data['branch_name'],
+                    'trx_date'           => $data['tanggal'],
+                    'trx_type'           => 'purchase_inventory_partial',
+                    'reference_no'       => 'PG-'.$data['pengajuan_id'],
+                    'amount'             => $inventoryTotal,
+                    'paid_amount'        => $dp,
+                    'payment_account_id' => $paymentAccountId
+                ]);
+
+            } else {
+
+                $trxId = $service->create([
+                    'company_id'         => $companyId,
+                    'branch_id'          => $branchId,
+                    'branch_name'        => $data['branch_name'],
+                    'trx_date'           => $data['tanggal'],
+                    'trx_type'           => 'purchase_inventory',
+                    'reference_no'       => 'PG-'.$data['pengajuan_id'],
+                    'amount'             => $inventoryTotal,
+                    'payment_account_id' => $paymentAccountId
+                ]);
+            }
         }
 
         if ($expenseTotal > 0) {
 
-            $trxId = $service->create([
-                'company_id'         => $companyId,
-                'branch_id'          => $branchId,
-                'branch_name'        => $data['branch_name'],
-                'trx_date'           => $data['tanggal'],
-                'trx_type'           => 'expense_kitchen',
-                'reference_no'       => 'PG-'.$data['pengajuan_id'],
-                'amount'             => $expenseTotal,
-                'payment_account_id' => $paymentAccountId
-            ]);
+            if ($dp > 0 && $dp < $expenseTotal) {
+
+                $trxId = $service->create([
+                    'company_id'         => $companyId,
+                    'branch_id'          => $branchId,
+                    'branch_name'        => $data['branch_name'],
+                    'trx_date'           => $data['tanggal'],
+                    'trx_type'           => 'purchase_inventory_partial',
+                    'reference_no'       => 'PG-'.$data['pengajuan_id'],
+                    'amount'             => $expenseTotal,
+                    'paid_amount'        => $dp,
+                    'payment_account_id' => $paymentAccountId
+                ]);
+
+            } else {
+
+                $trxId = $service->create([
+                    'company_id'         => $companyId,
+                    'branch_id'          => $branchId,
+                    'branch_name'        => $data['branch_name'],
+                    'trx_date'           => $data['tanggal'],
+                    'trx_type'           => 'purchase_inventory',
+                    'reference_no'       => 'PG-'.$data['pengajuan_id'],
+                    'amount'             => $expenseTotal,
+                    'payment_account_id' => $paymentAccountId
+                ]);
+            }
         }
 
         $db->transComplete();

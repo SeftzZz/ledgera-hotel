@@ -107,6 +107,7 @@ class TransactionController extends BaseController
             $trxId = $service->create([
                 'company_id'         => $this->request->getPost('company_id'),
                 'branch_id'          => $branchId > 0 ? $branchId : null,
+                'branch_name'        => $this->request->getPost('branch_name'),
                 'trx_date'           => $this->request->getPost('trx_date'),
                 'trx_type'           => $this->request->getPost('trx_type'),
                 'reference_no'       => $this->request->getPost('reference_no'),

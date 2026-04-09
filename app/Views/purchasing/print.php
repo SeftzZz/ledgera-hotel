@@ -62,6 +62,12 @@
       <td>Tanggal</td>
       <td><?= $po->tanggal_po ?></td>
     </tr>
+    <tr>
+      <td>Down Payment</td>
+      <td>
+        Rp <?= isset($po->dp_po) ? number_format($po->dp_po, 0, ',', '.') : '0' ?>
+      </td>
+    </tr>
   </table>
 </div>
 
