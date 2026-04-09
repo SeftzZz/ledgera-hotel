@@ -27,6 +27,7 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <form id="formAddTransaction">
+                    <input type="hidden" name="branch_name" class="form-control" value="<?= session('branch_name') ?>">
                     <div class="modal-header">
                         <h5 class="modal-title">Create Transaction</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

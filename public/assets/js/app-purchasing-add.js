@@ -179,7 +179,7 @@ $(function () {
 
     const json = await res.json();
     const data = json.data;
-    const isLocked = data.header.status === 'Proses';
+    const isLocked = data.header.status === 'Proses' || data.header.status === 'Selesai';
 
     $('#po_pengajuan_id').val(id);
 
@@ -190,6 +190,7 @@ $(function () {
     $('#po_divisi').val('');
     $('#po_jabatan').val('');
     $('#po_tanggal').val(new Date().toISOString().split('T')[0]);
+    $('#po_dp').val('');
 
     // =========================
     // GROUP VENDOR AWAL
@@ -478,6 +479,7 @@ $(function () {
       divisi: $('#po_divisi').val(),
       jabatan: $('#po_jabatan').val(),
       tanggal: $('#po_tanggal').val(),
+      deposit: $('#po_dp').val(),
       items: items,
       total: window.totalPayment,
       branch_name: window.branchName

@@ -243,6 +243,50 @@ class TransactionService
         }
 
         // =====================================
+        // EXPENSE PARTIAL
+        // =====================================
+        elseif (
+            str_contains($type, '_partial') &&
+            (str_starts_with($type, 'purchase') || str_starts_with($type, 'expense'))
+        ) {
+
+            $total = (float) $baseAmount;
+            $paid  = (float) ($trx['paid_amount'] ?? 0);
+            $hutang = $total - $paid;
+
+            // =========================
+            // DR INVENTORY / EXPENSE
+            // =========================
+            $journalLines[] = [
+                'account_id' => $map['debit_account_id'],
+                'debit'      => $total,
+                'credit'     => 0
+            ];
+
+            // =========================
+            // CR CASH (DP)
+            // =========================
+            if ($paid > 0) {
+                $journalLines[] = [
+                    'account_id' => $trx['payment_account_id'],
+                    'debit'      => 0,
+                    'credit'     => $paid
+                ];
+            }
+
+            // =========================
+            // CR HUTANG
+            // =========================
+            if ($hutang > 0) {
+                $journalLines[] = [
+                    'account_id' => $map['credit_account_id'], // Utang Usaha
+                    'debit'      => 0,
+                    'credit'     => $hutang
+                ];
+            }
+        }
+
+        // =====================================
         // SALES / REVENUE
         // =====================================
         elseif (
