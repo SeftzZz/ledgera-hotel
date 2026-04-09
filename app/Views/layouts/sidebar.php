@@ -181,7 +181,6 @@
           </a>
 
           <ul class="menu-sub">
-
             <!-- ROOMS -->
             <li class="menu-item <?= ($segment1=='dashboard')?'open active':'' ?>">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -189,21 +188,15 @@
               </a>
 
               <ul class="menu-sub">
-                <li class="menu-item <?= ($segment1=='dashboard' && $segment2=='')?'active':'' ?>">
-                  <a href="<?= base_url('dashboard') ?>" class="menu-link">
-                    <div data-i18n="Room List">Room List</div>
+                <li class="menu-item <?= ($segment1=='maintenance' && $segment2=='')?'active':'' ?>">
+                  <a href="<?= base_url('maintenance/rooms') ?>" class="menu-link">
+                    <div data-i18n="Room List">Rooms List</div>
                   </a>
                 </li>
 
-                <li class="menu-item <?= ($segment2=='dashboard')?'active':'' ?>">
+                <li class="menu-item <?= ($segment2=='maintenance')?'active':'' ?>">
                   <a href="<?= base_url('dashboard') ?>" class="menu-link">
                     <div data-i18n="Add Room">Add Room</div>
-                  </a>
-                </li>
-
-                <li class="menu-item <?= ($segment2=='dashboard')?'active':'' ?>">
-                  <a href="<?= base_url('dashboard') ?>" class="menu-link">
-                    <div data-i18n="Category Room List">Category Room List</div>
                   </a>
                 </li>
               </ul>
