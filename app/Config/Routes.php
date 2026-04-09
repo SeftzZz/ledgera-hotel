@@ -112,6 +112,9 @@ $routes->group('chats', ['filter' => 'auth'], function($routes) {
 // PREVENTIVE & MAINTENANCE
 $routes->group('maintenance', ['filter' => 'auth'], function($routes) {
     $routes->get('/', 'MaintenanceController::index');
+    $routes->post('datatable', 'MaintenanceController::datatable');
+    $routes->post('store', 'MaintenanceController::store');
+    
     $routes->post('datatableroom', 'MaintenanceController::datatableroom');
     $routes->get('rooms', 'MaintenanceController::rooms');
 });

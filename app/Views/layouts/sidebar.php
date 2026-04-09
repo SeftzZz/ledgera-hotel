@@ -180,36 +180,42 @@
             <div data-i18n="Maintenance">Maintenance</div>
           </a>
 
-          <ul class="menu-sub">
-            <!-- ROOMS -->
-            <li class="menu-item <?= ($segment1=='dashboard')?'open active':'' ?>">
-              <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <div data-i18n="Rooms">Rooms</div>
-              </a>
+            <ul class="menu-sub">
+                <!-- ROOMS -->
+                <li class="menu-item <?= ($segment1=='maintenance')?'open active':'' ?>">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <div data-i18n="Rooms">Rooms</div>
+                    </a>
 
-              <ul class="menu-sub">
-                <li class="menu-item <?= ($segment1=='maintenance' && $segment2=='')?'active':'' ?>">
-                  <a href="<?= base_url('maintenance/rooms') ?>" class="menu-link">
-                    <div data-i18n="Room List">Rooms List</div>
-                  </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item <?= ($segment1=='maintenance' && $segment2=='')?'active':'' ?>">
+                            <a href="<?= base_url('maintenance/rooms') ?>" class="menu-link">
+                                <div data-i18n="Room List">Rooms List</div>
+                            </a>
+                        </li>
+                        <li class="menu-item <?= ($segment2=='maintenance')?'active':'' ?>">
+                            <a href="<?= base_url('dashboard') ?>" class="menu-link">
+                                <div data-i18n="Add Room">Add Room</div>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
-                <li class="menu-item <?= ($segment2=='maintenance')?'active':'' ?>">
-                  <a href="<?= base_url('dashboard') ?>" class="menu-link">
-                    <div data-i18n="Add Room">Add Room</div>
-                  </a>
+                <!-- MAINTENANCE -->
+                <li class="menu-item <?= ($segment1=='maintenance')?'open active':'' ?>">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <div data-i18n="Maintenance">Maintenance</div>
+                    </a>
+
+                    <ul class="menu-sub">
+                        <li class="menu-item <?= ($segment1=='maintenance' && $segment2=='')?'active':'' ?>">
+                            <a href="<?= base_url('maintenance') ?>" class="menu-link">
+                                <div data-i18n="Maintenance List">Maintenance List</div>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
-              </ul>
-            </li>
-
-            <li class="menu-item <?= ($uri=='dashboard')?'active':'' ?>">
-                <a href="<?= base_url('dashboard') ?>" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-list"></i>
-                    <div>Add Maintenance</div>
-                </a>
-            </li>
-
-          </ul>
+            </ul>
         </li>
         <!-- preventive menu end -->
 
