@@ -4,7 +4,7 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="card">
         <div class="card-header">
-            <h4>Income Statement - <?= $year ?></h4>
+            <h4>Profit & Loss - <?= $year ?></h4>
         </div>
 
         <div class="card-body">

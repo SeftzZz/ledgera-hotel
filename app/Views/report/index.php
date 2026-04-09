@@ -39,7 +39,7 @@
     <!-- EXPORT JOURNAL FORM -->
     <!-- ===================== -->
     <div class="card p-4">
-        <h5 class="mb-3">Export Journal</h5>
+        <h5 class="mb-3">Cash Flow Report</h5>
 
         <form method="GET" action="<?= base_url('export/journals') ?>">
             <div class="row">

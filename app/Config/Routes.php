@@ -455,6 +455,8 @@ $routes->group('api', ['filter' => 'jwt'], function ($routes) {
     $routes->get('pengajuan', 'Api\InventoryController::index');
     $routes->get('pengajuan/(:num)', 'Api\InventoryController::show/$1');
     $routes->get('pengajuan/stats', 'Api\InventoryController::stats');
+    $routes->get('inventory/list', 'Api\InventoryController::inventoryList');
+    $routes->get('inventory/stats', 'Api\InventoryController::inventoryStats');
 
     // PURCHASING
     $routes->get('purchasing', 'Api\PurchasingController::index');
