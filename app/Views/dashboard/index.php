@@ -17,7 +17,7 @@
             <div class="row mt-4">
                 <div class="col-6">
                     <h6 class="text-white">Revenue</h6>
-                    <h4 class="text-white"><?= number_format($revenue,2) ?></h4>
+                    <h4 class="text-white" id="revenue-value"><?= number_format($revenue,2) ?></h4>
                     <!-- COLLECTION RATE -->
                     <div class="mt-3">
                         <small>Target Rp</small>
@@ -31,7 +31,7 @@
                 </div>
                 <div class="col-6">
                     <h6 class="text-white">Expense</h6>
-                    <h4 class="text-white"><?= number_format($expense,2) ?></h4>
+                    <h4 class="text-white" id="expense-value"><?= number_format($expense,2) ?></h4>
                     <!-- COLLECTION RATE -->
                     <div class="mt-3">
                         <small>Target Rp</small>
@@ -59,21 +59,21 @@
             <div class="row mt-4">
                 <div class="col-4">
                     <h6 class="text-white">Total Order</h6>
-                    <h4 class="text-white">
+                    <h4 class="text-white" id="estimated-value">
                         Rp <?= number_format($estimated,0,',','.') ?>
                     </h4>
                 </div>
 
                 <div class="col-4">
                     <h6 class="text-white">Cash In</h6>
-                    <h4 class="text-white">
+                    <h4 class="text-white" id="cash-value">
                         Rp <?= number_format($actualCash,0,',','.') ?>
                     </h4>
                 </div>
 
                 <div class="col-4">
                     <h6 class="text-white">Outstanding</h6>
-                    <h4 class="text-white">
+                    <h4 class="text-white" id="outstanding-value">
                         Rp <?= number_format($outstanding,0,',','.') ?>
                     </h4>
                 </div>
@@ -93,6 +93,104 @@
         </div>
     </div>
 </div>
+
+<!-- ========================= -->
+<!-- MONTHLY FINANCE CHART -->
+<!-- ========================= -->
+<div class="col-lg-12 mb-4">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Monthly Finance</h5>
+            <small class="text-muted">Revenue vs Expense</small>
+        </div>
+        <div class="card-body">
+            <div id="shipmentStatisticsChart"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- PROFIT OVERVIEW (MONTH) -->
+<!-- ========================= -->
+<div class="col-lg-3 col-sm-6 mb-4">
+    <div class="card">
+        <div class="card-header">
+            <small class="text-muted">End Of Month Overview</small>
+            <h4 class="card-title mb-0" id="profit-month">
+                Rp <?= number_format($profit,0,',','.') ?>
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="progress" style="height: 8px">
+                <div class="progress-bar bg-success" id="profit-margin-bar"
+                     style="width: <?= $revenue > 0 ? round(($profit/$revenue)*100,2) : 0 ?>%">
+                </div>
+            </div>
+            <small class="text-muted mt-2 d-block" id="profit-margin-text">
+                Margin <?= $revenue > 0 ? round(($profit/$revenue)*100,2) : 0 ?>%
+            </small>
+        </div>
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- PROFIT END OF DAY -->
+<!-- ========================= -->
+<div class="col-lg-3 col-sm-6 mb-4">
+    <div class="card">
+        <div class="card-header">
+            <small class="text-muted">Today Profit</small>
+            <h4 class="card-title mb-0" id="profit-today">
+                Rp <?= number_format($todayProfit,0,',','.') ?>
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="progress" style="height: 8px">
+                <div class="progress-bar bg-info"
+                     style="width: <?= $todayRevenue > 0 ? round(($todayProfit/$todayRevenue)*100,2) : 0 ?>%">
+                </div>
+            </div>
+            <small class="text-muted mt-2 d-block">
+                Margin <?= $todayRevenue > 0 ? round(($todayProfit/$todayRevenue)*100,2) : 0 ?>%
+            </small>
+        </div>
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- PENDING APPROVAL -->
+<!-- ========================= -->
+<div class="col-lg-3 col-sm-6 mb-4">
+    <div class="card">
+        <div class="card-body">
+            <div class="card-icon">
+                <span class="badge bg-label-warning rounded-pill p-2">
+                    <i class="ti ti-clock ti-sm"></i>
+                </span>
+            </div>
+            <h4 class="mt-2" id="pending-count"><?= $pending ?></h4>
+            <small>Pending Approvals</small>
+        </div>
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- POSTED APPROVAL -->
+<!-- ========================= -->
+<div class="col-lg-3 col-sm-6 mb-4">
+    <div class="card">
+        <div class="card-body">
+            <div class="card-icon">
+                <span class="badge bg-label-success rounded-pill p-2">
+                    <i class="ti ti-check ti-sm"></i>
+                </span>
+            </div>
+            <h4 class="mt-2" id="posted-count"><?= $posted ?></h4>
+            <small>Posted Journals</small>
+        </div>
+    </div>
+</div>
+
 <!-- ========================= -->
 <!-- DEPARTMENT BUDGET -->
 <!-- ========================= -->
@@ -219,70 +317,6 @@
     </div>
 </div>
 <?php endforeach; ?>
-<!-- ========================= -->
-<!-- PROFIT OVERVIEW (MONTH) -->
-<!-- ========================= -->
-<div class="col-lg-3 col-sm-6 mb-4">
-    <div class="card">
-        <div class="card-header">
-            <small class="text-muted">End Of Month Overview</small>
-            <h4 class="card-title mb-0">
-                Rp <?= number_format($profit,0,',','.') ?>
-            </h4>
-        </div>
-        <div class="card-body">
-            <div class="progress" style="height: 8px">
-                <div class="progress-bar bg-success"
-                     style="width: <?= $revenue > 0 ? round(($profit/$revenue)*100,2) : 0 ?>%">
-                </div>
-            </div>
-            <small class="text-muted mt-2 d-block">
-                Margin <?= $revenue > 0 ? round(($profit/$revenue)*100,2) : 0 ?>%
-            </small>
-        </div>
-    </div>
-</div>
-
-<!-- ========================= -->
-<!-- PROFIT END OF DAY -->
-<!-- ========================= -->
-<div class="col-lg-6 col-sm-6 mb-4">
-    <div class="card">
-        <div class="card-header">
-            <small class="text-muted">Today Profit</small>
-            <h4 class="card-title mb-0">
-                Rp <?= number_format($todayProfit,0,',','.') ?>
-            </h4>
-        </div>
-        <div class="card-body">
-            <div class="progress" style="height: 8px">
-                <div class="progress-bar bg-info"
-                     style="width: <?= $todayRevenue > 0 ? round(($todayProfit/$todayRevenue)*100,2) : 0 ?>%">
-                </div>
-            </div>
-            <small class="text-muted mt-2 d-block">
-                Margin <?= $todayRevenue > 0 ? round(($todayProfit/$todayRevenue)*100,2) : 0 ?>%
-            </small>
-        </div>
-    </div>
-</div>
-
-<!-- ========================= -->
-<!-- PENDING APPROVAL -->
-<!-- ========================= -->
-<div class="col-lg-3 col-sm-6 mb-4">
-    <div class="card">
-        <div class="card-body">
-            <div class="card-icon">
-                <span class="badge bg-label-warning rounded-pill p-2">
-                    <i class="ti ti-clock ti-sm"></i>
-                </span>
-            </div>
-            <h4 class="mt-2"><?= $pending ?></h4>
-            <small>Pending Approvals</small>
-        </div>
-    </div>
-</div>
 
 <!--/ Delivery Performance -->
 <!-- Reasons for delivery exceptions -->
@@ -302,50 +336,6 @@
 <?php endforeach; ?>
 <!--/ Reasons for delivery exceptions -->
 
-<!-- ========================= -->
-<!-- MONTHLY FINANCE CHART -->
-<!-- ========================= -->
-<div class="col-lg-8 mb-4">
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">Monthly Finance</h5>
-            <small class="text-muted">Revenue vs Expense</small>
-        </div>
-        <div class="card-body">
-            <canvas id="financeChart" height="120"></canvas>
-        </div>
-    </div>
-</div>
-
-<!-- ========================= -->
-<!-- QUICK SUMMARY -->
-<!-- ========================= -->
-<div class="col-lg-4 mb-4">
-    <div class="card h-100">
-        <div class="card-header">
-            <h5 class="mb-0">Quick Summary</h5>
-        </div>
-        <div class="card-body">
-            <div class="mb-3">
-                <strong>Total Revenue</strong>
-                <div><?= number_format($revenue,2) ?></div>
-            </div>
-
-            <div class="mb-3">
-                <strong>Total Expense</strong>
-                <div><?= number_format($expense,2) ?></div>
-            </div>
-
-            <div>
-                <strong>Net Profit</strong>
-                <div class="<?= $profit >= 0 ? 'text-success' : 'text-danger' ?>">
-                    <?= number_format($profit,2) ?>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 </div>
 </div>
 </div>
@@ -359,39 +349,206 @@
     branchRevenue: <?= json_encode($branchRevenue) ?>,
     branchExpense: <?= json_encode($branchExpense) ?>,
     branchTargets: <?= json_encode($branchTargets) ?>,
-    branchSW: <?= json_encode(array_values($branchSW)) ?>
+    branchSW: <?= json_encode(array_values($branchSW)) ?>,
+    revenue: <?= json_encode($revenue) ?>,
+    actualCash: <?= json_encode($actualCash) ?>,
+    outstanding: <?= json_encode($outstanding) ?>,
+    historyLabels: <?= json_encode($historyLabels) ?>,
+    historyRevenue: <?= json_encode($historyRevenue) ?>,
+    historyCash: <?= json_encode($historyCash) ?>,
+    historyOutstanding: <?= json_encode($historyOutstanding) ?>
   };
 </script>
 <script src="<?= base_url('assets/js/app-logistics-dashboard.js' ) ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const ctx = document.getElementById('financeChart');
+(function () {
 
-new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: ['Revenue (Accrual)', 'Cash In', 'Outstanding'],
-        datasets: [{
-            label: 'Amount',
-            data: [
-                <?= $revenue ?>,
-                <?= $actualCash ?>,
-                <?= $outstanding ?>
-            ],
-            backgroundColor: [
-                '#28c76f',
-                '#ea5455',
-                '#7367f0'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { display: false }
-        }
+  function initWS() {
+
+    const token = window.jwtToken;
+
+    if (!token) {
+      console.warn('⏳ WAITING TOKEN...');
+      return false;
     }
-});
-</script>
 
+    // console.log('🔥 INIT WS START');
+    // console.log('TOKEN:', token);
+
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsUrl = `${protocol}://${window.location.hostname}:4002?token=${token}`;
+
+    console.log('CONNECT TO:', wsUrl);
+
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log('✅ WS Connected');
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+
+        console.log('📡 WS EVENT:', msg);
+
+        handleRealtimeUpdate(msg);
+
+      } catch (err) {
+        console.error('WS parse error', err);
+      }
+    };
+
+    ws.onerror = (err) => {
+      console.error('❌ WS Error FULL:', err);
+    };
+
+    ws.onclose = () => {
+      console.warn('⚠️ WS Disconnected');
+    };
+
+    return true;
+  }
+
+  // retry sampai token ada
+  const interval = setInterval(() => {
+    if (initWS()) {
+      clearInterval(interval);
+    }
+  }, 500);
+
+})();
+</script>
+<script>
+function handleRealtimeUpdate(msg) {
+
+  switch (msg.type) {
+
+    case 'transaction_created':
+    case 'journal_posted':
+    case 'order_paid':
+      refreshDashboard();
+      break;
+
+    default:
+      console.log('Unhandled event:', msg.type);
+  }
+
+}
+</script>
+<script>
+async function refreshDashboard() {
+  try {
+
+    const res = await fetch('/dashboard/data', {
+      headers: {
+        Authorization: 'Bearer ' + localStorage.getItem('jwtToken')
+      }
+    });
+
+    const data = await res.json();
+
+    updateUI(data);
+
+  } catch (err) {
+    console.error('Refresh error:', err);
+  }
+}
+</script>
+<script>
+function updateUI(data) {
+
+  // ======================
+  // ACCOUNTING
+  // ======================
+  document.getElementById('revenue-value').innerText =
+    formatRupiah(data.revenue);
+
+  document.getElementById('expense-value').innerText =
+    formatRupiah(data.expense);
+
+  // ======================
+  // ESTIMATED
+  // ======================
+  document.getElementById('estimated-value').innerText =
+    formatRupiah(data.estimated);
+
+  document.getElementById('cash-value').innerText =
+    formatRupiah(data.actualCash);
+
+  document.getElementById('outstanding-value').innerText =
+    formatRupiah(data.outstanding);
+
+  // ======================
+  // PROFIT
+  // ======================
+  document.getElementById('profit-month').innerText =
+    formatRupiah(data.profit);
+  
+  const margin = data.revenue > 0
+  ? ((data.profit / data.revenue) * 100)
+  : 0;
+
+  document.getElementById('profit-margin-bar').style.width = margin + '%';
+  document.getElementById('profit-margin-text').innerText =
+    'Margin ' + margin.toFixed(2) + '%';
+
+  // ======================
+  // TODAY PROFIT
+  // ======================
+  document.getElementById('profit-today').innerText =
+    formatRupiah(data.todayProfit);
+
+  // ======================
+  // PENDING
+  // ======================
+  document.getElementById('pending-count').innerText =
+    data.pending;
+
+  // ======================
+  // POSTED
+  // ======================
+  document.getElementById('posted-count').innerText =
+    data.posted;
+
+  // ======================
+  // UPDATE CHART
+  // ======================
+  updateShipmentChart(data);
+
+}
+</script>
+<script>
+function updateShipmentChart(data) {
+
+  if (!window.shipmentChart) return;
+
+  window.shipmentChart.updateOptions({
+    xaxis: {
+      categories: data.historyLabels
+    }
+  });
+
+  window.shipmentChart.updateSeries([
+    {
+      name: 'Revenue',
+      data: data.historyRevenue
+    },
+    {
+      name: 'Cash In',
+      data: data.historyCash
+    },
+    {
+      name: 'Outstanding',
+      data: data.historyOutstanding
+    }
+  ]);
+}
+</script>
+<script>
+function formatRupiah(num) {
+  return 'Rp ' + Number(num).toLocaleString('id-ID');
+}
+</script>
 <?= $this->endSection() ?>

@@ -26,9 +26,172 @@
     line: {
       series1: config.colors.warning,
       series2: config.colors.primary,
-      series3: '#7367f029'
+      series3: config.colors.danger
     }
   };
+
+  // Shipment statistics Chart
+  // --------------------------------------------------------------------
+  const shipmentEl = document.querySelector('#shipmentStatisticsChart'),
+    shipmentConfig = {
+      series: [
+        {
+          name: 'Revenue',
+          type: 'column',
+          data: window.dashboardData.historyRevenue
+        },
+        {
+          name: 'Cash In',
+          type: 'line',
+          data: window.dashboardData.historyCash
+        },
+        {
+          name: 'Outstanding',
+          type: 'line',
+          data: window.dashboardData.historyOutstanding
+        }
+      ],
+      chart: {
+        height: 270,
+        type: 'line',
+        stacked: false,
+        parentHeightOffset: 0,
+        toolbar: {
+          show: false
+        },
+        zoom: {
+          enabled: false
+        }
+      },
+      markers: {
+        size: 4,
+        colors: [config.colors.white],
+        strokeColors: chartColors.line.series2,
+        hover: {
+          size: 6
+        },
+        borderRadius: 4
+      },
+      stroke: {
+        curve: 'smooth',
+        width: [0, 3, 3],
+        lineCap: 'round'
+      },
+      legend: {
+        show: true,
+        position: 'bottom',
+        markers: {
+          width: 8,
+          height: 8,
+          offsetX: -3
+        },
+        height: 40,
+        offsetY: 10,
+        itemMargin: {
+          horizontal: 10,
+          vertical: 0
+        },
+        fontSize: '15px',
+        fontFamily: 'Public Sans',
+        fontWeight: 400,
+        labels: {
+          colors: headingColor,
+          useSeriesColors: false
+        },
+        offsetY: 10
+      },
+      grid: {
+        strokeDashArray: 8
+      },
+      colors: [chartColors.line.series1, chartColors.line.series2, chartColors.line.series3],
+      fill: {
+        opacity: [1, 1, 1]
+      },
+      plotOptions: {
+        bar: {
+          columnWidth: '30%',
+          startingShape: 'rounded',
+          endingShape: 'rounded',
+          borderRadius: 4
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      xaxis: {
+        categories: window.dashboardData.historyLabels
+      },
+      yaxis: {
+        labels: {
+          formatter: function (val) {
+            return 'Rp ' + val.toLocaleString('id-ID');
+          }
+        }
+      },
+      responsive: [
+        {
+          breakpoint: 1400,
+          options: {
+            chart: {
+              height: 270
+            },
+            xaxis: {
+              labels: {
+                style: {
+                  fontSize: '10px'
+                }
+              }
+            },
+            legend: {
+              itemMargin: {
+                vertical: 0,
+                horizontal: 10
+              },
+              fontSize: '13px',
+              offsetY: 12
+            }
+          }
+        },
+        {
+          breakpoint: 1399,
+          options: {
+            chart: {
+              height: 415
+            },
+            plotOptions: {
+              bar: {
+                columnWidth: '50%'
+              }
+            }
+          }
+        },
+        {
+          breakpoint: 982,
+          options: {
+            plotOptions: {
+              bar: {
+                columnWidth: '30%'
+              }
+            }
+          }
+        },
+        {
+          breakpoint: 480,
+          options: {
+            chart: {
+              height: 250
+            },
+            legend: {
+              offsetY: 7
+            }
+          }
+        }
+      ]
+    };
+  if (typeof shipmentEl !== undefined && shipmentEl !== null) {
+    window.shipmentChart = new ApexCharts(shipmentEl, shipmentConfig);
+    window.shipmentChart.render();
+  }
 
   // Reasons for delivery exceptions Chart
   // --------------------------------------------------------------------

@@ -467,92 +467,94 @@ class JournalController extends BaseController
                     ->where('pengajuan_id', $pengajuanId)
                     ->get()
                     ->getResultArray();
+
+                $formPurchasing = $db->table('form_purchasing')
+                    ->where('pengajuan_id', $pengajuanId)
+                    ->orderBy('id', 'DESC')
+                    ->get()
+                    ->getRowArray();
+
+                $formPurchasingId = $formPurchasing['id'] ?? 0;
+
+                if (!$formPurchasingId) {
+                    return $this->response->setJSON([
+                        'status' => false,
+                        'message' => 'Form purchasing tidak ditemukan'
+                    ]);
+                }
+
+                if (!empty($pengajuanId)) {
+                    $db->table('form_pengajuan')
+                        ->where('id', $pengajuanId)
+                        ->update([
+                            'status' => 'Selesai',
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ]);
+                }
+
+                // ambil vendor_id
+                $vendorItemIds = array_column($pengajuanDetails, 'vendor_item_id');
+
+                $vendorItems = $db->table('vendor_items')
+                    ->whereIn('id', $vendorItemIds)
+                    ->get()
+                    ->getResultArray();
+
+                $vendorMap = [];
+                foreach ($vendorItems as $v) {
+                    $vendorMap[$v['id']] = $v;
+                }
+
+                if (empty($pengajuanDetails)) {
+                    return $this->response->setJSON([
+                        'status' => false,
+                        'message' => 'Detail pengajuan tidak ditemukan'
+                    ]);
+                }
+
+                foreach ($pengajuanDetails as $item) {
+
+                    if (!isset($vendorMap[$item['vendor_item_id']])) {
+                        continue; // atau throw error
+                    }
+
+                    $vendorId = $vendorMap[$item['vendor_item_id']]['vendor_id'] ?? 0;
+
+                    $existing = $db->table('inventori')
+                        ->where('vendor_item_id', $item['vendor_item_id'])
+                        ->where('form_purchasing_id', $formPurchasingId)
+                        ->where('sparepart', $item['sparepart'])
+                        ->where('is_delete', 0)
+                        ->get()
+                        ->getRowArray();
+
+                    if ($existing) {
+
+                        $db->table('inventori')
+                            ->where('id', $existing['id'])
+                            ->set('qty', 'qty + ' . (int)$item['qty'], false)
+                            ->update();
+
+                    } else {
+
+                        $db->table('inventori')->insert([
+                            'vendor_id'          => $vendorId,
+                            'vendor_item_id'     => $item['vendor_item_id'],
+                            'sparepart'          => $item['sparepart'],
+                            'kondisi'            => $item['kondisi'],
+                            'qty'                => (int)$item['qty'],
+                            'is_used'            => 0,
+                            'is_delete'          => 0,
+                            'form_purchasing_id' => $formPurchasingId,
+                            'created_at'         => date('Y-m-d H:i:s'),
+                            'updated_at'         => date('Y-m-d H:i:s')
+                        ]);
+                    }
+                }
             }
         }
 
-        $formPurchasing = $db->table('form_purchasing')
-            ->where('pengajuan_id', $pengajuanId)
-            ->orderBy('id', 'DESC')
-            ->get()
-            ->getRowArray();
-
-        $formPurchasingId = $formPurchasing['id'] ?? 0;
-
-        if (!$formPurchasingId) {
-            return $this->response->setJSON([
-                'status' => false,
-                'message' => 'Form purchasing tidak ditemukan'
-            ]);
-        }
-
-        if (!empty($pengajuanId)) {
-            $db->table('form_pengajuan')
-                ->where('id', $pengajuanId)
-                ->update([
-                    'status' => 'Selesai',
-                    'updated_at' => date('Y-m-d H:i:s')
-                ]);
-        }
-
-        // ambil vendor_id
-        $vendorItemIds = array_column($pengajuanDetails, 'vendor_item_id');
-
-        $vendorItems = $db->table('vendor_items')
-            ->whereIn('id', $vendorItemIds)
-            ->get()
-            ->getResultArray();
-
-        $vendorMap = [];
-        foreach ($vendorItems as $v) {
-            $vendorMap[$v['id']] = $v;
-        }
-
-        if (empty($pengajuanDetails)) {
-            return $this->response->setJSON([
-                'status' => false,
-                'message' => 'Detail pengajuan tidak ditemukan'
-            ]);
-        }
-
-        foreach ($pengajuanDetails as $item) {
-
-            if (!isset($vendorMap[$item['vendor_item_id']])) {
-                continue; // atau throw error
-            }
-
-            $vendorId = $vendorMap[$item['vendor_item_id']]['vendor_id'] ?? 0;
-
-            $existing = $db->table('inventori')
-                ->where('vendor_item_id', $item['vendor_item_id'])
-                ->where('form_purchasing_id', $formPurchasingId)
-                ->where('sparepart', $item['sparepart'])
-                ->where('is_delete', 0)
-                ->get()
-                ->getRowArray();
-
-            if ($existing) {
-
-                $db->table('inventori')
-                    ->where('id', $existing['id'])
-                    ->set('qty', 'qty + ' . (int)$item['qty'], false)
-                    ->update();
-
-            } else {
-
-                $db->table('inventori')->insert([
-                    'vendor_id'          => $vendorId,
-                    'vendor_item_id'     => $item['vendor_item_id'],
-                    'sparepart'          => $item['sparepart'],
-                    'kondisi'            => $item['kondisi'],
-                    'qty'                => (int)$item['qty'],
-                    'is_used'            => 0,
-                    'is_delete'          => 0,
-                    'form_purchasing_id' => $formPurchasingId,
-                    'created_at'         => date('Y-m-d H:i:s'),
-                    'updated_at'         => date('Y-m-d H:i:s')
-                ]);
-            }
-        }
+        $this->emitWS('journal_posted', $journal['branch_id']);
 
         return $this->response->setJSON([
             'status' => true,
@@ -629,5 +631,25 @@ class JournalController extends BaseController
         }
 
         return null;
+    }
+
+    private function emitWS($type, $branchId)
+    {
+        $payload = [
+            'type' => $type,
+            'branch_id' => $branchId
+        ];
+
+        $ch = curl_init('http://localhost:4003/emit');
+
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_POSTFIELDS => json_encode($payload),
+        ]);
+
+        curl_exec($ch);
+        curl_close($ch);
     }
 }

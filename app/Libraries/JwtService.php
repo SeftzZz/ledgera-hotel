@@ -22,9 +22,11 @@ class JwtService
             'iat'  => time(),
             'exp'  => time() + $this->config->accessTokenTTL,
             'data' => [
-                'id'    => $user->id,
-                'email' => $user->email,
-                'role'  => $user->role
+                'id'        => $user->id,
+                'email'     => $user->email,
+                'role'      => $user->role,
+                'branch_id' => $user->branch_id,
+                'company_id'=> $user->company_id
             ]
         ];
 

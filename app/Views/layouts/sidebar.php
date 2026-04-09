@@ -264,7 +264,7 @@
           <span class="menu-header-text" data-i18n="Purchasing">Purchasing</span>
         </li>
         
-        <li class="menu-item <?= ($uri=='purchasing')?'active':'' ?>">
+        <li class="menu-item <?= ($segment1=='purchasing' && $segment2=='')?'active':'' ?>">
             <a href="<?= base_url('purchasing') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-list"></i>
                 <div>Purchasing</div>
@@ -276,21 +276,21 @@
             <span class="menu-header-text">Accounting</span>
         </li>
 
-        <li class="menu-item <?= ($uri=='opening-balance')?'active':'' ?>">
+        <li class="menu-item <?= ($segment1=='opening-balance' && $segment2=='')?'active':'' ?>">
             <a href="<?= base_url('opening-balance') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-scale"></i>
                 <div>Opening Balance</div>
             </a>
         </li>
 
-        <li class="menu-item <?= ($uri=='transaction')?'active':'' ?>">
+        <li class="menu-item <?= ($segment1=='transaction' && $segment2=='')?'active':'' ?>">
             <a href="<?= base_url('transaction') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-credit-card"></i>
                 <div>Transactions</div>
             </a>
         </li>
 
-        <li class="menu-item <?= ($uri=='journal')?'active':'' ?>">
+        <li class="menu-item <?= ($segment1=='journal' && $segment2=='')?'active':'' ?>">
             <a href="<?= base_url('journal') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-file-text"></i>
                 <div>Journal</div>
@@ -298,42 +298,42 @@
         </li>
 
         <!-- NEW MENU -->
-        <li class="menu-item <?= ($uri=='trial-balance')?'active':'' ?>">
+        <li class="menu-item <?= ($segment1=='trial-balance' && $segment2=='')?'active':'' ?>">
             <a href="<?= base_url('trial-balance') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-report-analytics"></i>
                 <div>Trial Balance</div>
             </a>
         </li>
 
-        <li class="menu-item <?= ($uri=='balance-sheet')?'active':'' ?>">
+        <li class="menu-item <?= ($segment1=='balance-sheet' && $segment2=='')?'active':'' ?>">
             <a href="<?= base_url('balance-sheet') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-report-money"></i>
                 <div>Balance Sheet</div>
             </a>
         </li>
 
-        <li class="menu-item <?= ($uri=='income-statement')?'active':'' ?>">
+        <li class="menu-item <?= ($segment1=='income-statement' && $segment2=='')?'active':'' ?>">
             <a href="<?= base_url('income-statement') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-plus-minus"></i>
                 <div>P&L</div>
             </a>
         </li>
 
-        <li class="menu-item <?= ($uri=='equity')?'active':'' ?>">
+        <li class="menu-item <?= ($segment1=='equity' && $segment2=='')?'active':'' ?>">
             <a href="<?= base_url('equity') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-wallet"></i>
                 <div>Equity</div>
             </a>
         </li>
 
-        <li class="menu-item <?= ($uri=='approval')?'active':'' ?>">
+        <li class="menu-item <?= ($segment1=='approval' && $segment2=='')?'active':'' ?>">
             <a href="<?= base_url('approval') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-checks"></i>
                 <div>Approval</div>
             </a>
         </li>
 
-        <li class="menu-item <?= ($uri=='closing')?'active':'' ?>">
+        <li class="menu-item <?= ($segment1=='closing' && $segment2=='')?'active':'' ?>">
             <a href="<?= base_url('closing') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-calendar-check"></i>
                 <div>Closing Period</div>
@@ -344,7 +344,7 @@
             <span class="menu-header-text">Reports</span>
         </li>
 
-        <li class="menu-item <?= ($uri=='report')?'active':'' ?>">
+        <li class="menu-item <?= ($segment1=='report' && $segment2=='')?'active':'' ?>">
             <a href="<?= base_url('report') ?>" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-chart-bar"></i>
                 <div>Financial Reports</div>
