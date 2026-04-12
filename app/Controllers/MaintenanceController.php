@@ -317,6 +317,34 @@ class MaintenanceController extends BaseController
             ]);
         }
 
+        // ================= VALIDASI ITEMS DULU =================
+        $items = $this->request->getPost('items');
+
+        if ($items) {
+            foreach ($items as $item) {
+                $inv = $db->table('inventori')
+                    ->where('id', $item['id'])
+                    ->get()
+                    ->getRowArray();
+
+                if (!$inv) {
+                    return $this->response->setJSON([
+                        'status' => false,
+                        'message' => 'Item tidak ditemukan'
+                    ]);
+                }
+
+                // VALIDASI STOCK
+                if ((int)$item['qty'] > (int)$inv['qty']) {
+                    return $this->response->setJSON([
+                        'status' => false,
+                        'message' => 'Stock tidak cukup untuk ' . $inv['sparepart']
+                    ]);
+                }
+            }
+        }
+
+        // ================= UPDATE MAIN =================
         $data = [
             'description'   => $description,
             'status'        => $status,
@@ -327,7 +355,7 @@ class MaintenanceController extends BaseController
 
         $this->maintenanceModel->update($id, $data);
 
-        $items = $this->request->getPost('items');
+        // ================= HANDLE ITEMS =================
         if ($items) {
             // hapus lama
             $db->table('maintenance_items')
@@ -335,7 +363,6 @@ class MaintenanceController extends BaseController
                 ->delete();
 
             foreach ($items as $item) {
-                // ambil nama sparepart dari inventori
                 $inv = $db->table('inventori')
                     ->where('id', $item['id'])
                     ->get()
@@ -343,33 +370,39 @@ class MaintenanceController extends BaseController
 
                 if (!$inv) continue;
 
-                // insert ke maintenance_items
+                // insert item
                 $db->table('maintenance_items')->insert([
                     'maintenance_id' => $id,
-                    'item_name' => $inv['sparepart'],
-                    'qty' => (int)$item['qty']
+                    'item_name'      => $inv['sparepart'],
+                    'qty'            => (int)$item['qty']
                 ]);
 
-                // kurangi stok inventori
+                // kurangi stok
                 $db->table('inventori')
                     ->where('id', $item['id'])
-                    ->set('qty', 'qty - '.(int)$item['qty'], false)
+                    ->set('qty', 'qty - ' . (int)$item['qty'], false)
                     ->update();
             }
         }
 
         // ================= INSERT LOG =================
-        $logData = [
+        $db->table('maintenance_logs')->insert([
             'maintenance_id' => $id,
             'status'         => $status,
             'notes'          => $description,
             'created_at'     => date('Y-m-d H:i:s'),
             'created_by'     => session()->get('user_id')
-        ];
-
-        $db->table('maintenance_logs')->insert($logData);
+        ]);
 
         $db->transComplete();
+
+        // ================= RESULT =================
+        if ($db->transStatus() === false) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Update gagal'
+            ]);
+        }
 
         return $this->response->setJSON([
             'status'  => true,
