@@ -79,6 +79,92 @@
 									    </div>
 									</div>
 								</div>
+
+								<!-- edit modal form -->
+				                <div class="modal fade" id="modalEditMaintenance" tabindex="-1" aria-hidden="true">
+									<div class="modal-dialog modal-lg modal-dialog-centered">
+									    <div class="modal-content">
+										    <form id="formEditMaintenance" enctype="multipart/form-data">
+										        <div class="modal-header">
+										          	<h5 class="modal-title">Edit Maintenance</h5>
+										          	<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+										        </div>
+
+										        <div class="modal-body">
+										          	<input type="hidden" name="id" id="edit_id">
+										          	<div class="row">
+								                        <div class="col-md-4 mb-3">
+								                            <label class="form-label" for="edit_room">Room No.</label>
+								                        	<select
+															    name="room"
+															    id="edit_room"
+															    class="form-select select2"
+															    data-placeholder="Select Rooms"
+															    style="width:100%" disabled>
+															    <option value=""></option>
+															    <?php foreach ($rooms as $room): ?>
+															        <option value="<?= $room['id'] ?>">
+															            <?= esc($room['room_no']) ?>
+															        </option>
+															    <?php endforeach; ?>
+															</select>
+								                        </div>
+								                        <div class="col-md-4 mb-3">
+								                            <label class="form-label">Location</label>
+								                        	<input type="text" class="form-control" name="location" id="edit_location" disabled>
+								                        </div>
+								                        <div class="col-md-4 mb-3">
+								                            <label class="form-label">Issue</label>
+										            		<input type="text" class="form-control" name="issue" id="edit_issue" disabled>
+								                        </div>
+								                    </div>
+								                    <div class="row">
+								                        <div class="col-md-4 mb-3">
+								                            <label class="form-label">Started</label>
+								                        	<input type="date" name="start" id="edit_start" class="form-control" value="<?= date('Y-m-d') ?>" id="html5-date-input" disabled />
+								                        </div>
+								                        <div class="col-md-4 mb-3">
+								                            <label class="form-label">Date</label>
+								                        	<input type="date" name="complete" class="form-control" value="<?= date('Y-m-d') ?>" id="html5-date-input" required />
+								                        </div>
+								                        <div class="col-md-4 mb-3">
+								                            <label class="form-label">Status</label>
+								                            <select name="status" id="edit_status" class="form-select required">
+							                                    <option value="open">Open</option>
+							                                    <option value="in_progress">In Progress</option>
+							                                    <option value="done">Done</option>
+							                                    <option value="cancelled">Cancel</option>
+							                                </select>
+								                        </div>
+								                    </div>
+								                    <div class="row">
+								                        <div class="col-md-12 mb-6">
+								                            <label class="form-label">Note</label>
+										            		<textarea class="form-control" name="note" id="edit_note" rows="3"></textarea>
+								                        </div>
+								                    </div>
+								                    <div class="row">
+								                        <div class="col-md-12 mb-6">
+								                            <hr>
+															<h6 class="mb-3">Sparepart Replacement</h6>
+
+															<div id="itemsWrapper"></div>
+
+															<button type="button" class="btn btn-sm btn-primary mb-3" id="btnAddItem">
+															    <i class="ti ti-plus"></i> Add Item
+															</button>
+								                        </div>
+								                    </div>
+										        </div>
+
+										        <div class="modal-footer">
+										        	<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+										          	<button type="submit" class="btn btn-primary">Save</button>
+										        </div>
+										    </form>
+									    </div>
+									</div>
+								</div>
 						    </div>
 						</div>
 
@@ -96,6 +182,8 @@
 		                <script src="<?= base_url('assets/vendor/libs/select2/select2.js') ?>"></script>
 
 						<script>
+							let inventoriOptions = '';
+							let itemIndex = 0;
 							'use strict';
 							$(function () {
 							    let dt_tableMaintenance = $('.dtMaintenance'), dt_maintenance;
@@ -278,18 +366,46 @@
 							    });
 							});
 
-
 							// ===============================
 							// EDIT
 							// ===============================
+							$('#modalEditMaintenance').on('shown.bs.modal', function () {
+							    $('#edit_room').select2({
+							        dropdownParent: $('#modalEditMaintenance'),
+							        width: '100%',
+							        placeholder: "Select Rooms",
+							        allowClear: true
+							    });
+							});
+
+							$('#modalEditMaintenance').on('hidden.bs.modal', function () {
+							    // reset form
+							    $('#formEditMaintenance')[0].reset();
+
+							    // reset select2
+							    $('#edit_room').val(null).trigger('change');
+
+							    // reset item
+							    $('#itemsWrapper').html('');
+    							itemIndex = 0;
+							});
+
 							$(document).on('click', '.btn-edit', function () {
 							    const id = $(this).data('id');
+
+							    // ambil inventori
+							    $.get("<?= base_url('maintenance/get-inventori') ?>", function(res){
+
+							        inventoriOptions = res.data.map(i => 
+							            `<option value="${i.id}">${i.sparepart} (Stock: ${i.qty})</option>`
+							        ).join('');
+
+							    });
 
 							    $.post("<?= base_url('maintenance/get') ?>", {
 							        id: id,
 							        '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
 							    }, function (res) {
-
 							        if (!res.status) {
 							            Swal.fire('Error', res.message, 'error');
 							            return;
@@ -299,15 +415,52 @@
 
 							        $('#edit_id').val(d.id);
 							        $('#edit_room').val(d.room_id);
+							        $('#edit_location').val(d.location);
 							        $('#edit_issue').val(d.issue);
-							        $('#edit_priority').val(d.priority);
+							        $('#edit_start').val(d.started_at);
+							        $('#edit_note').val(d.description);
 							        $('#edit_status').val(d.status);
 
 							        $('#modalEditMaintenance').modal('show');
-
 							    }, 'json');
 							});
 
+							// ADD ITEM
+							$('#btnAddItem').on('click', function () {
+							    $('#itemsWrapper').append(itemRow(itemIndex++, inventoriOptions));
+
+							    $('.select2-item').select2({
+							        dropdownParent: $('#modalEditMaintenance'),
+							        width: '100%'
+							    });
+							});
+
+							// REMOVE ITEM
+							$(document).on('click', '.btn-remove-item', function () {
+							    $(this).closest('.item-row').remove();
+							});
+
+							// SELECT INVENTORI
+							function itemRow(index, inventoriOptions) {
+							    return `
+							        <div class="row mb-2 item-row">
+							            <div class="col-md-7">
+							                <select name="items[${index}][id]" class="form-select select2-item" required>
+							                    <option value="">Select Sparepart</option>
+							                    ${inventoriOptions}
+							                </select>
+							            </div>
+							            <div class="col-md-3">
+							                <input type="number" name="items[${index}][qty]" class="form-control" placeholder="Qty" min="1" required>
+							            </div>
+							            <div class="col-md-2">
+							                <button type="button" class="btn btn-danger btn-remove-item">
+							                    <i class="ti ti-trash"></i>
+							                </button>
+							            </div>
+							        </div>
+							    `;
+							}
 
 							// ===============================
 							// UPDATE
@@ -345,7 +498,6 @@
 							        }
 							    });
 							});
-
 
 							// ===============================
 							// DELETE

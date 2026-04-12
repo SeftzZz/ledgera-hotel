@@ -224,7 +224,7 @@ class MaintenanceController extends BaseController
         $logData = [
             'maintenance_id' => $maintenanceId,
             'status'         => 'open',
-            'notes'          => $this->request->getPost('note'),
+            'notes'          => $this->request->getPost('issue'),
             'created_at'     => date('Y-m-d H:i:s'),
             'created_by'     => session()->get('user_id')
         ];
@@ -244,6 +244,187 @@ class MaintenanceController extends BaseController
         return $this->response->setJSON([
             'status'  => true,
             'message' => 'Maintenance added successfully'
+        ]);
+    }
+
+    // ===============================
+    // GET MAINTENANCE BY ID
+    // ===============================
+    public function getById()
+    {
+        $id = $this->request->getPost('id');
+        $maintenance = $this->maintenanceModel
+            ->where('deleted_at', null)
+            ->find($id);
+
+        if (!$maintenance) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Data not found'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status' => true,
+            'data' => $maintenance
+        ]);
+    }
+
+    // ===============================
+    // GET INVENTORI
+    // ===============================
+    public function getInventori()
+    {
+        $db = \Config\Database::connect();
+
+        $data = $db->table('inventori')
+            ->select('id, sparepart, qty')
+            ->where('is_delete', 0)
+            ->where('qty >', 0)
+            ->orderBy('sparepart', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        return $this->response->setJSON([
+            'status' => true,
+            'data'   => $data
+        ]);
+    }
+
+    // ===============================
+    // UPDATE
+    // ===============================
+    public function update()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(404);
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $id          = $this->request->getPost('id');
+        $complete    = $this->request->getPost('complete');
+        $status      = $this->request->getPost('status');
+        $description = $this->request->getPost('note');
+
+        $maintenance = $this->maintenanceModel->find($id);
+
+        if (!$maintenance) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Data not found'
+            ]);
+        }
+
+        $data = [
+            'description'   => $description,
+            'status'        => $status,
+            'completed_at'  => $complete,
+            'updated_at'    => date('Y-m-d H:i:s'),
+            'updated_by'    => session()->get('user_id')
+        ];
+
+        $this->maintenanceModel->update($id, $data);
+
+        $items = $this->request->getPost('items');
+        if ($items) {
+            // hapus lama
+            $db->table('maintenance_items')
+                ->where('maintenance_id', $id)
+                ->delete();
+
+            foreach ($items as $item) {
+                // ambil nama sparepart dari inventori
+                $inv = $db->table('inventori')
+                    ->where('id', $item['id'])
+                    ->get()
+                    ->getRowArray();
+
+                if (!$inv) continue;
+
+                // insert ke maintenance_items
+                $db->table('maintenance_items')->insert([
+                    'maintenance_id' => $id,
+                    'item_name' => $inv['sparepart'],
+                    'qty' => (int)$item['qty']
+                ]);
+
+                // kurangi stok inventori
+                $db->table('inventori')
+                    ->where('id', $item['id'])
+                    ->set('qty', 'qty - '.(int)$item['qty'], false)
+                    ->update();
+            }
+        }
+
+        // ================= INSERT LOG =================
+        $logData = [
+            'maintenance_id' => $id,
+            'status'         => $status,
+            'notes'          => $description,
+            'created_at'     => date('Y-m-d H:i:s'),
+            'created_by'     => session()->get('user_id')
+        ];
+
+        $db->table('maintenance_logs')->insert($logData);
+
+        $db->transComplete();
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'Maintenance successfully updated'
+        ]);
+    }
+
+    // ===============================
+    // DELETE (SOFT DELETE)
+    // ===============================
+    public function delete()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(404);
+        }
+
+        $id = $this->request->getPost('id');
+
+        if (!$id) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'ID not valid'
+            ]);
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        // HARD DELETE LOGS
+        $db->table('maintenance_logs')
+            ->where('maintenance_id', $id)
+            ->delete();
+
+        
+        // SOFT DELETE MAIN DATA
+        $data = [
+            'deleted_at' => date('Y-m-d H:i:s'),
+            'deleted_by' => session()->get('user_id')
+        ];
+
+        $this->maintenanceModel->update($id, $data);
+
+        $db->transComplete();
+
+        // RESULT
+        if ($db->transStatus() === false) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Failed to delete data'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'Data deleted successfully'
         ]);
     }
 
