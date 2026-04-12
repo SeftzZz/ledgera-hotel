@@ -32,6 +32,7 @@ $routes->get('logout', 'Auth\Login::logout');
 
 // DASHBOARD (WEB)
 $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
+$routes->get('dashboard/data', 'DashboardController::data', ['filter' => 'auth']);
 
 // =========================
 // MASTER DATA

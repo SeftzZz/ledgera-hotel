@@ -487,6 +487,8 @@ class OrderService
         //     ]);
         // }
 
+        $this->emitWS('order_paid', $cart['branch_id']);
+
         $db->transComplete();
 
         if ($db->transStatus() === false) {
@@ -500,4 +502,23 @@ class OrderService
 
     }
 
+    private function emitWS($type, $branchId)
+    {
+        $payload = [
+            'type' => $type,
+            'branch_id' => $branchId
+        ];
+
+        $ch = curl_init('http://localhost:4003/emit');
+
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_POSTFIELDS => json_encode($payload),
+        ]);
+
+        curl_exec($ch);
+        curl_close($ch);
+    }
 }
