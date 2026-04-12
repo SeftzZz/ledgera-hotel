@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 12, 2026 at 06:58 PM
+-- Generation Time: Apr 12, 2026 at 07:12 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -489,8 +489,7 @@ INSERT INTO `chat_messages` (`id`, `chat_id`, `sender_type`, `message`, `created
 (5, 1, 'admin', 'Oke', '2026-03-15 15:37:32'),
 (6, 2, 'admin', 'Halo', '2026-03-15 16:21:27'),
 (7, 3, 'admin', 'Halo', '2026-03-15 16:22:32'),
-(8, 3, 'admin', 'Tes pesan', '2026-03-15 16:39:09'),
-(9, 4, 'admin', 'Hi', '2026-03-27 17:53:11');
+(8, 3, 'admin', 'Tes pesan', '2026-03-15 16:39:09');
 
 -- --------------------------------------------------------
 
@@ -1026,19 +1025,17 @@ CREATE TABLE `maintenance_items` (
   `id` int(11) NOT NULL,
   `maintenance_id` int(11) DEFAULT NULL,
   `item_name` varchar(100) DEFAULT NULL,
-  `qty` int(11) DEFAULT NULL,
-  `price` decimal(12,2) DEFAULT NULL,
-  `total` decimal(12,2) DEFAULT NULL
+  `qty` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `maintenance_items`
 --
 
-INSERT INTO `maintenance_items` (`id`, `maintenance_id`, `item_name`, `qty`, `price`, `total`) VALUES
-(1, 2, 'Lampu LED 20W', 2, 75000.00, 150000.00),
-(2, 1, 'Freon AC', 1, 200000.00, 200000.00),
-(3, 1, 'Jasa servis AC', 1, 150000.00, 150000.00);
+INSERT INTO `maintenance_items` (`id`, `maintenance_id`, `item_name`, `qty`) VALUES
+(1, 2, 'Lampu LED 20W', 2),
+(2, 1, 'Freon AC', 1),
+(3, 1, 'Jasa servis AC', 1);
 
 -- --------------------------------------------------------
 
@@ -1693,9 +1690,7 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `company_id`, `branch_id`, `category_id`, `role`, `name`, `email`, `phone`, `password`, `photo`, `is_active`, `last_login_at`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) VALUES
 (1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-04-12 20:16:23', '2026-01-18 12:25:53', 1, '2026-04-12 20:16:23', NULL, NULL, NULL),
 (2, 1, 3, 0, 'admin', 'Arya Seftian', 'yerblues6@gmail.com', '895330907220', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '2.png', 'active', '2026-04-06 14:49:54', '2026-01-18 18:59:55', 1, '2026-04-06 14:49:54', NULL, NULL, NULL),
-(3, 1, 3, 1, 'admin', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '3.png', 'active', '2026-04-06 13:51:18', '2026-01-19 10:53:08', 1, '2026-04-06 13:51:18', NULL, NULL, NULL),
-(17, 1, 3, 5, '', 'Yend Hendriyana', 'yend.hendriyana@gmail.com', '-', '$2y$10$vNXrV5jLsJ3MSMAv2GKWj.A.3D4kYEHnquRemDW/okF.AjBm6UMcG', NULL, 'active', NULL, '2026-04-08 15:28:02', NULL, '2026-04-08 15:28:02', NULL, NULL, NULL),
-(18, 0, 4, 8, '', 'User IT', 'it@heywork.id', '081234567890', '$2y$10$fL85xpOpYQBc8P0iNoJfH.BxzXS7p2vCb4ZMQSbZUQttpsupuEKzy', NULL, 'active', NULL, '2026-04-09 01:39:28', NULL, '2026-04-09 01:39:28', NULL, NULL, NULL);
+(3, 1, 3, 1, 'admin', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '3.png', 'active', '2026-04-06 13:51:18', '2026-01-19 10:53:08', 1, '2026-04-06 13:51:18', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
