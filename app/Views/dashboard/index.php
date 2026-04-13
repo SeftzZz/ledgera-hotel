@@ -21,7 +21,7 @@
                     <!-- COLLECTION RATE -->
                     <div class="mt-3">
                         <small>Target Rp</small>
-                        <div class="progress" style="height:6px;">
+                        <div class="progress" style="height:10px;">
                             <div class="progress-bar bg-success"
                                  style="width: <?= round($collectionRate,2) ?>%">
                             </div>
@@ -35,7 +35,7 @@
                     <!-- COLLECTION RATE -->
                     <div class="mt-3">
                         <small>Target Rp</small>
-                        <div class="progress" style="height:6px;">
+                        <div class="progress" style="height:10px;">
                             <div class="progress-bar bg-success"
                                  style="width: <?= round($collectionRate,2) ?>%">
                             </div>
@@ -82,7 +82,7 @@
             <!-- COLLECTION RATE -->
             <div class="mt-3">
                 <small>Collection Rate</small>
-                <div class="progress" style="height:6px;">
+                <div class="progress" style="height:10px;">
                     <div class="progress-bar bg-success"
                          style="width: <?= round($collectionRate,2) ?>%">
                     </div>
