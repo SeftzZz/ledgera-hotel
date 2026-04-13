@@ -10,6 +10,8 @@ class RoomModel extends Model
     protected $primaryKey = 'id';
 
     protected $allowedFields = [
+        'company_id',
+        'branch_id',
         'room_no',
         'created_by',
         'created_at',

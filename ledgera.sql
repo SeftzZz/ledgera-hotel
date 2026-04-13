@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 12, 2026 at 07:12 PM
+-- Generation Time: Apr 13, 2026 at 04:23 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -787,8 +787,8 @@ CREATE TABLE `inventori` (
 --
 
 INSERT INTO `inventori` (`id`, `vendor_id`, `vendor_item_id`, `sparepart`, `kondisi`, `qty`, `is_used`, `is_delete`, `form_purchasing_id`, `created_at`, `updated_at`) VALUES
-(3, 1, 5, 'Beras Super Cianjur', '-', 6000, 0, 0, 11, '2026-04-09 18:30:31', '2026-04-09 18:30:31'),
-(4, 3, 3, 'Lampu LED 20 Watt', '-', 8, 0, 0, 11, '2026-04-09 18:30:31', '2026-04-09 18:30:31');
+(3, 1, 5, 'Beras Super Cianjur', '-', 5999, 0, 0, 11, '2026-04-09 18:30:31', '2026-04-09 18:30:31'),
+(4, 3, 3, 'Lampu LED 20 Watt', '-', 7, 0, 0, 11, '2026-04-09 18:30:31', '2026-04-09 18:30:31');
 
 -- --------------------------------------------------------
 
@@ -996,7 +996,7 @@ CREATE TABLE `maintenance` (
   `description` text DEFAULT NULL,
   `status` enum('open','in_progress','done','cancelled') DEFAULT 'open',
   `started_at` date DEFAULT NULL,
-  `completed_at` datetime DEFAULT NULL,
+  `completed_at` date DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
   `created_by` int(1) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
@@ -1011,9 +1011,9 @@ CREATE TABLE `maintenance` (
 
 INSERT INTO `maintenance` (`id`, `company_id`, `branch_id`, `room_id`, `location`, `issue`, `description`, `status`, `started_at`, `completed_at`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) VALUES
 (1, 1, 3, 1, NULL, 'AC tidak dingin', 'AC hanya keluar angin, tidak dingin', 'in_progress', '2026-04-09', NULL, '2026-04-09 14:28:38', NULL, NULL, NULL, NULL, NULL),
-(2, 1, 3, NULL, 'Lobby', 'Lampu mati', 'Lampu utama lobby mati total', 'done', '2026-04-08', '2026-04-08 11:00:00', '2026-04-09 14:28:38', NULL, NULL, NULL, NULL, NULL),
+(2, 1, 3, NULL, 'Lobby', 'Lampu mati', 'Lampu utama lobby mati total', 'done', '2026-04-08', '2026-04-08', '2026-04-09 14:28:38', 1, NULL, NULL, NULL, NULL),
 (3, 1, 3, 11, NULL, 'TV tidak menyala', 'TV tidak bisa dinyalakan sama sekali', 'open', NULL, NULL, '2026-04-09 14:28:38', NULL, NULL, NULL, NULL, NULL),
-(6, 1, 3, 6, '', 'Lampu Kamar Mandi Mati', NULL, 'open', '2026-04-09', NULL, '2026-04-09 17:11:30', 1, NULL, NULL, NULL, NULL);
+(6, 1, 3, 6, NULL, 'Lampu Kamar Mandi Mati', NULL, 'open', '2026-04-09', NULL, '2026-04-09 17:11:30', NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1025,17 +1025,19 @@ CREATE TABLE `maintenance_items` (
   `id` int(11) NOT NULL,
   `maintenance_id` int(11) DEFAULT NULL,
   `item_name` varchar(100) DEFAULT NULL,
-  `qty` int(11) DEFAULT NULL
+  `qty` int(11) DEFAULT NULL,
+  `price` decimal(12,2) DEFAULT NULL,
+  `total` decimal(12,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `maintenance_items`
 --
 
-INSERT INTO `maintenance_items` (`id`, `maintenance_id`, `item_name`, `qty`) VALUES
-(1, 2, 'Lampu LED 20W', 2),
-(2, 1, 'Freon AC', 1),
-(3, 1, 'Jasa servis AC', 1);
+INSERT INTO `maintenance_items` (`id`, `maintenance_id`, `item_name`, `qty`, `price`, `total`) VALUES
+(1, 2, 'Lampu LED 20W', 2, 75000.00, 150000.00),
+(2, 1, 'Freon AC', 1, 200000.00, 200000.00),
+(3, 1, 'Jasa servis AC', 1, 150000.00, 150000.00);
 
 -- --------------------------------------------------------
 
@@ -1416,6 +1418,8 @@ INSERT INTO `role_permissions` (`id`, `role_id`, `permission_id`) VALUES
 
 CREATE TABLE `rooms` (
   `id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `branch_id` int(11) NOT NULL,
   `room_no` varchar(20) NOT NULL,
   `created_by` int(1) NOT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
@@ -1429,51 +1433,51 @@ CREATE TABLE `rooms` (
 -- Dumping data for table `rooms`
 --
 
-INSERT INTO `rooms` (`id`, `room_no`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES
-(1, '102', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(2, '103', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(3, '105', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(4, '106', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(5, '107', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(6, '108', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(7, '109', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(8, '201', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(9, '202', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(10, '203', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(11, '204', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(12, '205', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(13, '206', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(14, '207', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(15, '208', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(16, '209', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(17, '210', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(18, '211', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(19, '212', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(20, '214', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(21, '215', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(22, '216', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(23, '217', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(24, '218', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(25, '225', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(26, '226', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(27, '227', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(28, '228', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(29, '229', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(30, '230', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(31, '231', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(32, '232', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(33, '233', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(34, '234', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(35, '235', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(36, '237', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(37, '238', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(38, '239', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(39, '240', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(40, '241', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(41, '301', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(42, '302', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(43, '303', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
-(44, '304', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL);
+INSERT INTO `rooms` (`id`, `company_id`, `branch_id`, `room_no`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES
+(1, 1, 3, '102', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(2, 1, 3, '103', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(3, 1, 3, '105', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(4, 1, 3, '106', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(5, 1, 3, '107', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(6, 1, 3, '108', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(7, 1, 3, '109', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(8, 1, 3, '201', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(9, 1, 3, '202', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(10, 1, 3, '203', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(11, 1, 3, '204', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(12, 1, 3, '205', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(13, 1, 3, '206', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(14, 1, 3, '207', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(15, 1, 3, '208', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(16, 1, 3, '209', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(17, 1, 3, '210', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(18, 1, 3, '211', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(19, 1, 3, '212', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(20, 1, 3, '214', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(21, 1, 3, '215', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(22, 1, 3, '216', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(23, 1, 3, '217', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(24, 1, 3, '218', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(25, 1, 3, '225', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(26, 1, 3, '226', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(27, 1, 3, '227', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(28, 1, 3, '228', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(29, 1, 3, '229', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(30, 1, 3, '230', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(31, 1, 3, '231', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(32, 1, 3, '232', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(33, 1, 3, '233', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(34, 1, 3, '234', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(35, 1, 3, '235', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(36, 1, 3, '237', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(37, 1, 3, '238', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(38, 1, 3, '239', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(39, 1, 3, '240', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(40, 1, 3, '241', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(41, 1, 3, '301', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(42, 1, 3, '302', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(43, 1, 3, '303', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(44, 1, 3, '304', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1688,7 +1692,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `company_id`, `branch_id`, `category_id`, `role`, `name`, `email`, `phone`, `password`, `photo`, `is_active`, `last_login_at`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) VALUES
-(1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-04-12 20:16:23', '2026-01-18 12:25:53', 1, '2026-04-12 20:16:23', NULL, NULL, NULL),
+(1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-04-13 07:25:11', '2026-01-18 12:25:53', 1, '2026-04-13 07:25:11', NULL, NULL, NULL),
 (2, 1, 3, 0, 'admin', 'Arya Seftian', 'yerblues6@gmail.com', '895330907220', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '2.png', 'active', '2026-04-06 14:49:54', '2026-01-18 18:59:55', 1, '2026-04-06 14:49:54', NULL, NULL, NULL),
 (3, 1, 3, 1, 'admin', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '3.png', 'active', '2026-04-06 13:51:18', '2026-01-19 10:53:08', 1, '2026-04-06 13:51:18', NULL, NULL, NULL);
 

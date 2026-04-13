@@ -120,9 +120,14 @@ $routes->group('maintenance', ['filter' => 'auth'], function($routes) {
     $routes->get('get-inventori', 'MaintenanceController::getInventori');
     $routes->post('update', 'MaintenanceController::update');
     $routes->post('delete', 'MaintenanceController::delete');
+    $routes->post('get-detail', 'MaintenanceController::getDetail');
     
-    $routes->post('datatableroom', 'MaintenanceController::datatableroom');
     $routes->get('rooms', 'MaintenanceController::rooms');
+    $routes->post('datatableroom', 'MaintenanceController::datatableroom');
+    $routes->post('storeroom', 'MaintenanceController::storeroom');
+    $routes->post('getroom', 'MaintenanceController::getByIdRoom');
+    $routes->post('updateroom', 'MaintenanceController::updateroom');
+    $routes->post('deleteroom', 'MaintenanceController::deleteroom');
 });
 
 // =========================

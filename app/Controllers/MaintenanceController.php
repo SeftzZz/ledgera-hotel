@@ -151,8 +151,15 @@ class MaintenanceController extends BaseController
 
             // ================= ACTION BUTTON =================
             $actionButtons = '';
+            $actionButtons = '
+                    <button class="btn btn-icon btn-info btn-detail" data-id="'.$row['id'].'" 
+                        data-bs-toggle="tooltip" data-bs-placement="top" 
+                        data-bs-custom-class="tooltip-info" title="Detail">
+                        <i class="ti ti-eye"></i>
+                    </button>';
+
             if ($row['status'] !== 'done') {
-                $actionButtons = '
+                $actionButtons .= '
                     <button class="btn btn-icon btn-primary btn-edit" data-id="'.$row['id'].'" 
                         data-bs-toggle="tooltip" data-bs-placement="top" 
                         data-bs-custom-class="tooltip-primary" title="Edit">
@@ -461,6 +468,53 @@ class MaintenanceController extends BaseController
         ]);
     }
 
+    // ===============================
+    // DETAIL MAINTENACE
+    // ===============================
+    public function getDetail()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(404);
+        }
+
+        $id = $this->request->getPost('id');
+        $db = \Config\Database::connect();
+
+        $main = $db->table('maintenance m')
+            ->select('m.*, r.room_no as room')
+            ->join('rooms r', 'r.id = m.room_id', 'left')
+            ->where('m.id', $id)
+            ->get()
+            ->getRowArray();
+
+        if (!$main) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Data not found'
+            ]);
+        }
+
+        $items = $db->table('maintenance_items')
+            ->where('maintenance_id', $id)
+            ->get()
+            ->getResultArray();
+
+        $logs = $db->table('maintenance_logs')
+            ->where('maintenance_id', $id)
+            ->orderBy('id', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        return $this->response->setJSON([
+            'status' => true,
+            'data' => [
+                ...$main,
+                'items' => $items,
+                'logs'  => $logs
+            ]
+        ]);
+    }
+
     public function rooms()
     {
         return view('maintenance/rooms', [
@@ -468,6 +522,9 @@ class MaintenanceController extends BaseController
         ]);
     }
 
+    // ===============================
+    // DATATABLE SERVER SIDE - ROOMS
+    // ===============================
     public function datatableroom()
     {
         $request = service('request');
@@ -475,53 +532,284 @@ class MaintenanceController extends BaseController
         $searchValue = $request->getPost('search')['value'] ?? null;
         $length = (int) $request->getPost('length');
         $start  = (int) $request->getPost('start');
+        $order  = $request->getPost('order');
 
-        $builder = $this->roomModel
-            ->where('deleted_at', null);
+        $db = \Config\Database::connect();
 
-        if ($searchValue) {
-            $builder->groupStart()
-                ->like('room_no', $searchValue)
-            ->groupEnd();
+        /* ================= BASE QUERY ================= */
+        $baseBuilder = $db->table('rooms r')
+            ->join('branches b', 'b.id = r.branch_id', 'left')
+            ->where('r.deleted_at', null);
+
+        /* ================= FILTER SESSION ================= */
+        $companyId = session()->get('company_id');
+        $branchId  = session()->get('branch_id');
+        $userId    = session()->get('user_id');
+
+        $baseBuilder->where('r.company_id', $companyId);
+
+        if ($branchId) {
+            $baseBuilder->where('r.branch_id', $branchId);
         }
 
-        $recordsFiltered = $builder->countAllResults(false);
+        /* ================= SEARCH ================= */
+        if (!empty($searchValue)) {
+            $searchLower = strtolower($searchValue);
 
-        $data = $builder
-            ->orderBy('room_no', 'DESC')
-            ->limit($length, $start)
-            ->find();
+            $baseBuilder->groupStart()
+                ->like('r.room_no', $searchValue)
+                ->orLike('b.branch_name', $searchValue);
 
-        $recordsTotal = $this->roomModel
+            $baseBuilder->groupEnd();
+        }
+
+        /* ================= COUNT FILTERED ================= */
+        $builderFiltered = clone $baseBuilder;
+        $recordsFiltered = $builderFiltered->countAllResults();
+
+        /* ================= COUNT TOTAL ================= */
+        $recordsTotal = $db->table('rooms')
             ->where('deleted_at', null)
+            ->where('company_id', $companyId)
             ->countAllResults();
 
+        /* ================= GET DATA ================= */
+        $builderData = clone $baseBuilder;
+
+        /* ================= ORDERING ================= */
+        $columns = [
+            1 => null,              // no_urut
+            2 => 'b.branch_name',   // branch
+            3 => 'r.room_no'        // room
+        ];
+
+        if (!empty($order)) {
+            $colIndex = $order[0]['column'];
+            $dir      = $order[0]['dir'];
+
+            if (isset($columns[$colIndex]) && $columns[$colIndex] !== null) {
+                $builderData->orderBy($columns[$colIndex], $dir);
+            }
+        } else {
+            $builderData->orderBy('r.id', 'DESC');
+        }
+
+        /* ================= EXECUTE ================= */
+        $data = $builderData
+            ->select('r.*, b.branch_name')
+            ->limit($length, $start)
+            ->get()
+            ->getResultArray();
+
+        if (!empty($order)) {
+            $columns = [
+                1 => 'b.branch_name',
+                2 => 'b.branch_name',
+                3 => 'r.room_no'
+            ];
+
+            $colIndex = $order[0]['column'];
+            $dir = $order[0]['dir'];
+
+            if (isset($columns[$colIndex])) {
+                $builderData->orderBy($columns[$colIndex], $dir);
+            }
+        } else {
+            $orderColumn = $columns[$colIndex] ?? 'r.id';
+            $builderData->orderBy($orderColumn, $dir ?? 'DESC');
+        }
+
+        /* ================= FORMAT DATA ================= */
         $result = [];
         $no = $start + 1;
 
         foreach ($data as $row) {
-            $action = '
-                <button class="btn btn-icon btn-primary btn-edit" data-id="'.$row['id'].'" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-primary" title="Edit">
+            // ================= ACTION BUTTON =================
+            $actionButtons = '
+                <button class="btn btn-icon btn-primary btn-edit" data-id="'.$row['id'].'" 
+                    data-bs-toggle="tooltip" data-bs-placement="top" 
+                    data-bs-custom-class="tooltip-primary" title="Edit">
                     <i class="ti ti-pencil"></i>
                 </button>
 
-                <button class="btn btn-icon btn-danger btn-delete" data-id="'.$row['id'].'" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-danger" title="Delete">
+                <button class="btn btn-icon btn-danger btn-delete" data-id="'.$row['id'].'" 
+                    data-bs-toggle="tooltip" data-bs-placement="top" 
+                    data-bs-custom-class="tooltip-danger" title="Delete">
                     <i class="ti ti-trash"></i>
                 </button>
             ';
-
+            
+            // ================= FORMAT =================
             $result[] = [
-                'no_urut' => $no++ . '.',
-                'room' => esc($row['room_no']),
-                'action' => $action
+                'no_urut'      => $no++ . '.',
+                'branch'       => $row['branch_name'] ?? '-',
+                'room'         => $row['room_no'] ?? '-',
+                'action'       => $actionButtons
             ];
         }
 
         return $this->response->setJSON([
-            'draw' => (int)$request->getPost('draw'),
-            'recordsTotal' => $recordsTotal,
+            'draw'            => (int) $request->getPost('draw'),
+            'recordsTotal'    => $recordsTotal,
             'recordsFiltered' => $recordsFiltered,
-            'data' => $result
+            'data'            => $result
+        ]);
+    }
+
+    // ===============================
+    // STORE ROOMS
+    // ===============================
+    public function storeroom()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(404);
+        }
+
+        $companyId = session()->get('company_id');
+        $branchId  = session()->get('branch_id');
+
+        // cek apakah name sudah ada
+        $exist = $this->roomModel
+            ->where('room_no', $this->request->getPost('roomno'))
+            ->where('company_id', $companyId)
+            ->where('branch_id', $branchId)
+            ->where('deleted_at', null)
+            ->first();
+
+        if ($exist) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Room number already exists'
+            ]);
+        }
+
+        // ================= INSERT ROOMS =================
+        $data = [
+            'company_id'   => session()->get('company_id'),
+            'branch_id'    => session()->get('branch_id'),
+            'room_no'      => $this->request->getPost('roomno'),
+            'created_at'   => date('Y-m-d H:i:s'),
+            'created_by'   => session()->get('user_id')
+        ];
+
+        $this->roomModel->insert($data);
+
+        // ================= RESPONSE =================
+        if ($this->roomModel->transStatus() === false) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Failed to save room'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'Room added successfully'
+        ]);
+    }
+
+    // ===============================
+    // GET ROOM BY ID
+    // ===============================
+    public function getByIdRoom()
+    {
+        $id = $this->request->getPost('id');
+        $room = $this->roomModel
+            ->where('company_id', session()->get('company_id'))
+            ->where('branch_id', session()->get('branch_id'))
+            ->where('deleted_at', null)
+            ->find($id);
+
+        if (!$room) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Data not found'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status' => true,
+            'data' => $room
+        ]);
+    }
+
+    // ===============================
+    // UPDATE
+    // ===============================
+    public function updateroom()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(404);
+        }
+
+        $id       = $this->request->getPost('id');
+        $roomno   = trim($this->request->getPost('roomno'));
+
+        $room = $this->roomModel->find($id);
+
+        if (!$room) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Data not found'
+            ]);
+        }
+
+        // CEK DUPLIKAT NAME
+        $duplicate = $this->roomModel
+            ->where('company_id', session()->get('company_id'))
+            ->where('branch_id', session()->get('branch_id'))
+            ->where('room_no', $roomno)
+            ->where('id !=', $id)
+            ->where('deleted_at', null)
+            ->first();
+
+        if ($duplicate) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Room number already exists'
+            ]);
+        }
+
+        // UPDATE DATA
+        $data = [
+            'room_no'    => $roomno,
+            'updated_by' => session()->get('user_id'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->roomModel->update($id, $data);
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'Room number successfully updated'
+        ]);
+    }
+
+    // ===============================
+    // DELETE ROOM (SOFT DELETE)
+    // ===============================
+    public function deleteroom()
+    {
+        $id = $this->request->getPost('id');
+
+        // ambil data room
+        $room = $this->roomModel->find($id);
+
+        if (!$room) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Room tidak ditemukan'
+            ]);
+        }
+
+        $this->roomModel->update($id, [
+            'deleted_at' => date('Y-m-d H:i:s'),
+            'deleted_by' => session()->get('user_id')
+        ]);
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'Room deleted successfully'
         ]);
     }
 }

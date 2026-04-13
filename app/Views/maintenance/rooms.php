@@ -9,6 +9,7 @@
 						                    <tr>
 						                        <th></th>
 						                        <th>No.</th>
+						                        <th>Branch</th>
 						                        <th>Room No.</th>
 						                        <th>Action</th>
 						                    </tr>
@@ -17,19 +18,19 @@
 						        </div>
 
 						        <!-- add modal form -->
-						        <div class="modal fade" id="modalAddSkill" tabindex="-1" aria-hidden="true">
+						        <div class="modal fade" id="modalAddRoom" tabindex="-1" aria-hidden="true">
 									<div class="modal-dialog modal-lg modal-dialog-centered">
 									    <div class="modal-content">
-										    <form id="formAddSkill" enctype="multipart/form-data">
+										    <form id="formAddRoom" enctype="multipart/form-data">
 										        <div class="modal-header">
-										          	<h5 class="modal-title">Add Skill</h5>
+										          	<h5 class="modal-title">Add Room</h5>
 										          	<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 										        </div>
 										        <div class="modal-body">
 										          	<div class="row">
 								                        <div class="col-md-12 mb-6">
-								                            <label class="form-label">Skill Name</label>
-								                        	<input type="text" class="form-control" name="namaskill" required>
+								                            <label class="form-label">Room No</label>
+								                        	<input type="text" class="form-control" name="roomno" required>
 								                        </div>
 								                    </div>
 										        </div>
@@ -43,12 +44,12 @@
 								</div>
 
 								<!-- edit modal form -->
-				                <div class="modal fade" id="modalEditSkill" tabindex="-1" aria-hidden="true">
+				                <div class="modal fade" id="modalEditRoom" tabindex="-1" aria-hidden="true">
 									<div class="modal-dialog modal-lg modal-dialog-centered">
 									    <div class="modal-content">
-										    <form id="formEditSkill" enctype="multipart/form-data">
+										    <form id="formEditRoom" enctype="multipart/form-data">
 										        <div class="modal-header">
-										          	<h5 class="modal-title">Edit Skill</h5>
+										          	<h5 class="modal-title">Edit Room</h5>
 										          	<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 										        </div>
 
@@ -56,8 +57,8 @@
 										          	<input type="hidden" name="id" id="edit_id">
 										          	<div class="row">
 								                        <div class="col-md-12 mb-6">
-								                            <label class="form-label">Skill Name</label>
-								                        	<input type="text" class="form-control" name="namaskill" id="edit_skillname" required>
+								                            <label class="form-label">Room No.</label>
+								                        	<input type="text" class="form-control" name="roomno" id="edit_roomno" required>
 								                        </div>
 								                    </div>
 										        </div>
@@ -90,9 +91,9 @@
 							// DataTables Rooms
 						    'use strict';
 						    $(function () {
-						        let dt_tableSkill = $('.dtRoom'), dt_skill;
-						        if (dt_tableSkill.length) {
-						        	dt_skill = dt_tableSkill.DataTable({
+						        let dt_tableRoom = $('.dtRoom'), dt_skill;
+						        if (dt_tableRoom.length) {
+						        	dt_skill = dt_tableRoom.DataTable({
 						        		processing: true,
 					                	serverSide: true,
 					                	responsive: true,
@@ -106,6 +107,7 @@
 						                columns: [
 						                    { data: null },          // responsive control
 						                    { data: 'no_urut' },
+						                    { data: 'branch' },
 						                    { data: 'room' },
 						                    { data: 'action' }       // actions (HTML from backend)
 						                ],
@@ -139,7 +141,7 @@
 						                        searchable: false
 						                    }
 					                	],
-					                	order: [[2, 'desc']],
+					                	order: [[3, 'desc']],
 					                	dom:
 					                    	'<"card-header flex-column flex-md-row"' +
 					                        '<"head-label text-center">' +
@@ -166,27 +168,27 @@
 						                                extend: 'print',
 						                                text: '<i class="ti ti-printer me-1"></i>Print',
 						                                className: 'dropdown-item',
-						                                exportOptions: { columns: [1,2] }
+						                                exportOptions: { columns: [1,2,3] }
 						                            },
 						                            {
 						                                extend: 'csv',
 						                                text: '<i class="ti ti-file-text me-1"></i>Csv',
 						                                className: 'dropdown-item',
-						                                exportOptions: { columns: [1,2] }
+						                                exportOptions: { columns: [1,2,3] }
 						                            },
 						                            {
 						                                extend: 'pdf',
 						                                text: '<i class="ti ti-file-description me-1"></i>Pdf',
 						                                className: 'dropdown-item',
-						                                exportOptions: { columns: [1,2] }
+						                                exportOptions: { columns: [1,2,3] }
 						                            }
 						                        ]
 						                    },
 						                    {
-						                        text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-sm-inline-block">Add New Skill</span>',
+						                        text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-sm-inline-block">Add New Room</span>',
 						                        className: 'create-new btn btn-primary waves-effect waves-light',
 						                        action: function () {
-										            $('#modalAddSkill').modal('show');
+										            $('#modalAddRoom').modal('show');
 										        }
 						                    }
 						                ],
@@ -220,31 +222,18 @@
 						        }
 						    });
 
-							$('#modalAddSkill').on('shown.bs.modal', function () {
-							    // INIT SELECT2
-							    $('#add_category').select2({
-							        dropdownParent: $('#modalAddSkill'),
-							        width: '100%',
-							        placeholder: "Select Categories",
-							        allowClear: true
-							    });
-							});
-
-							$('#modalAddSkill').on('hidden.bs.modal', function () {
+							$('#modalAddRoom').on('hidden.bs.modal', function () {
 							    // reset form
-							    $('#formAddSkill')[0].reset();
-
-							    // reset select2
-							    $('#add_category').val(null).trigger('change');
+							    $('#formAddRoom')[0].reset();
 							});
 
 							// Submit form insert data
-							$('#formAddSkill').on('submit', function (e) {
+							$('#formAddRoom').on('submit', function (e) {
 							    e.preventDefault();
 							    let formData = new FormData(this);
 							    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 							    Swal.fire({
-							        title: 'Add New Skill?',
+							        title: 'Add New Room?',
 							        icon: 'question',
 							        showCancelButton: true,
 							        reverseButtons: true,
@@ -253,7 +242,7 @@
 							    }).then(result => {
 							        if (result.isConfirmed) {
 							            $.ajax({
-							                url: "<?= base_url('admin/skills/store') ?>",
+							                url: "<?= base_url('maintenance/storeroom') ?>",
 							                type: "POST",
 							                data: formData,
 							                processData: false,
@@ -269,7 +258,7 @@
 							                            showConfirmButton: false
 							                        });
 
-							                        $('#modalAddSkill').modal('hide');
+							                        $('#modalAddRoom').modal('hide');
 							                        $('.dtRoom').DataTable().ajax.reload(null, false);
 							                    } else {
 							                        Swal.fire({
@@ -284,27 +273,15 @@
 							    });
 							});
 
-							$('#modalEditSkill').on('shown.bs.modal', function () {
-							    $('#edit_category').select2({
-							        dropdownParent: $('#modalEditSkill'),
-							        width: '100%',
-							        placeholder: "Select Categories",
-							        allowClear: true
-							    });
-							});
-
-							$('#modalEditSkill').on('hidden.bs.modal', function () {
+							$('#modalEditRoom').on('hidden.bs.modal', function () {
 							    // reset form
-							    $('#formEditSkill')[0].reset();
-
-							    // reset select2
-							    $('#edit_category').val(null).trigger('change');
+							    $('#formEditRoom')[0].reset();
 							});
 
 							// Submit form edit data
 							$(document).on('click', '.btn-edit', function () {
 						        const id = $(this).data('id');
-						        $.post("<?= base_url('admin/skills/get') ?>", {
+						        $.post("<?= base_url('maintenance/getroom') ?>", {
 						            id: id,
 						            '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
 						        }, function (res) {
@@ -315,16 +292,15 @@
 						            }
 
 						            const d = res.data;
-									$('#modalEditSkill').modal('show');
+									$('#modalEditRoom').modal('show');
 									setTimeout(function () {
 									    $('#edit_id').val(d.id);
-									    $('#edit_category').val(d.category).trigger('change');
-									    $('#edit_skillname').val(d.name);
+									    $('#edit_roomno').val(d.room_no);
 									}, 200);
 						        }, 'json');
 						    });
 
-							$('#formEditSkill').on('submit', function (e) {
+							$('#formEditRoom').on('submit', function (e) {
 							    e.preventDefault();
 							    let formData = new FormData(this);
 							    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
@@ -339,7 +315,7 @@
 							    }).then((result) => {
 							        if (result.isConfirmed) {
 							            $.ajax({
-									        url: "<?= base_url('admin/skills/update') ?>",
+									        url: "<?= base_url('maintenance/updateroom') ?>",
 									        type: "POST",
 									        data: formData,
 									        processData: false,
@@ -355,7 +331,7 @@
 									                    showConfirmButton: false
 									                });
 
-									                $('#modalEditSkill').modal('hide');
+									                $('#modalEditRoom').modal('hide');
 									                $('.dtRoom').DataTable().ajax.reload(null, false);
 									            } else {
 									                Swal.fire('Failed', res.message, 'error');
@@ -383,7 +359,7 @@
 							    }).then((result) => {
 							        if (result.isConfirmed) {
 							            $.ajax({
-							                url: "<?= base_url('admin/skills/delete') ?>",
+							                url: "<?= base_url('maintenance/deleteroom') ?>",
 							                type: "POST",
 							                dataType: "json",
 							                data: {
@@ -411,14 +387,6 @@
 							            });
 							        }
 							    });
-							});
-
-							$('#add_category').on('change', function(){
-							    if($(this).val() === '__new__'){
-							        $('#kategori_manual').show().prop('required', true);
-							    } else {
-							        $('#kategori_manual').hide().prop('required', false);
-							    }
 							});
 						</script>
 						<?= $this->endSection() ?>

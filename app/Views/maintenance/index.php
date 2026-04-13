@@ -129,7 +129,7 @@
 								                        </div>
 								                        <div class="col-md-4 mb-3">
 								                            <label class="form-label">Status</label>
-								                            <select name="status" id="edit_status" class="form-select required">
+								                            <select name="status" id="edit_status" class="form-select" required>
 							                                    <option value="open">Open</option>
 							                                    <option value="in_progress">In Progress</option>
 							                                    <option value="done">Done</option>
@@ -164,6 +164,57 @@
 										    </form>
 									    </div>
 									</div>
+								</div>
+
+								<!-- detail modal -->
+								<div class="modal fade" id="modalDetailMaintenance" tabindex="-1" aria-hidden="true">
+								    <div class="modal-dialog modal-lg modal-dialog-centered">
+								        <div class="modal-content">
+								            <div class="modal-header">
+								                <h5 class="modal-title">Maintenance Detail</h5>
+								                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+								            </div>
+
+								            <div class="modal-body">
+								                <table class="table table-bordered">
+								                    <tr><th width="30%">Room</th><td id="detail_room"></td></tr>
+								                    <tr><th>Location</th><td id="detail_location"></td></tr>
+								                    <tr><th>Issue</th><td id="detail_issue"></td></tr>
+								                    <tr><th>Status</th><td id="detail_status"></td></tr>
+								                    <tr><th>Started</th><td id="detail_started"></td></tr>
+								                    <tr><th>Completed</th><td id="detail_completed"></td></tr>
+								                    <tr><th>Note</th><td id="detail_note"></td></tr>
+								                </table>
+
+								                <hr>
+
+								                <h6>Sparepart Used</h6>
+								                <table class="table table-sm table-striped">
+								                    <thead>
+								                        <tr>
+								                            <th>Item</th>
+								                            <th width="100">Qty</th>
+								                        </tr>
+								                    </thead>
+								                    <tbody id="detail_items"></tbody>
+								                </table>
+
+								                <hr>
+
+								                <h6>Logs</h6>
+								                <table class="table table-sm table-bordered">
+								                    <thead>
+								                        <tr>
+								                            <th>Date</th>
+								                            <th>Status</th>
+								                            <th>Note</th>
+								                        </tr>
+								                    </thead>
+								                    <tbody id="detail_logs"></tbody>
+								                </table>
+								            </div>
+								        </div>
+								    </div>
 								</div>
 						    </div>
 						</div>
@@ -532,5 +583,119 @@
 							        }
 							    });
 							});
-							</script>
+
+							// ===============================
+							// FORMAT TGL INDO
+							// ===============================
+							function formatDateIndo(dateStr) {
+							    if (!dateStr) return '-';
+
+							    const date = new Date(dateStr);
+							    if (isNaN(date)) return '-';
+
+							    const months = [
+							        'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+							        'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+							    ];
+
+							    const day   = String(date.getDate()).padStart(2, '0');
+							    const month = months[date.getMonth()];
+							    const year  = date.getFullYear();
+
+							    return `${day} ${month} ${year}`;
+							}
+
+							function formatDateTimeIndo(dateStr) {
+							    if (!dateStr) return '-';
+
+							    const date = new Date(dateStr);
+							    if (isNaN(date)) return '-';
+
+							    return new Intl.DateTimeFormat('id-ID', {
+							        day: '2-digit',
+							        month: 'short',
+							        year: 'numeric',
+							        hour: '2-digit',
+							        minute: '2-digit',
+							        hour12: false
+							    }).format(date).replace(',', ' -');
+							}
+
+							function capitalizeFirst(str) {
+							    if (!str) return '';
+							    return str.charAt(0).toUpperCase() + str.slice(1);
+							}
+
+							// ===============================
+							// DETAIL
+							// ===============================
+							$(document).on('click', '.btn-detail', function () {
+							    const id = $(this).data('id');
+
+							    $.ajax({
+							        url: "<?= base_url('maintenance/get-detail') ?>",
+							        type: "POST",
+							        data: {
+							            id: id,
+							            '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+							        },
+							        dataType: 'json',
+							        success(res) {
+							            if (!res.status) {
+							                Swal.fire('Error', res.message, 'error');
+							                return;
+							            }
+
+							            const d = res.data;
+
+							            // ================= MAIN DATA =================
+							            $('#detail_room').text(d.room ?? '-');
+							            $('#detail_location').text(d.location ?? '-');
+							            $('#detail_issue').text(d.issue);
+							            $('#detail_status').text(capitalizeFirst(d.status));
+							            $('#detail_started').text(formatDateIndo(d.started_at));
+										$('#detail_completed').text(formatDateIndo(d.completed_at));
+							            $('#detail_note').text(d.description ?? '-');
+
+							            // ================= ITEMS =================
+							            let itemsHtml = '';
+							            if (d.items && d.items.length > 0) {
+							                d.items.forEach(i => {
+							                    itemsHtml += `
+							                        <tr>
+							                            <td>${i.item_name}</td>
+							                            <td>${i.qty}</td>
+							                        </tr>
+							                    `;
+							                });
+							            } else {
+							                itemsHtml = `<tr><td colspan="2" class="text-center">No items</td></tr>`;
+							            }
+							            $('#detail_items').html(itemsHtml);
+
+							            // ================= LOGS =================
+							            let logsHtml = '';
+							            if (d.logs && d.logs.length > 0) {
+							                d.logs.forEach(l => {
+							                    logsHtml += `
+							                        <tr>
+							                            <td>${formatDateTimeIndo(l.created_at)}</td>
+							                            <td>${capitalizeFirst(l.status)}</td>
+							                            <td>${l.notes ?? '-'}</td>
+							                        </tr>
+							                    `;
+							                });
+							            } else {
+							                logsHtml = `<tr><td colspan="3" class="text-center">No logs</td></tr>`;
+							            }
+							            $('#detail_logs').html(logsHtml);
+
+							            $('#modalDetailMaintenance').modal('show');
+							        },
+							        error() {
+							            Swal.fire('Error', 'Server error', 'error');
+							        }
+							    });
+							});
+						</script>
 						<?= $this->endSection() ?>
