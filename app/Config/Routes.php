@@ -113,10 +113,21 @@ $routes->group('chats', ['filter' => 'auth'], function($routes) {
 
 // PREVENTIVE & MAINTENANCE
 $routes->group('maintenance', ['filter' => 'auth'], function($routes) {
-
-    $routes->get('/', 'Maintenance::index');
-    $routes->get('detail/(:num)', 'Maintenance::detail/$1');
-
+    $routes->get('/', 'MaintenanceController::index');
+    $routes->post('datatable', 'MaintenanceController::datatable');
+    $routes->post('store', 'MaintenanceController::store');
+    $routes->post('get', 'MaintenanceController::getById');
+    $routes->get('get-inventori', 'MaintenanceController::getInventori');
+    $routes->post('update', 'MaintenanceController::update');
+    $routes->post('delete', 'MaintenanceController::delete');
+    $routes->post('get-detail', 'MaintenanceController::getDetail');
+    
+    $routes->get('rooms', 'MaintenanceController::rooms');
+    $routes->post('datatableroom', 'MaintenanceController::datatableroom');
+    $routes->post('storeroom', 'MaintenanceController::storeroom');
+    $routes->post('getroom', 'MaintenanceController::getByIdRoom');
+    $routes->post('updateroom', 'MaintenanceController::updateroom');
+    $routes->post('deleteroom', 'MaintenanceController::deleteroom');
 });
 
 // =========================

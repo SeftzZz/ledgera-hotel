@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.3
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Apr 09, 2026 at 07:51 PM
--- Server version: 10.11.10-MariaDB-log
--- PHP Version: 8.3.27
+-- Host: 127.0.0.1
+-- Generation Time: Apr 13, 2026 at 04:23 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `ledgera`
+-- Database: `ledgerahotel`
 --
 
 -- --------------------------------------------------------
@@ -461,8 +461,7 @@ CREATE TABLE `chats` (
 INSERT INTO `chats` (`id`, `user_id`, `branch_id`, `created_at`) VALUES
 (1, 1, 3, '2026-03-10 01:26:30'),
 (2, 2, 3, '2026-03-15 16:19:55'),
-(3, 3, 2, '2026-03-15 16:22:28'),
-(4, 9, 3, '2026-03-27 17:53:08');
+(3, 3, 2, '2026-03-15 16:22:28');
 
 -- --------------------------------------------------------
 
@@ -490,8 +489,7 @@ INSERT INTO `chat_messages` (`id`, `chat_id`, `sender_type`, `message`, `created
 (5, 1, 'admin', 'Oke', '2026-03-15 15:37:32'),
 (6, 2, 'admin', 'Halo', '2026-03-15 16:21:27'),
 (7, 3, 'admin', 'Halo', '2026-03-15 16:22:32'),
-(8, 3, 'admin', 'Tes pesan', '2026-03-15 16:39:09'),
-(9, 4, 'admin', 'Hi', '2026-03-27 17:53:11');
+(8, 3, 'admin', 'Tes pesan', '2026-03-15 16:39:09');
 
 -- --------------------------------------------------------
 
@@ -789,7 +787,8 @@ CREATE TABLE `inventori` (
 --
 
 INSERT INTO `inventori` (`id`, `vendor_id`, `vendor_item_id`, `sparepart`, `kondisi`, `qty`, `is_used`, `is_delete`, `form_purchasing_id`, `created_at`, `updated_at`) VALUES
-(3, 1, 5, 'Beras Super Cianjur', '-', 6000, 0, 0, 11, '2026-04-09 18:30:31', '2026-04-09 18:30:31');
+(3, 1, 5, 'Beras Super Cianjur', '-', 5999, 0, 0, 11, '2026-04-09 18:30:31', '2026-04-09 18:30:31'),
+(4, 3, 3, 'Lampu LED 20 Watt', '-', 7, 0, 0, 11, '2026-04-09 18:30:31', '2026-04-09 18:30:31');
 
 -- --------------------------------------------------------
 
@@ -984,46 +983,86 @@ INSERT INTO `loyalty_tiers` (`id`, `name`, `min_points`, `min_spending`, `cashba
 -- --------------------------------------------------------
 
 --
--- Table structure for table `maintenances`
+-- Table structure for table `maintenance`
 --
 
-CREATE TABLE `maintenances` (
+CREATE TABLE `maintenance` (
   `id` int(11) NOT NULL,
-  `tgl_order` varchar(10) NOT NULL,
-  `tgl_selesai` varchar(10) NOT NULL,
-  `jam_order` varchar(5) NOT NULL,
-  `jam_selesai` varchar(5) NOT NULL,
-  `type` varchar(100) NOT NULL,
-  `requester` varchar(50) NOT NULL,
-  `vehicle_id` int(11) NOT NULL,
-  `no_pintu` varchar(20) NOT NULL,
-  `staff_gudang` varchar(50) NOT NULL,
-  `security` varchar(50) NOT NULL,
-  `driver_id` int(11) NOT NULL DEFAULT 0,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `company_id` int(11) NOT NULL,
+  `branch_id` int(11) NOT NULL,
+  `room_id` int(11) DEFAULT NULL,
+  `location` varchar(100) DEFAULT NULL,
+  `issue` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `status` enum('open','in_progress','done','cancelled') DEFAULT 'open',
+  `started_at` date DEFAULT NULL,
+  `completed_at` date DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `created_by` int(1) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `updated_by` int(1) DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  `deleted_by` int(1) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `maintenance`
+--
+
+INSERT INTO `maintenance` (`id`, `company_id`, `branch_id`, `room_id`, `location`, `issue`, `description`, `status`, `started_at`, `completed_at`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) VALUES
+(1, 1, 3, 1, NULL, 'AC tidak dingin', 'AC hanya keluar angin, tidak dingin', 'in_progress', '2026-04-09', NULL, '2026-04-09 14:28:38', NULL, NULL, NULL, NULL, NULL),
+(2, 1, 3, NULL, 'Lobby', 'Lampu mati', 'Lampu utama lobby mati total', 'done', '2026-04-08', '2026-04-08', '2026-04-09 14:28:38', 1, NULL, NULL, NULL, NULL),
+(3, 1, 3, 11, NULL, 'TV tidak menyala', 'TV tidak bisa dinyalakan sama sekali', 'open', NULL, NULL, '2026-04-09 14:28:38', NULL, NULL, NULL, NULL, NULL),
+(6, 1, 3, 6, NULL, 'Lampu Kamar Mandi Mati', NULL, 'open', '2026-04-09', NULL, '2026-04-09 17:11:30', NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `maintenance_orders`
+-- Table structure for table `maintenance_items`
 --
 
-CREATE TABLE `maintenance_orders` (
+CREATE TABLE `maintenance_items` (
   `id` int(11) NOT NULL,
-  `maintenance_id` int(11) NOT NULL,
-  `inventori_id` int(11) DEFAULT NULL,
-  `permintaan_perbaikan` text NOT NULL,
-  `sparepart` varchar(255) NOT NULL,
-  `qty` int(11) NOT NULL,
-  `kondisi` varchar(20) NOT NULL,
-  `posisi` varchar(100) NOT NULL,
-  `keterangan` text DEFAULT NULL,
-  `no_seri` varchar(255) DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `maintenance_id` int(11) DEFAULT NULL,
+  `item_name` varchar(100) DEFAULT NULL,
+  `qty` int(11) DEFAULT NULL,
+  `price` decimal(12,2) DEFAULT NULL,
+  `total` decimal(12,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `maintenance_items`
+--
+
+INSERT INTO `maintenance_items` (`id`, `maintenance_id`, `item_name`, `qty`, `price`, `total`) VALUES
+(1, 2, 'Lampu LED 20W', 2, 75000.00, 150000.00),
+(2, 1, 'Freon AC', 1, 200000.00, 200000.00),
+(3, 1, 'Jasa servis AC', 1, 150000.00, 150000.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `maintenance_logs`
+--
+
+CREATE TABLE `maintenance_logs` (
+  `id` int(11) NOT NULL,
+  `maintenance_id` int(11) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `created_by` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `maintenance_logs`
+--
+
+INSERT INTO `maintenance_logs` (`id`, `maintenance_id`, `status`, `notes`, `created_at`, `created_by`) VALUES
+(1, 1, 'in_progress', 'Teknisi mulai cek AC', '2026-04-09 09:00:00', 5),
+(2, 2, 'done', 'Lampu diganti baru', '2026-04-08 11:00:00', 6),
+(3, 3, 'open', 'Menunggu teknisi tersedia', '2026-04-09 07:35:00', 4),
+(4, 6, 'open', 'Lampu Kamar Mandi Mati', '2026-04-09 17:11:30', 1);
 
 -- --------------------------------------------------------
 
@@ -1374,6 +1413,75 @@ INSERT INTO `role_permissions` (`id`, `role_id`, `permission_id`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `rooms`
+--
+
+CREATE TABLE `rooms` (
+  `id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `branch_id` int(11) NOT NULL,
+  `room_no` varchar(20) NOT NULL,
+  `created_by` int(1) NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_by` int(1) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_by` int(1) DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rooms`
+--
+
+INSERT INTO `rooms` (`id`, `company_id`, `branch_id`, `room_no`, `created_by`, `created_at`, `updated_by`, `updated_at`, `deleted_by`, `deleted_at`) VALUES
+(1, 1, 3, '102', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(2, 1, 3, '103', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(3, 1, 3, '105', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(4, 1, 3, '106', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(5, 1, 3, '107', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(6, 1, 3, '108', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(7, 1, 3, '109', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(8, 1, 3, '201', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(9, 1, 3, '202', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(10, 1, 3, '203', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(11, 1, 3, '204', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(12, 1, 3, '205', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(13, 1, 3, '206', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(14, 1, 3, '207', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(15, 1, 3, '208', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(16, 1, 3, '209', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(17, 1, 3, '210', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(18, 1, 3, '211', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(19, 1, 3, '212', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(20, 1, 3, '214', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(21, 1, 3, '215', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(22, 1, 3, '216', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(23, 1, 3, '217', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(24, 1, 3, '218', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(25, 1, 3, '225', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(26, 1, 3, '226', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(27, 1, 3, '227', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(28, 1, 3, '228', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(29, 1, 3, '229', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(30, 1, 3, '230', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(31, 1, 3, '231', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(32, 1, 3, '232', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(33, 1, 3, '233', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(34, 1, 3, '234', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(35, 1, 3, '235', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(36, 1, 3, '237', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(37, 1, 3, '238', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(38, 1, 3, '239', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(39, 1, 3, '240', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(40, 1, 3, '241', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(41, 1, 3, '301', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(42, 1, 3, '302', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(43, 1, 3, '303', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL),
+(44, 1, 3, '304', 1, '2026-04-09 00:50:03', NULL, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `sub_ledgers`
 --
 
@@ -1584,11 +1692,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `company_id`, `branch_id`, `category_id`, `role`, `name`, `email`, `phone`, `password`, `photo`, `is_active`, `last_login_at`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) VALUES
-(1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-04-09 13:13:23', '2026-01-18 12:25:53', 1, '2026-04-09 13:13:23', NULL, NULL, NULL),
+(1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-04-13 07:25:11', '2026-01-18 12:25:53', 1, '2026-04-13 07:25:11', NULL, NULL, NULL),
 (2, 1, 3, 0, 'admin', 'Arya Seftian', 'yerblues6@gmail.com', '895330907220', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '2.png', 'active', '2026-04-06 14:49:54', '2026-01-18 18:59:55', 1, '2026-04-06 14:49:54', NULL, NULL, NULL),
-(3, 1, 3, 1, 'admin', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '3.png', 'active', '2026-04-06 13:51:18', '2026-01-19 10:53:08', 1, '2026-04-06 13:51:18', NULL, NULL, NULL),
-(17, 1, 3, 5, '', 'Yend Hendriyana', 'yend.hendriyana@gmail.com', '-', '$2y$10$vNXrV5jLsJ3MSMAv2GKWj.A.3D4kYEHnquRemDW/okF.AjBm6UMcG', NULL, 'active', NULL, '2026-04-08 15:28:02', NULL, '2026-04-08 15:28:02', NULL, NULL, NULL),
-(18, 0, 4, 8, '', 'User IT', 'it@heywork.id', '081234567890', '$2y$10$fL85xpOpYQBc8P0iNoJfH.BxzXS7p2vCb4ZMQSbZUQttpsupuEKzy', NULL, 'active', NULL, '2026-04-09 01:39:28', NULL, '2026-04-09 01:39:28', NULL, NULL, NULL);
+(3, 1, 3, 1, 'admin', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '3.png', 'active', '2026-04-06 13:51:18', '2026-01-19 10:53:08', 1, '2026-04-06 13:51:18', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1815,6 +1921,15 @@ INSERT INTO `wallet_transactions` (`id`, `wallet_id`, `type`, `amount`, `referen
 (9, 1, 'debit', 35000.00, 'order', 14, 'Order payment', '2026-03-22 18:29:08'),
 (10, 1, 'debit', 35000.00, 'order', 15, 'Order payment', '2026-03-22 18:29:52'),
 (11, 1, 'debit', 25000.00, 'order', 16, 'Order payment', '2026-03-22 18:32:15');
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `vw_export_journal`
+--
+DROP TABLE IF EXISTS `vw_export_journal`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vw_export_journal`  AS SELECT `jh`.`journal_no` AS `journal_no`, `jh`.`journal_date` AS `journal_date`, `coa`.`account_code` AS `account_code`, `coa`.`account_name` AS `account_name`, `jd`.`debit` AS `debit`, `jd`.`credit` AS `credit`, `jh`.`description` AS `description` FROM ((`journal_headers` `jh` join `journal_details` `jd` on(`jd`.`journal_id` = `jh`.`id`)) join `coa` on(`coa`.`id` = `jd`.`account_id`)) WHERE `jh`.`status` = 'posted' ;
 
 --
 -- Indexes for dumped tables
@@ -2054,18 +2169,22 @@ ALTER TABLE `loyalty_tiers`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `maintenances`
+-- Indexes for table `maintenance`
 --
-ALTER TABLE `maintenances`
+ALTER TABLE `maintenance`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `maintenance_orders`
+-- Indexes for table `maintenance_items`
 --
-ALTER TABLE `maintenance_orders`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `maintenance_id` (`maintenance_id`),
-  ADD KEY `fk_maintenance_orders_inventori` (`inventori_id`);
+ALTER TABLE `maintenance_items`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `maintenance_logs`
+--
+ALTER TABLE `maintenance_logs`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `migrations`
@@ -2156,6 +2275,12 @@ ALTER TABLE `roles`
 -- Indexes for table `role_permissions`
 --
 ALTER TABLE `role_permissions`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `rooms`
+--
+ALTER TABLE `rooms`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -2420,7 +2545,7 @@ ALTER TABLE `form_purchasing`
 -- AUTO_INCREMENT for table `inventori`
 --
 ALTER TABLE `inventori`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `items`
@@ -2459,16 +2584,22 @@ ALTER TABLE `loyalty_tiers`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `maintenances`
+-- AUTO_INCREMENT for table `maintenance`
 --
-ALTER TABLE `maintenances`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `maintenance`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT for table `maintenance_orders`
+-- AUTO_INCREMENT for table `maintenance_items`
 --
-ALTER TABLE `maintenance_orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `maintenance_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `maintenance_logs`
+--
+ALTER TABLE `maintenance_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `migrations`
@@ -2547,6 +2678,12 @@ ALTER TABLE `roles`
 --
 ALTER TABLE `role_permissions`
   MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
+-- AUTO_INCREMENT for table `rooms`
+--
+ALTER TABLE `rooms`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `sub_ledgers`
@@ -2631,15 +2768,6 @@ ALTER TABLE `wallets`
 --
 ALTER TABLE `wallet_transactions`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
-
--- --------------------------------------------------------
-
---
--- Structure for view `vw_export_journal`
---
-DROP TABLE IF EXISTS `vw_export_journal`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vw_export_journal`  AS SELECT `jh`.`journal_no` AS `journal_no`, `jh`.`journal_date` AS `journal_date`, `coa`.`account_code` AS `account_code`, `coa`.`account_name` AS `account_name`, `jd`.`debit` AS `debit`, `jd`.`credit` AS `credit`, `jh`.`description` AS `description` FROM ((`journal_headers` `jh` join `journal_details` `jd` on(`jd`.`journal_id` = `jh`.`id`)) join `coa` on(`coa`.`id` = `jd`.`account_id`)) WHERE `jh`.`status` = 'posted' ;
 
 --
 -- Constraints for dumped tables
@@ -2782,13 +2910,6 @@ ALTER TABLE `journal_headers`
 ALTER TABLE `journal_taxes`
   ADD CONSTRAINT `journal_taxes_ibfk_1` FOREIGN KEY (`journal_id`) REFERENCES `journal_headers` (`id`),
   ADD CONSTRAINT `journal_taxes_ibfk_2` FOREIGN KEY (`tax_id`) REFERENCES `tax_codes` (`id`);
-
---
--- Constraints for table `maintenance_orders`
---
-ALTER TABLE `maintenance_orders`
-  ADD CONSTRAINT `fk_maintenance_orders_header` FOREIGN KEY (`maintenance_id`) REFERENCES `maintenances` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_maintenance_orders_inventori` FOREIGN KEY (`inventori_id`) REFERENCES `inventori` (`id`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `orders`
