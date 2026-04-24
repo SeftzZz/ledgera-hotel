@@ -51,11 +51,17 @@ class Login extends BaseController
 
         $user = $this->userModel
             ->select('
+                users.id as user_id,
                 users.*,
                 companies.company_name,
-                branches.*,
-                categories.id,
-                categories.name as category_name,
+
+                branches.id as branch_id,
+                branches.branch_name,
+                branches.branch_address,
+                branches.branch_logo,
+
+                categories.id as category_id,
+                categories.name as category_name
             ')
             ->join('companies', 'companies.id = users.company_id', 'left')
             ->join('branches', 'branches.id = users.branch_id', 'left')
@@ -81,6 +87,10 @@ class Login extends BaseController
 
         $token = $this->jwt->generateAccessToken((object)$user);
         $refreshToken = $this->jwt->generateRefreshToken();
+        // ==============================
+        // DETECT OWNER
+        // ==============================
+        $isOwner = empty($user['branch_id']) && empty($user['category_id']);
 
         // Set session login
         session()->set([
@@ -101,6 +111,7 @@ class Login extends BaseController
             'refresh_token'   => $refreshToken,
             'is_logged_in'    => true,
             'logged_at'       => date('Y-m-d H:i:s'),
+            'is_owner'        => $isOwner
         ]);
         
         // Update last login

@@ -60,6 +60,45 @@
         </div>
     </div>
 
+    <!-- LOAN MODAL -->
+    <div class="modal fade" id="modalLoan" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+            <div class="modal-content">
+                <form id="formLoan">
+                    <input type="hidden" name="company_id" id="loan_company_id">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Pengajuan Kredit / Installment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+                            <label class="form-label">Jumlah Kredit *</label>
+                            <input type="number" name="amount" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tenor (bulan) *</label>
+                            <input type="number" name="tenor" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mulai Bulan *</label>
+                            <input type="month" name="start_date" class="form-control" required>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <?= $this->endSection() ?>
@@ -239,6 +278,66 @@ $(function () {
                             $('.dtCompany').DataTable().ajax.reload(null, false);
 
                             $('#formAddCompany')[0].reset();
+
+                        } else {
+                            Swal.fire('Failed', res.message, 'error');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error', 'Server error', 'error');
+                    }
+                });
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-loan', function () {
+        let companyId = $(this).data('id');
+
+        // set ke hidden input
+        $('#loan_company_id').val(companyId);
+
+        // tampilkan modal
+        $('#modalLoan').modal('show');
+    });
+
+    $('#formLoan').on('submit', function (e) {
+        e.preventDefault();
+
+        let formData = new FormData(this);
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+        Swal.fire({
+            title: 'Submit loan?',
+            text: 'This will generate journal & installment schedule',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, proceed'
+        }).then(result => {
+
+            if (result.isConfirmed) {
+
+                $.ajax({
+                    url: "<?= base_url('company/loan') ?>",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    dataType: 'json',
+                    success: function (res) {
+
+                        if (res.status) {
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: res.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+
+                            $('#modalLoan').modal('hide');
+                            $('#formLoan')[0].reset();
 
                         } else {
                             Swal.fire('Failed', res.message, 'error');

@@ -3,14 +3,21 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Services\DashboardService;
 
 class Purchasing extends BaseController
 {
     public function index()
     {
-        return view('purchasing/index', [
-            'title' => 'Purchasing'
+        $service = new DashboardService();
+
+        $data = $service->getDashboardData([
+            'company_id'  => session('company_id'),
+            'branch_id'   => session('branch_id'),
+            'category_id' => session('category_id'),
         ]);
+
+        return view('purchasing/index', $data);
     }
 
     public function print($id)

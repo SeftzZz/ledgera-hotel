@@ -82,9 +82,9 @@ class TransactionController extends BaseController
                 'date'         => date('d-m-Y', strtotime($row['trx_date'])),
                 'type'         => esc($row['trx_type']),
                 'amount'       => number_format($row['amount'], 2),
-                'action'       => '
-                    <button class="btn btn-sm btn-primary btn-view" data-id="'.$row['id'].'">View</button>
-                '
+                // 'action'       => '
+                //     <button class="btn btn-sm btn-primary btn-view" data-id="'.$row['id'].'">View</button>
+                // '
             ];
         }
 

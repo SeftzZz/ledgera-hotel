@@ -31,7 +31,9 @@ class BusinessPartnerController extends BaseController
         $draw   = (int) $request->getPost('draw');
         $order  = $request->getPost('order');
 
-        $builder = $this->model->where('is_delete', 0);
+        $builder = $this->model
+            ->where('company_id', session('company_id'))
+            ->where('is_delete', 0);
 
         $recordsTotal = (clone $builder)->countAllResults(false);
 

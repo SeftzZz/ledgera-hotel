@@ -54,7 +54,8 @@ class BranchController extends BaseController
 
         $builder = $this->model
             ->select('branches.*, companies.company_name')
-            ->join('companies', 'companies.id = branches.company_id', 'left');
+            ->join('companies', 'companies.id = branches.company_id', 'left')
+            ->where('companies.id', session('company_id'));
 
         // TOTAL
         $recordsTotal = (clone $builder)->countAllResults(false);

@@ -63,20 +63,20 @@ class Cart extends BaseApiController
         // =========================
         // 🔥 VALIDASI SKILL CATEGORY
         // =========================
-        if (!$skill_category) {
-            return $this->error('skill_category required');
-        }
+        // if (!$skill_category) {
+        //     return $this->error('skill_category required');
+        // }
 
-        $category = $db->table('categories')
-            ->select('id, name')
-            ->where('LOWER(name)', strtolower(trim($skill_category)))
-            ->where('status', 'active')
-            ->get()
-            ->getRowArray();
+        // $category = $db->table('categories')
+        //     ->select('id, name')
+        //     ->where('LOWER(name)', strtolower(trim($skill_category)))
+        //     ->where('status', 'active')
+        //     ->get()
+        //     ->getRowArray();
 
-        if (!$category) {
-            return $this->error('Invalid skill_category');
-        }
+        // if (!$category) {
+        //     return $this->error('Invalid skill_category');
+        // }
 
         // =========================
         // CEK USER BY EMAIL
@@ -96,7 +96,7 @@ class Cart extends BaseApiController
             // =========================
             $userId = $userModel->insert([
                 'branch_id'   => $branchId,
-                'category_id' => $category['id'],
+                // 'category_id' => $category['id'],
                 'name'        => $name,
                 'email'       => $email,
                 'phone'       => $phone,

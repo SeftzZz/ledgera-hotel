@@ -64,6 +64,7 @@ class Chat extends BaseApiController
 
         $chats = $db->table('chats')
             ->where('user_id',$userId)
+            ->where('branch_id', session('branch_id'))
             ->orderBy('id','DESC')
             ->get()
             ->getResultArray();
@@ -85,6 +86,7 @@ class Chat extends BaseApiController
         $db = Database::connect();
 
         $messages = $db->table('chat_messages')
+            ->where('branch_id', session('branch_id'))
             ->where('chat_id',$chatId)
             ->orderBy('id','ASC')
             ->get()
@@ -162,6 +164,7 @@ class Chat extends BaseApiController
                 ) as last_time
             ')
             ->join('users u','u.id = c.user_id','left')
+            ->where('branch_id', session('branch_id'))
             ->orderBy('c.id','DESC')
             ->get()
             ->getResultArray();

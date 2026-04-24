@@ -44,6 +44,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->get('/', 'CompanyController::index');
         $routes->post('datatable', 'CompanyController::datatable');
         $routes->post('store', 'CompanyController::store');
+        $routes->post('loan', 'CompanyController::loan');
     });
 
     // BRANCH

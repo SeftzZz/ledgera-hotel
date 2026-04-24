@@ -41,7 +41,28 @@ class TransactionService
 
         // 🔥 override
         $trx['branch_id'] = $branchId;
+        // =========================
+        // 🔥 RESOLVE CATEGORY (DEPARTMENT)
+        // =========================
+        $categoryId = null;
 
+        if (!empty($trx['department'])) {
+
+            $category = $db->table('categories')
+                ->where('LOWER(name)', strtolower(trim($trx['department'])))
+                ->get()
+                ->getRowArray();
+
+            if (!$category) {
+                throw new \Exception("Category tidak ditemukan: {$trx['department']}");
+            }
+
+            $categoryId = (int) $category['id'];
+        }
+
+        // inject ke trx
+        $trx['category_id'] = $categoryId;
+        
         // ==============================
         // VALIDATION
         // ==============================
@@ -509,6 +530,55 @@ class TransactionService
             ];
         }
 
+        elseif ($type === 'loan_installment') {
+
+            $principal = (float) $trx['principal'];
+            $interest  = (float) ($trx['interest'] ?? 0);
+            $fee       = (float) ($trx['fee'] ?? 0);
+
+            $total = $principal + $interest + $fee;
+
+            // =========================
+            // DR UTANG BANK
+            // =========================
+            $journalLines[] = [
+                'account_id' => $map['debit_account_id'], // utang bank
+                'debit'      => $principal,
+                'credit'     => 0
+            ];
+
+            // =========================
+            // DR BEBAN KREDIT
+            // =========================
+            if ($interest > 0) {
+                $journalLines[] = [
+                    'account_id' => $map['interest_account_id'],
+                    'debit'      => $interest,
+                    'credit'     => 0
+                ];
+            }
+
+            // =========================
+            // DR PLATFORM FEE
+            // =========================
+            if ($fee > 0) {
+                $journalLines[] = [
+                    'account_id' => $map['fee_account_id'],
+                    'debit'      => $fee,
+                    'credit'     => 0
+                ];
+            }
+
+            // =========================
+            // CR KAS
+            // =========================
+            $journalLines[] = [
+                'account_id' => $trx['payment_account_id'],
+                'debit'      => 0,
+                'credit'     => $total
+            ];
+        }
+
         // =====================================
         // DEFAULT
         // =====================================
@@ -537,7 +607,8 @@ class TransactionService
         $journalId = $journal->create([
             'company_id'   => $trx['company_id'],
             'branch_id'    => $trx['branch_id'],
-            'journal_no'   => 'AUTO-' . $trxId,
+            'journal_no'   => 'JRN-' . round(microtime(true) * 1000),
+            'description'  => $trx['trx_type'] . '-' . $trx['reference_no'],
             'journal_date' => $trx['trx_date'],
             'period_month' => (int) date('m', strtotime($trx['trx_date'])),
             'period_year'  => (int) date('Y', strtotime($trx['trx_date']))
@@ -558,30 +629,6 @@ class TransactionService
         return $trxId;
     }
     
-    public function applyTax($amount, $taxId, $transactionType)
-    {
-        $tax = $this->taxModel->find($taxId);
-
-        $taxAmount = $amount * ($tax->tax_rate / 100);
-
-        if ($tax->tax_type === 'ppn') {
-
-            if ($tax->tax_direction === 'output') {
-                $this->journal->credit($tax->coa_account_id, $taxAmount);
-            }
-
-            if ($tax->tax_direction === 'input') {
-                $this->journal->debit($tax->coa_account_id, $taxAmount);
-            }
-        }
-
-        if ($tax->tax_type === 'withholding') {
-            $this->journal->credit($tax->coa_account_id, $taxAmount);
-        }
-
-        return $taxAmount;
-    }
-
     private function emitWS($type, $branchId)
     {
         $payload = [

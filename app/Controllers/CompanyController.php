@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\CompanyModel;
 use CodeIgniter\HTTP\ResponseInterface;
+use App\Services\TransactionService;
 
 class CompanyController extends BaseController
 {
@@ -45,6 +46,7 @@ class CompanyController extends BaseController
         ];
 
         $builder = $this->model
+            // ->where('id', session('company_id'))
             ->where('deleted_at', null);
 
         // TOTAL
@@ -87,6 +89,11 @@ class CompanyController extends BaseController
                     </button>
                     <button class="btn btn-sm btn-icon btn-danger btn-delete" data-id="'.$row['id'].'">
                         <i class="ti ti-trash"></i>
+                    </button>
+                    <button class="btn btn-sm btn-icon btn-warning btn-loan" 
+                            data-id="'.$row['id'].'" 
+                            title="Loan / Installment">
+                        <i class="ti ti-credit-card"></i>
                     </button>
                 </div>
             ';
@@ -158,6 +165,115 @@ class CompanyController extends BaseController
 
             return $this->response->setJSON([
                 'status'  => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function loan(): ResponseInterface
+    {
+        try {
+
+            $request = service('request');
+
+            $companyId = $request->getPost('company_id');
+            $amount = (float) $request->getPost('amount');
+            $tenor  = (int) $request->getPost('tenor');
+            $start  = $request->getPost('start_date');
+
+            if ($amount <= 0 || $tenor <= 0 || empty($start)) {
+                return $this->response->setJSON([
+                    'status' => false,
+                    'message' => 'Invalid input'
+                ]);
+            }
+
+            $startDate = date('Y-m-01', strtotime($start));
+
+            $trxService = new TransactionService();
+
+            // 1. CREDIT BANK
+            $trxService->create([
+                'company_id' => $companyId,
+                'branch_name'=> session('branch_name'),
+                'trx_type'   => 'credit_bank',
+                'amount'     => $amount,
+                'trx_date'   => $startDate,
+                'reference_no' => 'LOAN-' . time(),
+                'category_id' => 5,
+                'payment_account_id' => 35,
+            ]);
+
+            // 2. OPTIONAL: GENERATE SCHEDULE (TAPI DRAFT)
+            $perMonth = floor(($amount / $tenor) * 100) / 100; // fix 2 decimal
+            $totalAllocated = 0;
+
+            $interestRate = 0.03;
+            $feeRate      = 0.009;
+
+            $outstanding = $amount;
+
+            $interestPerMonth = round($amount * $interestRate, 2);
+
+            for ($i = 0; $i < $tenor; $i++) {
+
+                $date = date('Y-m-d', strtotime("+".($i+1)." month", strtotime($startDate)));
+
+                // =========================
+                // PRINCIPAL (TETAP)
+                // =========================
+                if ($i === $tenor - 1) {
+                    $principal = round($outstanding, 2);
+                } else {
+                    $principal = $perMonth;
+                }
+
+                // =========================
+                // 🔥 BUNGA FLAT (TETAP)
+                // =========================
+                $interestAmount = $interestPerMonth;
+
+                // =========================
+                // FEE
+                // =========================
+                $feeAmount = round($principal * $feeRate, 2);
+
+                // =========================
+                // SAVE
+                // =========================
+                $trxService->create([
+                    'company_id'         => $companyId,
+                    'branch_name'        => session('branch_name'),
+                    'trx_type'           => 'loan_installment',
+                    'amount'             => $principal + $interestAmount + $feeAmount,
+                    'principal'          => $principal,
+                    'interest'           => $interestAmount,
+                    'fee'                => $feeAmount,
+                    'trx_date'           => $date,
+                    'reference_no'       => 'LOAN-INSTALL-' . $i,
+                    'category_id'        => 5,
+                    'payment_account_id' => 1,
+                    'status'             => 'draft'
+                ]);
+
+                // tetap dikurangi (buat principal saja)
+                $outstanding -= $principal;
+            }
+
+            return $this->response->setJSON([
+                'status' => true,
+                'message' => 'Loan & installment created successfully',
+                'meta' => json_encode([
+                    'principal' => $principal,
+                    'interest'  => $interestAmount,
+                    'fee'       => $feeAmount
+                ])
+            ]);
+
+        } catch (\Throwable $e) {
+
+            return $this->response->setJSON([
+                'status' => false,
                 'message' => $e->getMessage()
             ]);
         }

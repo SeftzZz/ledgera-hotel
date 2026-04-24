@@ -31,7 +31,9 @@ class TaxController extends BaseController
         $draw   = (int) $request->getPost('draw');
         $order  = $request->getPost('order');
 
-        $builder = $this->model->where('deleted_at', null);
+        $builder = $this->model
+            ->where('company_id', session('company_id'))
+            ->where('deleted_at', null);
 
         $recordsTotal = (clone $builder)->countAllResults(false);
 

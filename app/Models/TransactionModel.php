@@ -16,9 +16,11 @@ class TransactionModel extends Model
         'trx_type',
         'reference_no',
         'amount',
+        'journal_id',
         'debit_account_id',
         'credit_account_id',
-        'journal_id',
+        'payment_account_id',
+        'category_id',
         'status'
     ];
 

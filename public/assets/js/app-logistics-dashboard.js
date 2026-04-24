@@ -227,11 +227,11 @@
       }
 
       // data per branch
-      const seriesData = [
-        revenues[i] || 0,
-        expenses[i] || 0
-      ];
+      const revenueVal = Number(revenues[i]) || 0;
+      const expenseVal = Number(expenses[i]) || 0;
 
+      const seriesData = [revenueVal, expenseVal];
+      
       const deliveryExceptionsChartConfig = {
         chart: {
           height: 420,
@@ -305,7 +305,12 @@
           }
         },
         tooltip: {
-          theme: false,
+          // theme: 'dark', // 🔥 ini otomatis putih text
+          style: {
+            fontSize: '13px',
+            fontFamily: 'Public Sans',
+            color: '#ffffff' // 🔥 force putih
+          },
           y: {
             formatter: function(val) {
               return 'Rp ' + Number(val).toLocaleString();

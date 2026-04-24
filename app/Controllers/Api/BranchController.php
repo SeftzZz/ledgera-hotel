@@ -25,29 +25,26 @@ class BranchController extends BaseApiController
         $db = \Config\Database::connect();
         $db->transStart();
 
-        $data = $this->request->getPost(); // 🔥 ganti dari getJSON
+        $data = $this->request->getPost();
 
         // ======================
-        // VALIDASI
+        // VALIDASI BASIC
         // ======================
-        if (empty($data['company_id']) || empty($data['branch_code']) || empty($data['branch_name'])) {
+        if (
+            empty($data['company_id']) ||
+            empty($data['branch_code']) ||
+            empty($data['branch_name'])
+        ) {
             return $this->response->setJSON([
                 'status' => false,
                 'message' => 'Field wajib belum lengkap'
             ]);
         }
 
-        if (($data['room_revenue'] + $data['fb_revenue']) != 100) {
+        if (empty($data['targets']) || !is_array($data['targets'])) {
             return $this->response->setJSON([
                 'status' => false,
-                'message' => 'Room + FB harus 100%'
-            ]);
-        }
-
-        if (($data['tax_service'] + $data['total_margin']) != 100) {
-            return $this->response->setJSON([
-                'status' => false,
-                'message' => 'Tax + Margin harus 100%'
+                'message' => 'Target minimal 1'
             ]);
         }
 
@@ -56,30 +53,85 @@ class BranchController extends BaseApiController
         // ======================
         $branchModel = new \App\Models\BranchModel();
 
-        $id = $branchModel->insert([
+        $branchId = $branchModel->insert([
             'company_id'  => $data['company_id'],
             'branch_code' => $data['branch_code'],
             'branch_name' => $data['branch_name']
         ], true);
 
         // ======================
-        // INSERT TARGET 🔥
+        // INSERT MULTI TARGET
         // ======================
-        $db->table('branches_target')->insert([
-            'branch_id'    => $id,
-            'target'       => $data['target'],
-            'room_revenue' => $data['room_revenue'],
-            'fb_revenue'   => $data['fb_revenue'],
-            'tax_service'  => $data['tax_service'],
-            'total_margin' => $data['total_margin']
-        ]);
+        $insertData = [];
+
+        foreach ($data['targets'] as $i => $t) {
+
+            $target = floatval($t['target'] ?? 0);
+            $room   = floatval($t['room_revenue'] ?? 0);
+            $fb     = floatval($t['fb_revenue'] ?? 0);
+            $tax    = floatval($t['tax_service'] ?? 0);
+            $margin = floatval($t['total_margin'] ?? 0);
+
+            // ======================
+            // VALIDASI PER ROW
+            // ======================
+            if ($target <= 0) {
+                return $this->response->setJSON([
+                    'status' => false,
+                    'message' => "Target baris ke-" . ($i+1) . " tidak valid"
+                ]);
+            }
+
+            if (($room + $fb) != 100) {
+                return $this->response->setJSON([
+                    'status' => false,
+                    'message' => "Room + FB harus 100% (baris ke-" . ($i+1) . ")"
+                ]);
+            }
+
+            if (($tax + $margin) != 100) {
+                return $this->response->setJSON([
+                    'status' => false,
+                    'message' => "Tax + Margin harus 100% (baris ke-" . ($i+1) . ")"
+                ]);
+            }
+
+            // ======================
+            // OPTIONAL VALIDASI ASCENDING (RECOMMENDED)
+            // ======================
+            if ($i > 0) {
+                $prevTarget = floatval($data['targets'][$i-1]['target'] ?? 0);
+
+                if ($target <= $prevTarget) {
+                    return $this->response->setJSON([
+                        'status' => false,
+                        'message' => "Target harus naik (baris ke-" . ($i+1) . ")"
+                    ]);
+                }
+            }
+
+            $insertData[] = [
+                'company_id'   => $data['company_id'],
+                'branch_id'    => $branchId,
+                'target'       => $target,
+                'room_revenue' => $room,
+                'fb_revenue'   => $fb,
+                'tax_service'  => $tax,
+                'total_margin' => $margin
+            ];
+        }
+
+        // ======================
+        // BATCH INSERT (OPTIMAL)
+        // ======================
+        $db->table('branches_target')->insertBatch($insertData);
 
         $db->transComplete();
 
         return $this->response->setJSON([
             'status'  => true,
-            'message' => 'Branch & target berhasil dibuat',
-            'id'      => $id
+            'message' => 'Branch & multi target berhasil dibuat',
+            'id'      => $branchId
         ]);
     }
 

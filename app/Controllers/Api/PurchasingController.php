@@ -254,6 +254,7 @@ class PurchasingController extends BaseController
                     ->where('id', $item['detail_id'])
                     ->update([
                         'vendor_item_id' => $item['vendor_item_id'],
+                        'qty'            => $item['qty'],
                         'harga'          => $item['harga'],
                         'no_po'          => $item['no_po'] ?? null,
                         'is_bon'         => $item['is_bon'] ?? 0
@@ -293,7 +294,7 @@ class PurchasingController extends BaseController
             if (!$detail) continue;
 
             $purpose = $detail['purpose'] ?? 'inventory';
-            $qty     = (float) $detail['qty'];
+            $qty     = (float) ($item['qty'] ?? 0); // 🔥 dari frontend
             $harga   = (float) $item['harga'];
 
             $subtotal = $qty * $harga;

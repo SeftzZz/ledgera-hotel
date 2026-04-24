@@ -128,7 +128,7 @@ $(function () {
             let printBtn = '';
 
             // 🔥 hanya tampil jika status PROSES
-            if (data.status === 'Proses') {
+            if (data.status === 'Selesai') {
               printBtn = `
                 <a href="/purchasing/print/${data.id}" 
                    target="_blank"
@@ -251,7 +251,15 @@ $(function () {
         >
           <td>${i}</td>
           <td>${item.sparepart}</td>
-          <td>${item.qty}</td>
+          <td>
+            <input 
+              type="number" 
+              class="form-control qty-input" 
+              value="${item.qty}" 
+              min="0"
+              data-harga="${item.harga}"
+            >
+          </td>
           <td>${item.satuan}</td>
           <td>${item.purpose}</td>
           <td>${item.vendor_name}</td>
@@ -267,6 +275,9 @@ $(function () {
             </button>
           </td>
           <td>Rp ${Number(item.harga).toLocaleString()}</td>
+          <td class="subtotal">
+            Rp ${Number(item.harga * item.qty).toLocaleString()}
+          </td>
         </tr>
       `;
 
@@ -279,14 +290,76 @@ $(function () {
 
     $('#modalDetailPO').modal('show');
 
-    if (isLocked) {
+    const overLimit = checkLimit();
+
+    if (isLocked || overLimit) {
       $('#btnSavePO').closest('.modal-footer').hide();
     } else {
       $('#btnSavePO').closest('.modal-footer').show();
     }
 
+    $('#limitWarning').remove();
+
+    if (overLimit) {
+      $('#estimatedLimit').after(`
+        <div id="limitWarning" class="alert alert-danger mt-2">
+          Estimated spend melebihi limit!
+        </div>
+      `);
+    }
+
   });
 
+  $(document).on('input', '.qty-input', function () {
+
+    let row = $(this).closest('tr');
+
+    let qty = parseFloat($(this).val()) || 0;
+    let harga = parseFloat($(this).data('harga')) || 0;
+
+    let subtotal = qty * harga;
+
+    // update subtotal
+    row.find('.subtotal').text('Rp ' + subtotal.toLocaleString());
+
+    // =========================
+    // UPDATE TOTAL
+    // =========================
+    let total = 0;
+
+    $('#po_items_table tbody tr').each(function () {
+      let q = parseFloat($(this).find('.qty-input').val()) || 0;
+      let h = parseFloat($(this).find('.qty-input').data('harga')) || 0;
+      total += (q * h);
+    });
+
+    $('#po_grand_total').text('Rp ' + total.toLocaleString());
+    window.totalPayment = total;
+
+    // =========================
+    // UPDATE LIMIT UI
+    // =========================
+    const overLimit = checkLimit();
+
+    // tombol save
+    if (overLimit) {
+      $('#btnSavePO').closest('.modal-footer').hide();
+    } else {
+      $('#btnSavePO').closest('.modal-footer').show();
+    }
+
+    // warning
+    $('#limitWarning').remove();
+
+    if (overLimit) {
+      $('#estimatedLimit').after(`
+        <div id="limitWarning" class="alert alert-danger mt-2">
+          Estimated spend melebihi limit!
+        </div>
+      `);
+    }
+
+  });
 
   // =========================
   // PILIH VENDOR (OPEN MODAL)
@@ -455,10 +528,18 @@ $(function () {
         isBon = vendorRow.find('.is-bon').is(':checked') ? 1 : 0;
       }
 
+      const qty = parseFloat(row.find('.qty-input').val()) || 0;
+      const harga = parseFloat(row.data('harga')) || 0;
+
+      // ❗ skip kalau qty 0
+      if (qty <= 0) return;
+
       items.push({
         detail_id: row.data('detail-id'),
         vendor_item_id: row.data('item-id'),
-        harga: row.data('harga'),
+        qty: qty,
+        harga: harga,
+        subtotal: qty * harga, // 🔥 optional tapi bagus
         no_po: noPo,
         is_bon: isBon
       });
@@ -469,7 +550,7 @@ $(function () {
     // VALIDASI
     // =========================
     if (items.length === 0) {
-      Swal.fire('Error', 'Item kosong', 'error');
+      Swal.fire('Error', 'Item kosong atau qty 0', 'error');
       return;
     }
 
@@ -489,9 +570,6 @@ $(function () {
 
     try {
 
-      // =========================
-      // 1. SAVE PO
-      // =========================
       const res = await fetch('/api/purchasing/save', {
         method: 'POST',
         headers: {
@@ -507,9 +585,6 @@ $(function () {
         throw new Error(json.message || 'Gagal simpan PO');
       }
 
-      // =========================
-      // SUCCESS
-      // =========================
       Swal.fire({
         icon: 'success',
         title: 'Berhasil',
@@ -523,8 +598,8 @@ $(function () {
     } catch (err) {
 
       console.error(err);
-
       Swal.fire('Error', err.message || 'Terjadi kesalahan', 'error');
+
     }
 
   });

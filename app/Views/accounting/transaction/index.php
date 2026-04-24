@@ -14,7 +14,7 @@
                         <th>Date</th>
                         <th>Type</th>
                         <th>Amount</th>
-                        <th>Action</th>
+                        <!-- <th>Action</th> -->
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -168,7 +168,7 @@
                     { data: 'date' },
                     { data: 'type' },
                     { data: 'amount' },
-                    { data: 'action' }
+                    // { data: 'action' }
                 ],
                 columnDefs: [
                     {

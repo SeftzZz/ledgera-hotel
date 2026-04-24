@@ -242,7 +242,7 @@ function formatRupiah(number){
 
       alert('Payment updated ✅');
 
-      // location.reload();
+      location.reload();
 
     } catch (err) {
 

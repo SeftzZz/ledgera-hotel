@@ -29,6 +29,9 @@ class BalanceSheetController extends BaseController
             COALESCE(SUM(jd.credit),0) as total_credit
         ");
 
+        // =============================
+        // OPENING BALANCE
+        // =============================
         $builder->join(
             'coa_opening_balances ob',
             "ob.coa_id = c.id
@@ -37,28 +40,35 @@ class BalanceSheetController extends BaseController
             'left'
         );
 
+        // =============================
+        // 🔥 FILTER POSTED DI SUBQUERY (PALING AMAN)
+        // =============================
         $builder->join(
-            'journal_details jd',
+            "(SELECT jd.*
+              FROM journal_details jd
+              JOIN journal_headers jh ON jh.id = jd.journal_id
+              WHERE jh.status = 'posted'
+              AND jh.period_year = {$year}
+              AND jh.company_id = {$companyId}
+            ) jd",
             'jd.account_id = c.id',
             'left'
         );
 
-        $builder->join(
-            'journal_headers jh',
-            "jh.id = jd.journal_id
-             AND jh.status = 'posted'
-             AND jh.period_year = {$year}
-             AND jh.company_id = {$companyId}",
-            'left'
-        );
-
+        // =============================
+        // FILTER COA
+        // =============================
         $builder->where('c.company_id', $companyId);
         $builder->where('c.parent_id IS NOT NULL');
+
         $builder->groupBy('c.id');
         $builder->orderBy('c.account_code', 'ASC');
 
         $rows = $builder->get()->getResultArray();
 
+        // =============================
+        // INIT
+        // =============================
         $assets = [];
         $liabilities = [];
         $equity = [];
@@ -71,7 +81,6 @@ class BalanceSheetController extends BaseController
 
         foreach ($rows as $row) {
 
-            // 🔥 Normal balance logic
             $isDebitNormal = in_array($row['account_type'], ['asset','expense','cogs']);
 
             if ($isDebitNormal) {
@@ -109,7 +118,7 @@ class BalanceSheetController extends BaseController
             }
 
             // =============================
-            // CALCULATE NET PROFIT
+            // PROFIT (TIDAK DITAMPILKAN, HANYA DI TOTAL)
             // =============================
             if ($row['account_type'] == 'revenue') {
                 $netProfit += $ending;
@@ -120,17 +129,10 @@ class BalanceSheetController extends BaseController
             }
         }
 
-        // 🔥 Tambahkan laba berjalan ke equity
-        if ($netProfit != 0) {
-            $equity[] = [
-                'account_code' => '',
-                'account_name' => 'Laba Tahun Berjalan',
-                'account_type' => 'equity',
-                'balance' => $netProfit
-            ];
-
-            $totalEquity += $netProfit;
-        }
+        // =============================
+        // 🔥 TAMBAHKAN PROFIT KE TOTAL EQUITY (TANPA ROW)
+        // =============================
+        $totalEquity += $netProfit;
 
         return view('accounting/balance_sheet/index', [
             'title' => 'Balance Sheet',
@@ -143,4 +145,77 @@ class BalanceSheetController extends BaseController
             'year' => $year
         ]);
     }
+
+    // public function index()
+    // {
+    //     $companyId = session()->get('company_id') ?? 1;
+    //     $year      = date('Y');
+
+    //     $builder = $this->db->table('coa c');
+
+    //     $builder->select("
+    //         c.account_code,
+    //         c.account_name,
+    //         c.account_type,
+    //         COALESCE(ob.opening_balance,0) as opening_balance,
+
+    //         COALESCE(SUM(CASE WHEN jh.status = 'posted' THEN jd.debit ELSE 0 END),0) as total_debit,
+    //         COALESCE(SUM(CASE WHEN jh.status = 'posted' THEN jd.credit ELSE 0 END),0) as total_credit
+    //     ");
+
+    //     // OPENING
+    //     $builder->join(
+    //         'coa_opening_balances ob',
+    //         "ob.coa_id = c.id
+    //          AND ob.period_year = {$year}
+    //          AND ob.company_id = {$companyId}",
+    //         'left'
+    //     );
+
+    //     // JOIN NORMAL (BIAR SEMUA KELIHATAN)
+    //     $builder->join('journal_details jd', 'jd.account_id = c.id', 'left');
+    //     $builder->join('journal_headers jh', 'jh.id = jd.journal_id', 'left');
+
+    //     $builder->where('c.company_id', $companyId);
+    //     $builder->where('c.parent_id IS NOT NULL');
+
+    //     $builder->groupBy('c.id');
+    //     $builder->orderBy('c.account_code', 'ASC');
+
+    //     $rows = $builder->get()->getResultArray();
+
+    //     // =============================
+    //     // DEBUG OUTPUT
+    //     // =============================
+    //     $debug = [];
+
+    //     foreach ($rows as $row) {
+
+    //         $isDebitNormal = in_array($row['account_type'], ['asset','expense','cogs']);
+
+    //         if ($isDebitNormal) {
+    //             $ending = $row['opening_balance']
+    //                     + $row['total_debit']
+    //                     - $row['total_credit'];
+    //         } else {
+    //             $ending = $row['opening_balance']
+    //                     + $row['total_credit']
+    //                     - $row['total_debit'];
+    //         }
+
+    //         $debug[] = [
+    //             'code' => $row['account_code'],
+    //             'name' => $row['account_name'],
+    //             'type' => $row['account_type'],
+    //             'opening' => $row['opening_balance'],
+    //             'debit' => $row['total_debit'],
+    //             'credit' => $row['total_credit'],
+    //             'ending' => $ending
+    //         ];
+    //     }
+
+    //     return view('accounting/balance_sheet/debug_coa', [
+    //         'data' => $debug
+    //     ]);
+    // }
 }

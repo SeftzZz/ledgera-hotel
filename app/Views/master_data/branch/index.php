@@ -59,57 +59,83 @@
 
                         <h6 class="mb-3 mt-3">Target & Revenue Setting</h6>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Target Revenue *</label>
-                                <input type="number" name="target" class="form-control" required>
+                        <div class="target-repeater">
+
+                          <div data-repeater-list="targets">
+
+                            <div data-repeater-item>
+                              <div class="border rounded p-3 mb-3">
+
+                                <!-- ROW 1 -->
+                                <div class="row">
+                                  <div class="col-md-6 mb-3">
+                                    <label class="form-label">Target Revenue *</label>
+                                    <div class="input-group">
+                                      <span class="input-group-text range-start">0 -</span>
+                                      <input type="number" name="target" class="form-control target" required>
+                                    </div>
+                                  </div>
+
+                                  <div class="col-md-3 mb-3">
+                                    <label class="form-label">Room Revenue</label>
+                                    <div class="input-group">
+                                      <input type="number" name="room_revenue" class="form-control room">
+                                      <span class="input-group-text">%</span>
+                                    </div>
+                                    <div class="form-text preview-room">Rp 0</div>
+                                  </div>
+
+                                  <div class="col-md-3 mb-3">
+                                    <label class="form-label">FB Revenue</label>
+                                    <div class="input-group">
+                                      <input type="number" name="fb_revenue" class="form-control fb">
+                                      <span class="input-group-text">%</span>
+                                    </div>
+                                    <div class="form-text preview-fb">Rp 0</div>
+                                  </div>
+                                </div>
+
+                                <!-- ROW 2 -->
+                                <div class="row">
+                                  <div class="col-md-5 mb-3">
+                                    <label class="form-label">Tax & Service</label>
+                                    <div class="input-group">
+                                      <input type="number" name="tax_service" class="form-control tax">
+                                      <span class="input-group-text">%</span>
+                                    </div>
+                                    <div class="form-text preview-tax">Rp 0</div>
+                                  </div>
+
+                                  <div class="col-md-5 mb-3">
+                                    <label class="form-label">Total Margin</label>
+                                    <div class="input-group">
+                                      <input type="number" name="total_margin" class="form-control margin">
+                                      <span class="input-group-text">%</span>
+                                    </div>
+                                    <div class="form-text preview-margin">Rp 0</div>
+                                  </div>
+
+                                  <!-- DELETE -->
+                                  <div class="col-md-2">
+                                    <label class="form-label"></label>
+                                    <div class="input-group">
+                                        <button type="button" data-repeater-delete class="btn btn-danger w-100">
+                                          <i class="ti ti-trash"></i>
+                                        </button>
+                                    </div>
+                                  </div>
+                                </div>
+
+                              </div>
                             </div>
 
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">Room Revenue</label>
-                                <div class="input-group">
-                                    <input type="number" name="room_revenue" class="form-control">
-                                    <span class="input-group-text">%</span>
-                                </div>
-                                <div id="preview_room" class="form-text">
-                                  Rp 0
-                                </div>
-                            </div>
+                          </div>
 
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">FB Revenue (%)</label>
-                                <div class="input-group">
-                                    <input type="number" name="fb_revenue" class="form-control">
-                                    <span class="input-group-text">%</span>
-                                </div>
-                                <div id="preview_fb" class="form-text">
-                                  Rp 0
-                                </div>
-                            </div>
-                        </div>
+                          <!-- ADD BUTTON -->
+                          <button type="button" data-repeater-create class="btn btn-primary">
+                            <i class="ti ti-plus"></i> Tambah Target
+                          </button>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Tax & Service (%)</label>
-                                <div class="input-group">
-                                    <input type="number" name="tax_service" class="form-control">
-                                    <span class="input-group-text">%</span>
-                                </div>
-                                <div id="preview_tax" class="form-text">
-                                  Rp 0
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Total Margin (%)</label>
-                                <div class="input-group">
-                                    <input type="number" name="total_margin" class="form-control">
-                                    <span class="input-group-text">%</span>
-                                </div>
-                                <div id="preview_margin" class="form-text">
-                                  Rp 0
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -168,7 +194,10 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Target Revenue *</label>
-                                <input type="number" name="target" id="edit_target" class="form-control" required>
+                                <div class="input-group">
+                                    <span class="input-group-text">0 -</span>
+                                    <input type="number" name="target" id="edit_target" class="form-control" required>
+                                </div>
                             </div>
 
                             <div class="col-md-3 mb-3">
@@ -331,8 +360,8 @@ $(function () {
     $('#formAddBranch').on('submit', function (e) {
         e.preventDefault();
 
-        let formData = new FormData(this);
-        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+        // 🔥 pakai serialize (AMAN untuk repeater)
+        let formData = $(this).serialize();
 
         Swal.fire({
             title: 'Add new branch?',
@@ -349,9 +378,8 @@ $(function () {
                     url: "<?= base_url('api/branches') ?>",
                     type: "POST",
                     data: formData,
-                    processData: false,
-                    contentType: false,
                     dataType: 'json',
+
                     success: function (res) {
 
                         if (res.status) {
@@ -364,14 +392,34 @@ $(function () {
                                 showConfirmButton: false
                             });
 
+                            // 🔥 reset form
+                            $('#formAddBranch')[0].reset();
+
+                            // reset repeater ke 1 item
+                            let $repeater = $('.target-repeater');
+
+                            $repeater.find('[data-repeater-item]').not(':first').remove();
+
+                            // reset value item pertama
+                            $repeater.find('[data-repeater-item]').first().find('input').val('');
+
+                            // reset preview
+                            $repeater.find('.preview-room').text('Rp 0');
+                            $repeater.find('.preview-fb').text('Rp 0');
+                            $repeater.find('.preview-tax').text('Rp 0');
+                            $repeater.find('.preview-margin').text('Rp 0');
+
+                            // reset range
+                            updateTargetRanges();
+
                             $('#modalAddBranch').modal('hide');
                             $('.dtBranch').DataTable().ajax.reload(null, false);
-                            $('#formAddBranch')[0].reset();
 
                         } else {
                             Swal.fire('Failed', res.message, 'error');
                         }
                     },
+
                     error: function () {
                         Swal.fire('Error', 'Server error', 'error');
                     }
@@ -503,6 +551,55 @@ $(function () {
         '#formEditBranch input', 
         () => calculateTarget('#formEditBranch ')
     );
+
+    $('.target-repeater').repeater({
+      initEmpty: false,
+
+      show: function () {
+        $(this).slideDown();
+
+        // 🔥 update range setelah add
+        setTimeout(() => {
+          updateTargetRanges();
+        }, 100);
+      },
+
+      hide: function (deleteElement) {
+        if (confirm('Hapus target ini?')) {
+          $(this).slideUp(deleteElement);
+
+          // 🔥 update ulang setelah delete
+          setTimeout(() => {
+            updateTargetRanges();
+          }, 300);
+        }
+      }
+    });
+
+    function updateTargetRanges() {
+
+      let items = $('[data-repeater-item]');
+
+      items.each(function(index) {
+
+        let prev = items.eq(index - 1).find('.target').val() || 0;
+
+        if (index === 0) {
+          $(this).find('.range-start').text('0 -');
+        } else {
+          $(this).find('.range-start').text(prev + ' -');
+        }
+
+      });
+    }
+
+    $(document).on('input', '.target', function () {
+      updateTargetRanges();
+    });
+
+    $(document).ready(function () {
+      updateTargetRanges();
+    });
 });
 </script>
 

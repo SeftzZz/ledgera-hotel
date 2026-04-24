@@ -35,6 +35,7 @@ class Customers extends BaseApiController
                 COALESCE(SUM(orders.total_amount),0) as total_spent
             ')
             ->join('orders','orders.user_id = users.id','left')
+            ->where('branch_id', session('branch_id'))
             ->groupBy('users.id')
             ->orderBy('users.id','DESC')
             ->get()
