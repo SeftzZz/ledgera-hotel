@@ -4,7 +4,7 @@
 
 'use strict';
 
-const branchId = window.location.pathname.split('/').pop();
+const targetId = window.location.pathname.split('/').pop();
 let TARGET = 0;
 function formatRupiah(num) {
   return 'Rp ' + (num || 0).toLocaleString('id-ID');
@@ -59,7 +59,7 @@ $(function () {
   if (dt_category_list_table.length) {
     var dt_category = dt_category_list_table.DataTable({
       ajax: {
-        url: '/api/branches/ratio/' + branchId,
+        url: '/api/branches/ratio/' + targetId,
         headers: { Authorization: 'Bearer ' + window.jwtToken },
         dataSrc: function (json) {
 
@@ -74,7 +74,8 @@ $(function () {
             result.push({
               department: key,
               ratio_spend: row.ratio_spend?.[0] ?? null,
-              ratio_worker: row.ratio_worker?.[0] ?? null
+              ratio_worker: row.ratio_worker?.[0] ?? null,
+              ratio_dw: row.ratio_dw?.[0] ?? null,
             });
 
           });
@@ -88,8 +89,10 @@ $(function () {
 
         let totalSpend = 0;
         let totalWorker = 0;
+        let totalDw = 0;
         let value_spend = 0;
         let value_worker = 0;
+        let value_dw = 0;
         let rows = api.rows({ page: 'current' }).data();
 
         rows.each(function (row) {
@@ -99,6 +102,9 @@ $(function () {
 
           totalWorker += parseFloat(row.ratio_worker?.min_value || 0);
           value_worker = TARGET * totalWorker / 100;
+
+          totalDw += parseFloat(row.ratio_dw?.max_value || 0);
+          value_dw = TARGET * totalDw / 100;
         });
 
         $(api.column(2).footer()).html(`
@@ -114,12 +120,20 @@ $(function () {
             <small>${formatRupiah(value_worker)}</small>
           </div>
         `);
+
+        $(api.column(4).footer()).html(`
+          <div class="fw-bold text-success">
+            ${totalDw.toFixed(2)}%<br>
+            <small>${formatRupiah(value_dw)}</small>
+          </div>
+        `);
       },
       columns: [
         { data: null },
         { data: 'department' },
         { data: 'ratio_spend' },
         { data: 'ratio_worker' },
+        { data: 'ratio_dw' },
         { data: null },
         { data: null }
       ],
@@ -222,10 +236,30 @@ $(function () {
           targets: 4,
           render: function (data, type, full) {
 
+            let dw = full.ratio_dw;
+
+            if (!dw) return '<span class="text-muted">-</span>';
+
+            let percent = parseFloat(dw.max_value || 0);
+            let value = TARGET * percent / 100;
+
+            return `
+              <div class="d-flex flex-column">
+                <span class="fw-medium">${percent}%</span>
+                <small class="text-muted">${formatRupiah(value)}</small>
+              </div>
+            `;
+          }
+        },
+        {
+          targets: 5,
+          render: function (data, type, full) {
+
             let spend = full.ratio_spend;
             let worker = full.ratio_worker;
+            let dw = full.ratio_dw;
 
-            let isOver = (spend || worker); // karena kita ambil label OVER
+            let isOver = (spend || worker || dw); // karena kita ambil label OVER
 
             return isOver
               ? '<span class="badge bg-label-danger">OVER</span>'
@@ -348,14 +382,40 @@ $(function () {
     formData.forEach(i => data[i.name] = i.value);
 
     // 🔥 TAMBAHKAN HOTEL ID
-    data.hotel_id = branchId;
+    data.hotel_id = targetId;
 
-    let url = data.type === 'spend'
-      ? '/api/branches/ratio-spend'
-      : '/api/branches/ratio-worker';
+    // =============================
+    // MAPPING TYPE → API
+    // =============================
+    const endpointMap = {
+      spend: '/api/branches/ratio-spend',
+      worker: '/api/branches/ratio-worker',
+      dw: '/api/branches/ratio-dw'
+    };
+
+    let url = endpointMap[data.type];
+
+    if (!url) {
+      Swal.fire('Error', 'Type tidak valid', 'error');
+      return;
+    }
+
+    // =============================
+    // DEFAULT VALUE (SAMAKAN BACKEND)
+    // =============================
+    if (!data.label) {
+      data.label = 'OVER';
+    }
+
+    if (!data.min_value) {
+      data.min_value = 0;
+    }
 
     delete data.type;
 
+    // =============================
+    // AJAX
+    // =============================
     $.ajax({
       url: url,
       type: 'POST',
@@ -369,16 +429,24 @@ $(function () {
 
           Swal.fire('Success', 'Ratio saved', 'success');
 
-          $('#offcanvasEcommerceCategoryList').offcanvas('hide');
+          // close offcanvas
+          const offcanvasEl = document.getElementById('offcanvasEcommerceCategoryList');
+          const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl);
+          if (offcanvas) offcanvas.hide();
 
+          // reload datatable
           $('.datatables-category-list').DataTable().ajax.reload();
 
+          // reset form biar clean
+          $('#formRatio')[0].reset();
+
         } else {
-          Swal.fire('Error', res.message, 'error');
+          Swal.fire('Error', res.message || 'Gagal simpan', 'error');
         }
 
       },
-      error: function () {
+      error: function (xhr) {
+        console.error(xhr.responseText);
         Swal.fire('Error', 'Server error', 'error');
       }
     });
@@ -391,10 +459,10 @@ $(function () {
 
   document.addEventListener('DOMContentLoaded', function () {
 
-    function loadTarget(branchId) {
+    function loadTarget(targetId) {
 
       $.ajax({
-        url: `/api/branches/target/${branchId}`,
+        url: `/api/branches/target/${targetId}`,
         type: 'GET',
         headers: {
           Authorization: 'Bearer ' + window.jwtToken
@@ -421,7 +489,7 @@ $(function () {
       });
     }
 
-    loadTarget(branchId);
+    loadTarget(targetId);
 
     const form = document.getElementById('eCommerceCategoryListForm');
     if (!form) return;
@@ -552,5 +620,4 @@ $('#iconUpload').change(function () {
     }
 
   });
-
 });

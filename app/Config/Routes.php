@@ -53,6 +53,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->post('datatable', 'BranchController::datatable');
         $routes->post('store', 'BranchController::store');
         $routes->get('ratio/(:num)', 'BranchController::ratio/$1');
+        $routes->get('(:num)/ratio/(:num)', 'BranchController::ratio/$1/$2');
     });
 
     // PARTNER
@@ -289,8 +290,10 @@ $routes->group('api', ['filter' => 'jwt'], function ($routes) {
     $routes->post('branches/update',      'Api\BranchController::update');
     $routes->get('branches/ratio/(:num)', 'Api\BranchController::ratio/$1');
     $routes->get('branches/target/(:num)', 'Api\BranchController::target/$1');
+    $routes->get('branches/target-list/(:num)', 'Api\BranchController::targetList/$1');
     $routes->post('branches/ratio-spend',      'Api\BranchController::storeSpend');
     $routes->post('branches/ratio-worker',      'Api\BranchController::storeWorker');
+    $routes->post('branches/ratio-dw',      'Api\BranchController::storeDw');
 
     // Fiscal Years
     $routes->get('fiscal-years',                   'Api\FiscalYearController::index');

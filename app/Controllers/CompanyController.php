@@ -46,7 +46,7 @@ class CompanyController extends BaseController
         ];
 
         $builder = $this->model
-            // ->where('id', session('company_id'))
+            ->where('id', session('company_id'))
             ->where('deleted_at', null);
 
         // TOTAL

@@ -74,6 +74,7 @@
                           <th>Items</th>
                           <th>Budget Spend</th>
                           <th>Budget Worker</th>
+                          <th>Budget DW</th>
                           <th>Status</th>
                           <th>Actions</th>
                         </tr>
@@ -84,6 +85,7 @@
                           <th></th>
                           <th>Total Spend</th>
                           <th>Total Worker</th>
+                          <th>Total DW</th>
                           <th></th>
                           <th></th>
                         </tr>
@@ -132,6 +134,7 @@
                           <option value="">Select Type</option>
                           <option value="spend">Spend</option>
                           <option value="worker">Worker</option>
+                          <option value="dw">DW</option>
                         </select>
                       </div>
 

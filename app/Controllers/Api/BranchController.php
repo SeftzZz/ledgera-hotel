@@ -275,19 +275,26 @@ class BranchController extends BaseApiController
         ]);
     }
 
-    public function ratio($id)
+    public function ratio($target_id)
     {
         $db = \Config\Database::connect();
 
         $spend = $db->table('ratio_spend')
-            ->where('hotel_id', $id)
+            ->where('target_id', $target_id)
             ->where('is_active', 1)
             ->where('label', 'OVER')
             ->get()
             ->getResultArray();
 
         $worker = $db->table('ratio_worker')
-            ->where('hotel_id', $id)
+            ->where('target_id', $target_id)
+            ->where('is_active', 1)
+            ->where('label', 'OVER')
+            ->get()
+            ->getResultArray();
+
+        $dw = $db->table('ratio_dw')
+            ->where('target_id', $target_id)
             ->where('is_active', 1)
             ->where('label', 'OVER')
             ->get()
@@ -301,7 +308,8 @@ class BranchController extends BaseApiController
             if (!isset($result[$dept])) {
                 $result[$dept] = [
                     'ratio_spend' => [],
-                    'ratio_worker' => []
+                    'ratio_worker' => [],
+                    'ratio_dw' => [],
                 ];
             }
 
@@ -314,11 +322,26 @@ class BranchController extends BaseApiController
             if (!isset($result[$dept])) {
                 $result[$dept] = [
                     'ratio_spend' => [],
-                    'ratio_worker' => []
+                    'ratio_worker' => [],
+                    'ratio_dw' => [],
                 ];
             }
 
             $result[$dept]['ratio_worker'][] = $row;
+        }
+
+        foreach ($dw as $row) {
+            $dept = $row['department_category'];
+
+            if (!isset($result[$dept])) {
+                $result[$dept] = [
+                    'ratio_spend' => [],
+                    'ratio_worker' => [],
+                    'ratio_dw' => [],
+                ];
+            }
+
+            $result[$dept]['ratio_dw'][] = $row;
         }
 
         return $this->response->setJSON([
@@ -327,9 +350,9 @@ class BranchController extends BaseApiController
         ]);
     }
 
-    public function target($id = null)
+    public function target($target_id = null)
     {
-        if (!$id) {
+        if (!$target_id) {
             return $this->response->setJSON([
                 'status' => false,
                 'message' => 'Branch ID required'
@@ -339,7 +362,7 @@ class BranchController extends BaseApiController
         $db = \Config\Database::connect();
 
         $data = $db->table('branches_target')
-            ->where('branch_id', $id)
+            ->where('id', $target_id)
             ->get()
             ->getRowArray();
 
@@ -362,6 +385,22 @@ class BranchController extends BaseApiController
                 'tax'    => $target * ($data['tax_service'] / 100),
                 'margin' => $target * ($data['total_margin'] / 100),
             ]
+        ]);
+    }
+
+    public function targetList($target_id)
+    {
+        $db = \Config\Database::connect();
+
+        $data = $db->table('branches_target')
+            ->where('id', $target_id)
+            ->orderBy('id', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        return $this->response->setJSON([
+            'status' => true,
+            'data' => $data
         ]);
     }
 
@@ -411,6 +450,33 @@ class BranchController extends BaseApiController
                 'min_value' => $data['min_value'] ?? 0,
                 'max_value' => $data['max_value'],
                 'label' => $data['label'],
+                'sort_order' => $data['sort_order'] ?? 1
+            ]);
+
+        return $this->response->setJSON([
+            'status' => true
+        ]);
+    }
+
+    public function storeDw()
+    {
+        $data = $this->request->getPost();
+
+        if (empty($data['department_category']) || empty($data['max_value'])) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Field wajib belum lengkap'
+            ]);
+        }
+
+        \Config\Database::connect()
+            ->table('ratio_dw')
+            ->insert([
+                'hotel_id' => $data['hotel_id'],
+                'department_category' => $data['department_category'],
+                'min_value' => $data['min_value'] ?? 0,
+                'max_value' => $data['max_value'],
+                'label' => $data['label'] ?? 'OVER',
                 'sort_order' => $data['sort_order'] ?? 1
             ]);
 

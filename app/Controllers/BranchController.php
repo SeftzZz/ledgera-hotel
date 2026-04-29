@@ -53,9 +53,15 @@ class BranchController extends BaseController
         ];
 
         $builder = $this->model
-            ->select('branches.*, companies.company_name')
+            ->select('
+                branches.*, 
+                companies.company_name,
+                GROUP_CONCAT(CONCAT(branches_target.id, ":", branches_target.target)) as targets
+            ')
             ->join('companies', 'companies.id = branches.company_id', 'left')
-            ->where('companies.id', session('company_id'));
+            ->join('branches_target', 'branches_target.branch_id = branches.id', 'left')
+            ->where('branches.id', session('branch_id'))
+            ->groupBy('branches.id');
 
         // TOTAL
         $recordsTotal = (clone $builder)->countAllResults(false);
@@ -106,11 +112,6 @@ class BranchController extends BaseController
                         data-id="'.$row['id'].'">
                         <i class="ti ti-trash"></i>
                     </button>
-
-                    <a href="branch/ratio/'.$row['id'].'" class="btn btn-sm btn-icon btn-warning btn-ratio"
-                        data-id="'.$row['id'].'">
-                        <i class="ti ti-list"></i>
-                    </a>
                 </div>
             ';
 
@@ -119,6 +120,8 @@ class BranchController extends BaseController
                 'company_name' => esc($row['company_name'] ?? '-'),
                 'branch_code'  => esc($row['branch_code']),
                 'branch_name'  => esc($row['branch_name']),
+                'branch_id'    => esc($row['id']),
+                'targets'      => $row['targets'],
                 'action'       => $action
             ];
         }
@@ -131,11 +134,12 @@ class BranchController extends BaseController
         ]);
     }
 
-    public function ratio($id)
+    public function ratio($branch_id, $id)
     {
         return view('master_data/branch/ratio', [
             'title'     => 'Branch Ratio',
-            'branch_id' => $id
+            'branch_id' => $branch_id,
+            'target_id' => $id,
         ]);
     }
 }

@@ -13,6 +13,7 @@
                         <th>Branch Code</th>
                         <th>Branch Name</th>
                         <th>Action</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -292,7 +293,8 @@ $(function () {
                 { data: 'company_name' },
                 { data: 'branch_code' },
                 { data: 'branch_name' },
-                { data: 'action' }
+                { data: 'action' },
+                { data: null }
             ],
             columnDefs: [
                 {
@@ -310,8 +312,40 @@ $(function () {
                 },
                 {
                     targets: -1,
+                    title: 'Detail',
+                    searchable: false,
                     orderable: false,
-                    searchable: false
+                    render: function (data, type, full, meta) {
+
+                        let targets = full.targets ? full.targets.split(',') : [];
+
+                        let targetList = '';
+
+                        targets.forEach(item => {
+
+                            let [id, value] = item.split(':');
+
+                            targetList += `
+                                <a href="/branch/${full.branch_id}/ratio/${id}" class="dropdown-item">
+                                    <strong>${formatRupiah(parseInt(value))}</strong>
+                                </a>
+                            `;
+                        });
+
+                        return (
+                            '<div class="d-flex justify-content-sm-center align-items-sm-center">' +
+
+                                '<button class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">' +
+                                    '<i class="ti ti-dots-vertical"></i>' +
+                                '</button>' +
+
+                                '<div class="dropdown-menu dropdown-menu-end m-0">' +
+                                    targetList +
+                                '</div>' +
+
+                            '</div>'
+                        );
+                    }
                 }
             ],
             order: [[3, 'asc']],

@@ -207,6 +207,146 @@
                 displayLength: 10,
                 buttons: [
                     {
+          extend: 'collection',
+          className: 'btn btn-label-primary dropdown-toggle me-2 waves-effect waves-light',
+          text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
+          buttons: [
+                        {
+                          extend: 'print',
+                          text: '<i class="ti ti-printer me-1" ></i>Print',
+                          className: 'dropdown-item',
+                          exportOptions: {
+                            columns: [0, 1, 2, 5],
+                            // prevent avatar to be display
+                            format: {
+                              body: function (inner, coldex, rowdex) {
+                                if (inner.length <= 0) return inner;
+                                var el = $.parseHTML(inner);
+                                var result = '';
+                                $.each(el, function (index, item) {
+                                  if (item.classList !== undefined && item.classList.contains('user-name')) {
+                                    result = result + item.lastChild.firstChild.textContent;
+                                  } else if (item.innerText === undefined) {
+                                    result = result + item.textContent;
+                                  } else result = result + item.innerText;
+                                });
+                                return result;
+                              }
+                            }
+                          },
+                          customize: function (win) {
+                            //customize print view for dark
+                            $(win.document.body)
+                              .css('color', config.colors.headingColor)
+                              .css('border-color', config.colors.borderColor)
+                              .css('background-color', config.colors.bodyBg);
+                            $(win.document.body)
+                              .find('table')
+                              .addClass('compact')
+                              .css('color', 'inherit')
+                              .css('border-color', 'inherit')
+                              .css('background-color', 'inherit');
+                          }
+                        },
+                        {
+                          extend: 'csv',
+                          text: '<i class="ti ti-file-text me-1" ></i>Csv',
+                          className: 'dropdown-item',
+                          exportOptions: {
+                            columns: [0, 1, 2, 5],
+                            // prevent avatar to be display
+                            format: {
+                              body: function (inner, coldex, rowdex) {
+                                if (inner.length <= 0) return inner;
+                                var el = $.parseHTML(inner);
+                                var result = '';
+                                $.each(el, function (index, item) {
+                                  if (item.classList !== undefined && item.classList.contains('user-name')) {
+                                    result = result + item.lastChild.firstChild.textContent;
+                                  } else if (item.innerText === undefined) {
+                                    result = result + item.textContent;
+                                  } else result = result + item.innerText;
+                                });
+                                return result;
+                              }
+                            }
+                          }
+                        },
+                        {
+                          extend: 'excel',
+                          text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel',
+                          className: 'dropdown-item',
+                          exportOptions: {
+                            columns: [0, 1, 2, 5],
+                            // prevent avatar to be display
+                            format: {
+                              body: function (inner, coldex, rowdex) {
+                                if (inner.length <= 0) return inner;
+                                var el = $.parseHTML(inner);
+                                var result = '';
+                                $.each(el, function (index, item) {
+                                  if (item.classList !== undefined && item.classList.contains('user-name')) {
+                                    result = result + item.lastChild.firstChild.textContent;
+                                  } else if (item.innerText === undefined) {
+                                    result = result + item.textContent;
+                                  } else result = result + item.innerText;
+                                });
+                                return result;
+                              }
+                            }
+                          }
+                        },
+                        {
+                          extend: 'pdf',
+                          text: '<i class="ti ti-file-description me-1"></i>Pdf',
+                          className: 'dropdown-item',
+                          exportOptions: {
+                            columns: [0, 1, 2, 5],
+                            // prevent avatar to be display
+                            format: {
+                              body: function (inner, coldex, rowdex) {
+                                if (inner.length <= 0) return inner;
+                                var el = $.parseHTML(inner);
+                                var result = '';
+                                $.each(el, function (index, item) {
+                                  if (item.classList !== undefined && item.classList.contains('user-name')) {
+                                    result = result + item.lastChild.firstChild.textContent;
+                                  } else if (item.innerText === undefined) {
+                                    result = result + item.textContent;
+                                  } else result = result + item.innerText;
+                                });
+                                return result;
+                              }
+                            }
+                          }
+                        },
+                        {
+                          extend: 'copy',
+                          text: '<i class="ti ti-copy me-1" ></i>Copy',
+                          className: 'dropdown-item',
+                          exportOptions: {
+                            columns: [0, 1, 2, 5],
+                            // prevent avatar to be display
+                            format: {
+                              body: function (inner, coldex, rowdex) {
+                                if (inner.length <= 0) return inner;
+                                var el = $.parseHTML(inner);
+                                var result = '';
+                                $.each(el, function (index, item) {
+                                  if (item.classList !== undefined && item.classList.contains('user-name')) {
+                                    result = result + item.lastChild.firstChild.textContent;
+                                  } else if (item.innerText === undefined) {
+                                    result = result + item.textContent;
+                                  } else result = result + item.innerText;
+                                });
+                                return result;
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
                         text: '<i class="ti ti-plus me-sm-1"></i> <span>Create Transaction</span>',
                         className: 'btn btn-primary',
                         action: function () {
