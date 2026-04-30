@@ -24,7 +24,7 @@ class CartService
                     'item_id'    => $vendorItem->id,
                     'quantity'   => $data['quantity'],
                     'price'      => $data['price'],
-                    'created_at' => $data['date'],
+                    'created_at' => $data['date'] ?? date('Y-m-d H:i:s'),
                 ]);
                 return true;
             }
@@ -47,7 +47,7 @@ class CartService
                     'item_id'    => $item->id,
                     'quantity'   => $data['quantity'],
                     'price'      => $data['price'],
-                    'created_at' => $data['date'],
+                    'created_at' => $data['date'] ?? date('Y-m-d H:i:s'),
                 ]);
                 return true;
             }
@@ -71,7 +71,7 @@ class CartService
                     'item_id'    => $item->id,
                     'quantity'   => $data['quantity'],
                     'price'      => $data['price'],
-                    'created_at' => $data['date'],
+                    'created_at' => $data['date'] ?? date('Y-m-d H:i:s'),
                 ]);
                 return true;
             }

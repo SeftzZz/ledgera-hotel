@@ -55,11 +55,7 @@ class DashboardService
             'posted'  => $approval['posted'],
 
             // BRANCH
-            'branchLabels'  => $branch['branchLabels'],
-            'branchRevenue' => $branch['branchRevenue'],
-            'branchExpense' => $branch['branchExpense'],
-            'branchTargets' => $branch['branchTargets'],
-            'branchSW'      => $branch['branchSW'],
+            'branches'  => $branch['branches'],
 
             // DEPARTMENT
             'departmentSummary' => $department,
@@ -493,30 +489,37 @@ class DashboardService
         }
 
         // ==============================
-        // FINAL ARRAY
+        // FINAL ARRAY (GROUPED)
         // ==============================
-        $branchLabels  = [];
-        $branchRevenue = [];
-        $branchExpense = [];
-        $branchTargets = [];
-        $branchSW      = [];
+        $branches = [];
 
         foreach ($branchData as $row) {
+
             $id = (int)$row['id'];
 
-            $branchLabels[]  = $row['branch_name'];
-            $branchRevenue[] = (float)$row['revenue'];
-            $branchExpense[] = (float)$row['expense'];
-            $branchTargets[] = (float)$row['target'];
-            $branchSW[]      = (float)($swMap[$id] ?? 0);
+            // init branch kalau belum ada
+            if (!isset($branches[$id])) {
+                $branches[$id] = [
+                    'branch_id'   => $id,
+                    'branch_name' => $row['branch_name'],
+                    'items'       => []
+                ];
+            }
+
+            // push target sebagai item
+            $branches[$id]['items'][] = [
+                'target'  => (float)$row['target'],
+                'revenue' => (float)$row['revenue'],
+                'expense' => (float)$row['expense'],
+                'sw'      => (float)($swMap[$id] ?? 0)
+            ];
         }
 
+        // reset index
+        $branches = array_values($branches);
+
         return [
-            'branchLabels'  => $branchLabels,
-            'branchRevenue' => $branchRevenue,
-            'branchExpense' => $branchExpense,
-            'branchTargets' => $branchTargets,
-            'branchSW'      => $branchSW,
+            'branches' => $branches
         ];
     }
 

@@ -207,180 +207,204 @@
       return;
     }
 
-    const labels = window.dashboardData.branchLabels || [];
-    const revenues = window.dashboardData.branchRevenue || [];
-    const expenses = window.dashboardData.branchExpense || [];
-    const targets = window.dashboardData.branchTargets || [];
-    const sw = window.dashboardData.branchSW || [];
+    // 🔥 sekarang pakai branches (nested)
+    const branches = window.dashboardData.branches || [];
 
-    if (!labels.length) {
+    if (!branches.length) {
       console.warn('Data chart kosong');
       return;
     }
 
-    labels.forEach((branch, i) => {
-      const el = document.querySelector(`#deliveryExceptionsChart-${i}`);
+    branches.forEach((branch, i) => {
 
-      if (!el) {
-        console.warn(`Element #deliveryExceptionsChart-${i} tidak ditemukan`);
-        return;
-      }
+      if (!branch.items || !branch.items.length) return;
 
-      // data per branch
-      const revenueVal = Number(revenues[i]) || 0;
-      const expenseVal = Number(expenses[i]) || 0;
+      branch.items.forEach((item, j) => {
 
-      const seriesData = [revenueVal, expenseVal];
-      
-      const deliveryExceptionsChartConfig = {
-        chart: {
-          height: 420,
-          parentHeightOffset: 0,
-          type: 'donut'
-        },
-        labels: ['Revenue', 'Expense'], //override per branch
-        series: seriesData,
-        colors: [
-          chartColors?.donut?.series1 || '#28c76f',
-          chartColors?.donut?.series2 || '#ea5455',
-          chartColors?.donut?.series3 || '#ff9f43',
-          chartColors?.donut?.series4 || '#00cfe8',
-          chartColors?.donut?.series5 || '#7367f0'
-        ],
-        stroke: {
-          width: 0
-        },
-        dataLabels: {
-          enabled: false,
-          formatter: function (val) {
-            return parseInt(val) + '%';
-          }
-        },
-        legend: {
-          show: true,
-          position: 'bottom',
-          offsetY: 10,
-          markers: {
-            width: 8,
-            height: 8,
-            offsetX: -3
+        const el = document.querySelector(`#deliveryExceptionsChart-${i}-${j}`);
+
+        if (!el) {
+          console.warn(`Element #deliveryExceptionsChart-${i}-${j} tidak ditemukan`);
+          return;
+        }
+
+        // ======================
+        // DATA
+        // ======================
+        const revenueVal = Number(item.revenue) || 0;
+        const expenseVal = Number(item.expense) || 0;
+        const targetVal  = Number(item.target) || 0;
+        const swVal      = Number(item.sw) || 0;
+
+        // 🔥 KUNCI: normalize ke target
+        const revenueScaled = revenueVal;
+        const expenseScaled = expenseVal;
+
+        // ❗ ini yang bikin beda per target
+        const remaining = Math.max(targetVal - (revenueScaled + expenseScaled), 0);
+
+        const seriesData = [
+          revenueScaled,
+          expenseScaled,
+          remaining // dipakai untuk shaping
+        ];
+
+        const deliveryExceptionsChartConfig = {
+          chart: {
+            height: 420,
+            parentHeightOffset: 0,
+            type: 'donut'
           },
-          itemMargin: {
-            horizontal: 15,
-            vertical: 5
+          labels: ['Revenue', 'Expense', ''],
+          series: seriesData,
+          colors: [
+            chartColors?.donut?.series1 || '#28c76f',
+            chartColors?.donut?.series2 || '#ea5455',
+            '#e6e6e6',
+          ],
+          stroke: {
+            width: 0
           },
-          fontSize: '13px',
-          fontFamily: 'Public Sans',
-          fontWeight: 700,
-          labels: {
-            colors: typeof headingColor !== 'undefined' ? headingColor : '#6e6b7b',
-            useSeriesColors: false
-          },
-          
-          // Persentase Revenue & Expense
-          formatter: function (seriesName, opts) {
-            const value = opts.w.globals.series[opts.seriesIndex];
-            const target = targets[i] || 0;
-            const totalSW = sw[i] || 0;
-
-            // ambil total expense pembagi dari localStorage
-            // const totalSW = parseFloat(localStorage.getItem('dashboard_total_sw') || 0);
-            
-            let percent = 0;
-
-            if (seriesName === 'Revenue') {
-              percent = target > 0
-                ? (value / target) * 100
-                : 0;
+          dataLabels: {
+            enabled: false,
+            formatter: function (val) {
+              return parseInt(val) + '%';
             }
-
-            if (seriesName === 'Expense') {
-              percent = totalSW > 0
-                ? (value / totalSW) * 100
-                : 0;
-              // percent = totalSW;
-            }
-
-            return `${seriesName} (${percent.toFixed(2)}%)`;
-          }
-        },
-        tooltip: {
-          // theme: 'dark', // 🔥 ini otomatis putih text
-          style: {
+          },
+          legend: {
+            show: true,
+            position: 'bottom',
+            offsetY: 10,
+            markers: {
+              width: 8,
+              height: 8,
+              offsetX: -3
+            },
+            itemMargin: {
+              horizontal: 15,
+              vertical: 5
+            },
             fontSize: '13px',
             fontFamily: 'Public Sans',
-            color: '#ffffff' // 🔥 force putih
+            fontWeight: 700,
+            labels: {
+              colors: typeof headingColor !== 'undefined' ? headingColor : '#6e6b7b',
+              useSeriesColors: false
+            },
+
+            formatter: function (seriesName, opts) {
+
+              if (!seriesName) return ''; // hide remaining
+
+              let percent = 0;
+
+              if (seriesName === 'Revenue') {
+                percent = targetVal > 0
+                  ? (revenueVal / targetVal) * 100
+                  : 0;
+              }
+
+              if (seriesName === 'Expense') {
+                percent = targetVal > 0
+                  ? (expenseVal / targetVal) * 100
+                  : 0;
+              }
+
+              return `${seriesName} (${percent.toFixed(2)}%)`;
+            }
           },
-          y: {
-            formatter: function(val) {
-              return 'Rp ' + Number(val).toLocaleString();
+          tooltip: {
+            style: {
+              fontSize: '13px',
+              fontFamily: 'Public Sans',
+              color: '#ffffff'
+            },
+            y: {
+              formatter: function(val, opts) {
+
+                const index = opts.seriesIndex;
+
+                if (index === 0) {
+                  return 'Rp ' + Number(val).toLocaleString();
+                }
+
+                if (index === 1) {
+                  return 'Rp ' + Number(val).toLocaleString();
+                }
+
+                if (index === 2) {
+                  return 'Rp ' + Number(val).toLocaleString();
+                }
+
+                return 'Rp ' + Number(val).toLocaleString();
+              }
             }
-          }
-        },
-        grid: {
-          padding: {
-            top: 15
-          }
-        },
-        states: {
-          hover: {
-            filter: {
-              type: 'none'
+          },
+          grid: {
+            padding: {
+              top: 15
             }
-          }
-        },
-        plotOptions: {
-          pie: {
-            donut: {
-              size: '77%',
-              labels: {
-                show: true,
-                value: {
-                  fontSize: '18px',
-                  fontFamily: 'Public Sans',
-                  color: typeof headingColor !== 'undefined' ? headingColor : '#000',
-                  fontWeight: 500,
-                  offsetY: -30,
-                  formatter: function (val) {
-                    return 'Rp ' + parseInt(val).toLocaleString();
-                  }
-                },
-                name: {
-                  offsetY: 20,
-                  fontFamily: 'Public Sans'
-                },
-                total: {
+          },
+          states: {
+            hover: {
+              filter: {
+                type: 'none'
+              }
+            }
+          },
+          plotOptions: {
+            pie: {
+              donut: {
+                size: '77%',
+                labels: {
                   show: true,
-                  fontSize: '.75rem',
-                  label: branch, // 🔥 nama branch di tengah
-                  color: typeof labelColor !== 'undefined' ? labelColor : '#999',
-                  formatter: function () {
-                    const total = seriesData.reduce((a,b)=>a+b,0);
-                    return 'Rp ' + total.toLocaleString();
+                  value: {
+                    fontSize: '18px',
+                    fontFamily: 'Public Sans',
+                    color: typeof headingColor !== 'undefined' ? headingColor : '#000',
+                    fontWeight: 500,
+                    offsetY: -30,
+                    formatter: function (val) {
+                      return 'Rp ' + parseInt(val).toLocaleString();
+                    }
+                  },
+                  name: {
+                    offsetY: 20,
+                    fontFamily: 'Public Sans'
+                  },
+                  total: {
+                    show: true,
+                    fontSize: '.75rem',
+                    label: branch.branch_name,
+                    color: typeof labelColor !== 'undefined' ? labelColor : '#999',
+                    formatter: function () {
+                      return 'Rp ' + revenueVal.toLocaleString(); // 🔥 tetap revenue saja
+                    }
                   }
                 }
               }
             }
-          }
-        },
-        responsive: [
-          {
-            breakpoint: 420,
-            options: {
-              chart: {
-                height: 360
+          },
+          responsive: [
+            {
+              breakpoint: 420,
+              options: {
+                chart: {
+                  height: 360
+                }
               }
             }
-          }
-        ]
-      };
+          ]
+        };
 
-      try {
-        const chart = new ApexCharts(el, deliveryExceptionsChartConfig);
-        chart.render();
-      } catch (err) {
-        console.error(`Render chart ${branch} gagal:`, err);
-      }
+        try {
+          const chart = new ApexCharts(el, deliveryExceptionsChartConfig);
+          chart.render();
+        } catch (err) {
+          console.error(`Render chart ${branch.branch_name} gagal:`, err);
+        }
+
+      });
 
     });
 

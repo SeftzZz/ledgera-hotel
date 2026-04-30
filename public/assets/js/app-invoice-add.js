@@ -280,10 +280,10 @@ $(function () {
         const price  = row.querySelector('.invoice-item-price').value;
         const date  = row.querySelector('.invoice-item-date').value;
 
-        if (!date) {
-          alert('Date wajib diisi');
-          return;
-        }
+        // if (!date) {
+        //   alert('Date wajib diisi');
+        //   return;
+        // }
 
         if (!itemId || !qty || qty <= 0) continue;
 
@@ -323,15 +323,15 @@ $(function () {
         })
       });
 
-      if (!checkIn || !checkOut) {
-        alert('Check In & Check Out wajib diisi');
-        return;
-      }
+      // if (!checkIn || !checkOut) {
+      //   alert('Check In & Check Out wajib diisi');
+      //   return;
+      // }
 
-      if (new Date(checkOut) <= new Date(checkIn)) {
-        alert('Check Out harus lebih besar dari Check In');
-        return;
-      }
+      // if (new Date(checkOut) <= new Date(checkIn)) {
+      //   alert('Check Out harus lebih besar dari Check In');
+      //   return;
+      // }
 
       const orderJson = await orderRes.json();
 

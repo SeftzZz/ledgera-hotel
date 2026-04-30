@@ -376,16 +376,25 @@
 
         <!--/ Delivery Performance -->
         <!-- Reasons for delivery exceptions -->
-        <?php foreach ($branchLabels as $i => $branch): ?>
-        <div class="col-lg-4 col-sm-6 mb-4">
+        <?php foreach ($branches as $i => $branch): ?>
+        <div class="col-lg-12 col-sm-6 mb-4">
           <div class="card h-100">
             <div class="card-header d-flex align-items-center justify-content-between">
               <div class="card-title mb-0">
-                <h5 class="m-0 me-2"><?= $branch ?></h5>
+                <h5 class="m-0 me-2"><?= $branch['branch_name'] ?></h5>
               </div>
             </div>
             <div class="card-body">
-                <div id="deliveryExceptionsChart-<?= $i ?>" class="pt-md-4"></div>     
+                <div style="display:flex; flex-wrap:wrap; gap:20px;">
+                    <?php foreach ($branch['items'] as $j => $item): ?>
+                        <div style="width:32%;">
+                            <div style="justify-self: center;">
+                                <label>Target: Rp <?= number_format($item['target']) ?></label>
+                            </div>
+                            <div id="deliveryExceptionsChart-<?= $i ?>-<?= $j ?>"></div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
             </div>
           </div>
         </div>
@@ -437,11 +446,7 @@
     // ======================
     // BRANCH
     // ======================
-    branchLabels: <?= json_encode($branchLabels) ?>,
-    branchRevenue: <?= json_encode($branchRevenue) ?>,
-    branchExpense: <?= json_encode($branchExpense) ?>,
-    branchTargets: <?= json_encode($branchTargets) ?>,
-    branchSW: <?= json_encode(array_values($branchSW)) ?>,
+    branches: <?= json_encode($branches) ?>,
 
     // ======================
     // DEPARTMENT

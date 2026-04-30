@@ -58,7 +58,7 @@
                                     </select>
                                   </div>
                                   <div class="col-md-2 col-12 mb-md-0 mb-3">
-                                    <p class="mb-2 repeater-title">Qty</p>
+                                    <p class="mb-2 repeater-title">Rooms</p>
                                     <input
                                       type="text"
                                       class="form-control invoice-item-qty"
