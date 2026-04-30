@@ -86,7 +86,7 @@
                                     <input
                                       type="text"
                                       class="form-control w-100 date-picker invoice-item-date"
-                                      placeholder="YYYY-MM-DD" />
+                                      placeholder="YYYY-MM-DD"/>
                                   </div>
                                 </div>
                               </div>

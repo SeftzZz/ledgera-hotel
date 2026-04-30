@@ -30,7 +30,6 @@ $(function () {
           // PRODUCT NAME
           targets: 0,
           render: function (data, type, full) {
-
             let name = full.name;
 
             let states = ['success','danger','warning','info','dark','primary','secondary'];
@@ -39,24 +38,57 @@ $(function () {
             let initials = name.match(/\b\w/g) || [];
             initials = ((initials.shift() || '') + (initials.pop() || '')).toUpperCase();
 
-            let output;
-
-            output = `
+            let avatar = `
               <span class="avatar-initial rounded-2 bg-label-${state}">
                 ${initials}
               </span>
             `;
 
-            return `
-              <div class="d-flex justify-content-start align-items-center product-name">
+            // ambil dari ORDER (bukan item)
+            function formatDate(dateStr){
+              if(!dateStr) return '-';
 
-                <div class="avatar-wrapper">
-                  <div class="avatar me-2 rounded-2 bg-label-secondary">
-                    ${output}
+              const date = new Date(dateStr);
+
+              return date.toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              });
+            }
+            
+            let checkIn  = formatDate(window.orderData?.check_in || '-');
+            let checkOut = formatDate(window.orderData?.check_out || '-');
+            let note     = window.orderData?.note || '-';
+
+            return `
+              <div class="d-flex align-items-start">
+
+                <div class="avatar-wrapper me-2">
+                  <div class="avatar rounded-2 bg-label-secondary">
+                    ${avatar}
                   </div>
                 </div>
 
-                <span class="ms-1">${name}</span>
+                <div class="d-flex flex-column">
+
+                  <span class="fw-semibold">${name}</span>
+
+                  <small class="text-muted">
+                    <b>Check In:</b> ${checkIn}
+                  </small>
+
+                  <small class="text-muted">
+                    <b>Check Out:</b> ${checkOut}
+                  </small>
+
+                  ${note ? `
+                    <small class="text-muted">
+                      <b>Note:</b> ${note}
+                    </small>
+                  ` : ''}
+
+                </div>
 
               </div>
             `;
@@ -113,6 +145,7 @@ $(function () {
 
         const order = res.data.order;
         const items = res.data.items;
+        window.orderData = order;
 
         // HEADER
         $('#order_number').text(order.order_number);

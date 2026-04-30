@@ -9,6 +9,9 @@ class OrderModel extends BaseModel
 
     protected $allowedFields = [
         'order_number',
+        'check_in',
+        'check_out',
+        'note',
         'user_id',
         'branch_id',
         'cart_id',

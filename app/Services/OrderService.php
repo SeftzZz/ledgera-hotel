@@ -58,6 +58,15 @@ class OrderService
         $orderNumber = $data['order_number'];
         $deposit = $data['deposit'] ?? 0;
         $pengajuanId = $data['pengajuan_id'] ?? null;
+        $checkIn  = $data['check_in'] ?? null;
+        $checkOut = $data['check_out'] ?? null;
+        $note     = $data['note'] ?? null;
+
+        if ($checkIn && $checkOut) {
+            if (strtotime($checkOut) <= strtotime($checkIn)) {
+                throw new \Exception('Check Out harus lebih besar dari Check In');
+            }
+        }
 
         // if ($DEBUG) dd('INPUT DATA', $data);
 
@@ -233,6 +242,9 @@ class OrderService
 
         $orderId = $orderModel->insert([
             'order_number'  =>$orderNumber,
+            'check_in'      =>$checkIn,
+            'check_out'     =>$checkOut,
+            'note'          =>$note,
             'user_id'       =>$userId,
             'branch_id'     =>$cart['branch_id'],
             'cart_id'       =>$cartId,

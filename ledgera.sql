@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.3
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Apr 29, 2026 at 04:12 PM
--- Server version: 10.11.10-MariaDB-log
--- PHP Version: 8.3.27
+-- Host: 127.0.0.1
+-- Generation Time: Apr 30, 2026 at 03:42 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `ledgera`
+-- Database: `ledgerahotel`
 --
 
 -- --------------------------------------------------------
@@ -342,7 +342,8 @@ CREATE TABLE `carts` (
 --
 
 INSERT INTO `carts` (`id`, `user_id`, `branch_id`, `status`, `created_at`) VALUES
-(1, 2, 3, 'checked_out', '2026-04-28 15:05:06');
+(1, 2, 3, 'checked_out', '2026-04-28 15:05:06'),
+(2, 19, 3, 'checked_out', '2026-04-30 08:40:25');
 
 -- --------------------------------------------------------
 
@@ -356,7 +357,7 @@ CREATE TABLE `cart_items` (
   `item_id` int(11) DEFAULT NULL,
   `quantity` decimal(10,2) DEFAULT NULL,
   `price` decimal(15,2) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL
+  `created_at` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -364,7 +365,8 @@ CREATE TABLE `cart_items` (
 --
 
 INSERT INTO `cart_items` (`id`, `cart_id`, `item_id`, `quantity`, `price`, `created_at`) VALUES
-(1, 1, 10, 5.00, 5000000.00, '2026-04-28 00:00:00');
+(1, 1, 10, 5.00, 5000000.00, '2026-04-28'),
+(2, 2, 10, 1.00, 450000.00, '2026-04-30');
 
 -- --------------------------------------------------------
 
@@ -470,7 +472,6 @@ INSERT INTO `chats` (`id`, `user_id`, `branch_id`, `created_at`) VALUES
 (1, 1, 3, '2026-03-10 01:26:30'),
 (2, 2, 3, '2026-03-15 16:19:55'),
 (3, 3, 2, '2026-03-15 16:22:28'),
-(4, 9, 3, '2026-03-27 17:53:08'),
 (5, 18, 3, '2026-04-16 15:18:10'),
 (6, 17, 3, '2026-04-16 15:18:11'),
 (7, 3, 3, '2026-04-16 15:18:12');
@@ -497,12 +498,9 @@ INSERT INTO `chat_messages` (`id`, `chat_id`, `sender_type`, `message`, `created
 (1, 1, 'user', 'Hello', '2026-03-10 01:26:45'),
 (2, 1, 'user', 'Hi', '2026-03-15 15:31:14'),
 (3, 1, 'admin', 'Halo', '2026-03-15 15:35:36'),
-(4, 1, 'admin', 'Hi', '2026-03-15 15:36:50'),
 (5, 1, 'admin', 'Oke', '2026-03-15 15:37:32'),
 (6, 2, 'admin', 'Halo', '2026-03-15 16:21:27'),
-(7, 3, 'admin', 'Halo', '2026-03-15 16:22:32'),
-(8, 3, 'admin', 'Tes pesan', '2026-03-15 16:39:09'),
-(9, 4, 'admin', 'Hi', '2026-03-27 17:53:11');
+(7, 3, 'admin', 'Halo', '2026-03-15 16:22:32');
 
 -- --------------------------------------------------------
 
@@ -1029,6 +1027,9 @@ CREATE TABLE `migrations` (
 CREATE TABLE `orders` (
   `id` bigint(20) NOT NULL,
   `order_number` varchar(50) DEFAULT NULL,
+  `check_in` date DEFAULT NULL,
+  `check_out` date DEFAULT NULL,
+  `note` text DEFAULT NULL,
   `user_id` int(20) DEFAULT NULL,
   `branch_id` int(20) DEFAULT NULL,
   `cart_id` bigint(20) DEFAULT NULL,
@@ -1045,8 +1046,9 @@ CREATE TABLE `orders` (
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `order_number`, `user_id`, `branch_id`, `cart_id`, `subtotal`, `discount`, `wallet_used`, `deposit`, `total_amount`, `status`, `created_at`) VALUES
-(1, 'ORD2026042815044805118B', 2, 3, 1, 25000000.00, 0.00, 0.00, 0.00, 25000000.00, 'pending', '2026-04-28 15:05:06');
+INSERT INTO `orders` (`id`, `order_number`, `check_in`, `check_out`, `note`, `user_id`, `branch_id`, `cart_id`, `subtotal`, `discount`, `wallet_used`, `deposit`, `total_amount`, `status`, `created_at`) VALUES
+(1, 'ORD2026042815044805118B', NULL, NULL, NULL, 2, 3, 1, 25000000.00, 0.00, 0.00, 0.00, 25000000.00, 'pending', '2026-04-28 15:05:06'),
+(2, 'ORD20260430083939B9C52E', '2026-04-30', '2026-05-01', 'Sarapan Nasi Uduk Saja', 19, 3, 2, 450000.00, 0.00, 0.00, 0.00, 450000.00, 'pending', '2026-04-30 08:40:25');
 
 -- --------------------------------------------------------
 
@@ -1068,7 +1070,8 @@ CREATE TABLE `order_items` (
 --
 
 INSERT INTO `order_items` (`id`, `order_id`, `item_id`, `quantity`, `price`, `created_at`) VALUES
-(1, 1, 10, 5.00, 5000000.00, '2026-04-28 15:05:06');
+(1, 1, 10, 5.00, 5000000.00, '2026-04-28 15:05:06'),
+(2, 2, 10, 1.00, 450000.00, '2026-04-30 08:40:25');
 
 -- --------------------------------------------------------
 
@@ -1091,7 +1094,8 @@ CREATE TABLE `payments` (
 --
 
 INSERT INTO `payments` (`id`, `order_id`, `payment_method`, `amount`, `status`, `transaction_ref`, `paid_at`) VALUES
-(1, 1, 'cash', 25000000.00, 'pending', NULL, '2026-04-28 15:05:06');
+(1, 1, 'cash', 25000000.00, 'pending', NULL, '2026-04-28 15:05:06'),
+(2, 2, 'cash', 450000.00, 'pending', NULL, '2026-04-30 08:40:25');
 
 -- --------------------------------------------------------
 
@@ -1178,7 +1182,12 @@ INSERT INTO `point_transactions` (`id`, `user_id`, `points`, `type`, `reference_
 (2, 2, 500, 'earn', 'order', 28, '2026-04-24 21:29:27'),
 (3, 2, 20000, 'earn', 'order', 30, '2026-04-24 22:39:30'),
 (4, 3, 600000, 'earn', 'order', 31, '2026-04-24 22:39:55'),
-(5, 2, 2500, 'earn', 'order', 1, '2026-04-28 15:05:06');
+(5, 2, 2500, 'earn', 'order', 1, '2026-04-28 15:05:06'),
+(6, 19, 50, 'earn', 'order', 2, '2026-04-29 17:14:59'),
+(7, 19, 128, 'earn', 'order', 3, '2026-04-29 17:23:01'),
+(8, 19, 130, 'earn', 'order', 2, '2026-04-29 17:25:59'),
+(9, 19, 126, 'earn', 'order', 3, '2026-04-30 07:44:52'),
+(10, 19, 45, 'earn', 'order', 2, '2026-04-30 08:40:25');
 
 -- --------------------------------------------------------
 
@@ -1664,9 +1673,10 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `company_id`, `branch_id`, `category_id`, `role`, `name`, `email`, `phone`, `password`, `photo`, `is_active`, `last_login_at`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) VALUES
 (1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-04-28 13:26:57', '2026-01-18 12:25:53', 1, '2026-04-28 13:26:57', NULL, NULL, NULL),
 (2, 1, 3, 4, 'hotel_fo', 'Syahwal Ramadhan', 'syahwal.86@gmail.com', '895330907220', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '2.png', 'active', '2026-04-28 13:30:07', '2026-01-18 18:59:55', 1, '2026-04-28 13:30:07', NULL, NULL, NULL),
-(3, 1, 3, 0, 'hotel_gm', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '3.png', 'active', '2026-04-28 13:54:06', '2026-01-19 10:53:08', 1, '2026-04-28 13:54:06', NULL, NULL, NULL),
+(3, 1, 3, 0, 'hotel_gm', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '3.png', 'active', '2026-04-30 07:33:28', '2026-01-19 10:53:08', 1, '2026-04-30 07:33:28', NULL, NULL, NULL),
 (17, 1, 3, 1, 'hotel_fnb_production', 'Aji Kitchen', 'aji.kitchen@gmail.com', '-', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', NULL, 'active', '2026-04-24 15:05:48', '2026-04-08 15:28:02', NULL, '2026-04-24 15:05:48', NULL, NULL, NULL),
-(18, 0, 4, 8, NULL, 'User IT', 'it@heywork.id', '081234567890', '$2y$10$fL85xpOpYQBc8P0iNoJfH.BxzXS7p2vCb4ZMQSbZUQttpsupuEKzy', NULL, 'active', NULL, '2026-04-09 01:39:28', NULL, '2026-04-09 01:39:28', NULL, NULL, NULL);
+(18, 0, 4, 8, NULL, 'User IT', 'it@heywork.id', '081234567890', '$2y$10$fL85xpOpYQBc8P0iNoJfH.BxzXS7p2vCb4ZMQSbZUQttpsupuEKzy', NULL, 'active', NULL, '2026-04-09 01:39:28', NULL, '2026-04-09 01:39:28', NULL, NULL, NULL),
+(19, 0, 3, 0, '', 'FPP', 'fpp@gmail.com', '0812', '$2y$10$/oRPi6wi/t7INHPytXYlNe6IJVkmQ31Dum5wdTV7B/GpL1xGABqdu', NULL, 'active', NULL, '2026-04-29 17:07:05', NULL, '2026-04-29 17:07:05', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1703,7 +1713,8 @@ CREATE TABLE `user_points` (
 --
 
 INSERT INTO `user_points` (`id`, `user_id`, `points`) VALUES
-(1, 2, 2500);
+(1, 2, 2500),
+(2, 19, 479);
 
 -- --------------------------------------------------------
 
@@ -1892,6 +1903,15 @@ INSERT INTO `wallet_transactions` (`id`, `wallet_id`, `type`, `amount`, `referen
 (9, 1, 'debit', 35000.00, 'order', 14, 'Order payment', '2026-03-22 18:29:08'),
 (10, 1, 'debit', 35000.00, 'order', 15, 'Order payment', '2026-03-22 18:29:52'),
 (11, 1, 'debit', 25000.00, 'order', 16, 'Order payment', '2026-03-22 18:32:15');
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `vw_export_journal`
+--
+DROP TABLE IF EXISTS `vw_export_journal`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vw_export_journal`  AS SELECT `jh`.`journal_no` AS `journal_no`, `jh`.`journal_date` AS `journal_date`, `coa`.`account_code` AS `account_code`, `coa`.`account_name` AS `account_name`, `jd`.`debit` AS `debit`, `jd`.`credit` AS `credit`, `jh`.`description` AS `description` FROM ((`journal_headers` `jh` join `journal_details` `jd` on(`jd`.`journal_id` = `jh`.`id`)) join `coa` on(`coa`.`id` = `jd`.`account_id`)) WHERE `jh`.`status` = 'posted' ;
 
 --
 -- Indexes for dumped tables
@@ -2459,13 +2479,13 @@ ALTER TABLE `business_partners`
 -- AUTO_INCREMENT for table `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `cart_items`
 --
 ALTER TABLE `cart_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -2615,19 +2635,19 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `permissions`
@@ -2645,7 +2665,7 @@ ALTER TABLE `point_rules`
 -- AUTO_INCREMENT for table `point_transactions`
 --
 ALTER TABLE `point_transactions`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `ratio_dw`
@@ -2729,7 +2749,7 @@ ALTER TABLE `transaction_taxes`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `user_memberships`
@@ -2741,7 +2761,7 @@ ALTER TABLE `user_memberships`
 -- AUTO_INCREMENT for table `user_points`
 --
 ALTER TABLE `user_points`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `user_roles`
@@ -2784,15 +2804,6 @@ ALTER TABLE `wallets`
 --
 ALTER TABLE `wallet_transactions`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
-
--- --------------------------------------------------------
-
---
--- Structure for view `vw_export_journal`
---
-DROP TABLE IF EXISTS `vw_export_journal`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vw_export_journal`  AS SELECT `jh`.`journal_no` AS `journal_no`, `jh`.`journal_date` AS `journal_date`, `coa`.`account_code` AS `account_code`, `coa`.`account_name` AS `account_name`, `jd`.`debit` AS `debit`, `jd`.`credit` AS `credit`, `jh`.`description` AS `description` FROM ((`journal_headers` `jh` join `journal_details` `jd` on(`jd`.`journal_id` = `jh`.`id`)) join `coa` on(`coa`.`id` = `jd`.`account_id`)) WHERE `jh`.`status` = 'posted' ;
 
 --
 -- Constraints for dumped tables

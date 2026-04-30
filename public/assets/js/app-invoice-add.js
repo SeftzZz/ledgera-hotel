@@ -124,6 +124,17 @@ $(function () {
 
           <input type="text" name="customer_phone[]" class="form-control mb-3 mt-3" placeholder="No Telepon">
           <input type="email" name="customer_email[]" class="form-control" placeholder="Email">
+
+          <div class="row">
+            <div class="col-md-6 mb-3 mt-3">
+              <input type="text" name="check_in[]" class="form-control date-picker" placeholder="Check In">
+            </div>
+            <div class="col-md-6 mb-3 mt-3">
+              <input type="text" name="check_out[]" class="form-control date-picker" placeholder="Check Out">
+            </div>
+          </div>
+
+          <textarea name="note[]" class="form-control" placeholder="Note"></textarea>
         </div>
       `);
 
@@ -131,7 +142,7 @@ $(function () {
       $this.next('.extra-fields').find('.select2').select2({
         placeholder: "Select customer",
         width: '100%',
-        tags: true,                // 🔥 ini kunci
+        tags: true,                //ini kunci
         allowClear: true,
         createTag: function (params) {
           var term = $.trim(params.term);
@@ -148,17 +159,20 @@ $(function () {
         }
       });
 
+      // init datepicker untuk field baru
+      $this.next('.extra-fields').find('.date-picker').flatpickr({
+        monthSelectorType: 'static'
+      });
     }
   });
 
   $(document).on('change', '.select2', function () {
-
     const selected = $(this).find(':selected');
     const wrapper = $(this).closest('.extra-fields');
 
     const phone = selected.data('phone') || '';
     const email = selected.data('email') || '';
-    const name  = selected.text(); // 🔥 ambil nama (termasuk input manual)
+    const name  = selected.text(); // ambil nama (termasuk input manual)
 
     wrapper.find('input[name="customer_phone[]"]').val(phone);
     wrapper.find('input[name="customer_email[]"]').val(email);
@@ -210,9 +224,7 @@ $(function () {
   });
 
   document.getElementById('btnSubmit').addEventListener('click', async function () {
-
     try {
-
       const rows = document.querySelectorAll('[data-repeater-item]');
 
       if (rows.length === 0) {
@@ -221,13 +233,16 @@ $(function () {
       }
 
       // =========================
-      // 🔥 AMBIL CUSTOMER (ROW PERTAMA SAJA)
+      // AMBIL CUSTOMER (ROW PERTAMA SAJA)
       // =========================
       const firstRow = rows[0];
 
       const name = firstRow.querySelector('.customer-name-hidden')?.value || '';
       const phone = firstRow.querySelector('input[name="customer_phone[]"]')?.value || '';
       const email = firstRow.querySelector('input[name="customer_email[]"]')?.value || '';
+      const checkIn  = firstRow.querySelector('input[name="check_in[]"]')?.value || '';
+      const checkOut = firstRow.querySelector('input[name="check_out[]"]')?.value || '';
+      const note     = firstRow.querySelector('textarea[name="note[]"]')?.value || '';
 
       if (!email) {
         alert('Email wajib diisi');
@@ -235,7 +250,7 @@ $(function () {
       }
 
       // =========================
-      // 1. CREATE CART (🔥 sekarang kirim customer)
+      // 1. CREATE CART (sekarang kirim customer)
       // =========================
       const cartRes = await fetch('/api/cart/create', {
         method: 'POST',
@@ -265,6 +280,11 @@ $(function () {
         const price  = row.querySelector('.invoice-item-price').value;
         const date  = row.querySelector('.invoice-item-date').value;
 
+        if (!date) {
+          alert('Date wajib diisi');
+          return;
+        }
+
         if (!itemId || !qty || qty <= 0) continue;
 
         await fetch('/api/cart/add', {
@@ -284,7 +304,7 @@ $(function () {
       }
 
       // =========================
-      // 3. CHECKOUT (🔥 TANPA PRICE)
+      // 3. CHECKOUT (TANPA PRICE)
       // =========================
       const orderRes = await fetch('/api/orders/checkout', {
         method: 'POST',
@@ -297,15 +317,27 @@ $(function () {
           order_number: document.getElementById('invoiceId').value,
           payment_method: 'cash',
           deposit: document.getElementById('deposit').value,
+          check_in: checkIn,
+          check_out: checkOut,
+          note: note
         })
       });
+
+      if (!checkIn || !checkOut) {
+        alert('Check In & Check Out wajib diisi');
+        return;
+      }
+
+      if (new Date(checkOut) <= new Date(checkIn)) {
+        alert('Check Out harus lebih besar dari Check In');
+        return;
+      }
 
       const orderJson = await orderRes.json();
 
       alert('Order berhasil: ' + orderJson.data.order_number);
 
       location.reload();
-
     } catch (err) {
       console.error(err);
       alert('Terjadi error');
