@@ -914,4 +914,36 @@ class DashboardService
 
         return $result;
     }
+
+    public function calculateWorker(array $dept): array
+    {
+        $workerRatio = (float) ($dept['worker_ratio'] ?? 0);
+        $estimated   = (float) ($dept['estimated'] ?? 0);
+        $workforce   = (float) ($dept['workforce'] ?? 0);
+
+        // ======================
+        // LIMIT WORKER
+        // ======================
+        $limitWorker = $estimated * ($workerRatio / 100);
+
+        // ======================
+        // PERCENT
+        // ======================
+        $actualWorkerPercent = $limitWorker > 0
+            ? ($workforce / $limitWorker) * 100
+            : 0;
+
+        // ======================
+        // STATUS
+        // ======================
+        $statusWorker = $workforce > $limitWorker ? 'OVER' : 'SAFE';
+
+        return [
+            'worker_ratio'          => $workerRatio,
+            'limit_worker'          => $limitWorker,
+            'workforce'             => $workforce,
+            'actual_worker_percent' => $actualWorkerPercent,
+            'status_worker'         => $statusWorker
+        ];
+    }
 }

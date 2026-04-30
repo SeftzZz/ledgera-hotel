@@ -481,5 +481,5 @@ $routes->group('api', ['filter' => 'jwt'], function ($routes) {
     $routes->post('purchasing/save', 'Api\PurchasingController::save');
 
     // BUDGET LIMIT
-    $routes->get('budget-limit', 'Api\BudgetController::limit');
+    $routes->post('budget-limit', 'Api\BudgetController::limit');
 });
