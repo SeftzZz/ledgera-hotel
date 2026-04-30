@@ -479,4 +479,7 @@ $routes->group('api', ['filter' => 'jwt'], function ($routes) {
     $routes->post('purchasing/generate/(:num)', 'Api\PurchasingController::generateFromPengajuan/$1');
     $routes->get('purchasing/stats', 'Api\PurchasingController::stats');
     $routes->post('purchasing/save', 'Api\PurchasingController::save');
+
+    // BUDGET LIMIT
+    $routes->get('budget-limit', 'Api\BudgetController::limit');
 });
