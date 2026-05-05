@@ -713,6 +713,12 @@ class DashboardService
         $isOwner = session('is_owner');
 
         // ==============================
+        // 📅 BULAN AKTIF (REALTIME)
+        // ==============================
+        $startDate = date('Y-m-01 00:00:00');
+        $endDate   = date('Y-m-t 23:59:59');
+
+        // ==============================
         // GET BRANCHES
         // ==============================
         if ($isOwner) {
@@ -727,9 +733,6 @@ class DashboardService
                 ->getResultArray();
         }
 
-        // ==============================
-        // RESULT
-        // ==============================
         $result = [];
 
         foreach ($branches as $b) {
@@ -737,7 +740,7 @@ class DashboardService
             $bId = $b['id'];
 
             // ==============================
-            // GET CATEGORY PER BRANCH (FIXED)
+            // GET CATEGORY
             // ==============================
             $where = "WHERE c.status='active' AND c.branch_id = ?";
             $params = [$bId];
@@ -754,7 +757,7 @@ class DashboardService
             ", $params)->getResultArray();
 
             // ==============================
-            // TARGET PER BRANCH
+            // TARGET
             // ==============================
             $rowTarget = $db->table('branches_target')
                 ->select('target')
@@ -765,7 +768,7 @@ class DashboardService
             $target = (float)($rowTarget['target'] ?? 0);
 
             // ==============================
-            // RATIO PER BRANCH
+            // RATIO
             // ==============================
             $ratioSpend = $db->query("
                 SELECT department_category, MAX(max_value) as max_value
@@ -781,8 +784,16 @@ class DashboardService
                 GROUP BY department_category
             ", [$bId])->getResultArray();
 
+            $ratioDw = $db->query("
+                SELECT department_category, MAX(max_value) as max_value
+                FROM ratio_dw
+                WHERE hotel_id = ?
+                GROUP BY department_category
+            ", [$bId])->getResultArray();
+
             $spendMap  = array_column($ratioSpend, 'max_value', 'department_category');
             $workerMap = array_column($ratioWorker, 'min_value', 'department_category');
+            $dwMap     = array_column($ratioDw, 'max_value', 'department_category');
 
             foreach ($categories as $cat) {
 
@@ -790,11 +801,12 @@ class DashboardService
 
                 $spendRatio  = (float)($spendMap[$catName] ?? 0);
                 $workerRatio = (float)($workerMap[$catName] ?? 0);
+                $dwRatio     = (float)($dwMap[$catName] ?? 0);
 
                 $trxTypes = $this->getTrxByCategory($cat['id']);
 
                 // ==============================
-                // EXPENSE (PER BRANCH)
+                // EXPENSE (REALTIME BULAN)
                 // ==============================
                 $expense = 0;
 
@@ -802,7 +814,10 @@ class DashboardService
 
                     $in = implode(',', array_fill(0, count($trxTypes), '?'));
 
-                    $paramsExp = array_merge([$companyId, $bId], $trxTypes);
+                    $paramsExp = array_merge(
+                        [$companyId, $bId, $startDate, $endDate],
+                        $trxTypes
+                    );
 
                     $rowExp = $db->query("
                         SELECT
@@ -819,6 +834,7 @@ class DashboardService
                         WHERE jh.company_id = ?
                           AND jh.branch_id = ?
                           AND jh.status = 'posted'
+                          AND jh.created_at BETWEEN ? AND ?
                           AND EXISTS (
                               SELECT 1
                               FROM transactions t
@@ -832,7 +848,7 @@ class DashboardService
                 }
 
                 // ==============================
-                // WORKFORCE (PER BRANCH + CATEGORY)
+                // WORKFORCE
                 // ==============================
                 $workforce = 0;
 
@@ -854,11 +870,43 @@ class DashboardService
                         WHERE jh.company_id = ?
                           AND jh.branch_id = ?
                           AND jh.status = 'posted'
+                          AND jh.created_at BETWEEN ? AND ?
                           AND t.category_id = ?
                           AND t.trx_type IN ('expense_payroll','expense_salary')
-                    ", [$companyId, $bId, $cat['id']])->getRowArray();
+                    ", [$companyId, $bId, $startDate, $endDate, $cat['id']])->getRowArray();
 
                     $workforce = (float)($rowWorker['workforce'] ?? 0);
+                }
+
+                // ==============================
+                // DAILY WORKER
+                // ==============================
+                $dailyWorker = 0;
+
+                if ($dwRatio > 0) {
+
+                    $rowDw = $db->query("
+                        SELECT
+                            SUM(
+                                CASE 
+                                    WHEN coa.account_type = 'expense'
+                                    THEN COALESCE(jd.debit,0) - COALESCE(jd.credit,0)
+                                    ELSE 0
+                                END
+                            ) as dailyWorker
+                        FROM journal_details jd
+                        JOIN journal_headers jh ON jh.id = jd.journal_id
+                        JOIN transactions t ON t.journal_id = jh.id
+                        JOIN coa ON coa.id = jd.account_id
+                        WHERE jh.company_id = ?
+                          AND jh.branch_id = ?
+                          AND jh.status = 'posted'
+                          AND jh.created_at BETWEEN ? AND ?
+                          AND t.category_id = ?
+                          AND t.trx_type IN ('expense_payroll','expense_salary')
+                    ", [$companyId, $bId, $startDate, $endDate, $cat['id']])->getRowArray();
+
+                    $dailyWorker = (float)($rowDw['dailyWorker'] ?? 0);
                 }
 
                 // ==============================
@@ -866,23 +914,21 @@ class DashboardService
                 // ==============================
                 $limitSpend  = $target * ($spendRatio / 100);
                 $limitWorker = $estimated * ($workerRatio / 100);
+                $limitDw     = $estimated * ($dwRatio / 100);
 
                 // ==============================
                 // PERCENT
                 // ==============================
-                $actualSpendPercent = $limitSpend > 0
-                    ? ($expense / $limitSpend) * 100
-                    : 0;
-
-                $actualWorkerPercent = $limitWorker > 0
-                    ? ($workforce / $limitWorker) * 100
-                    : 0;
+                $actualSpendPercent  = $limitSpend > 0 ? ($expense / $limitSpend) * 100 : 0;
+                $actualWorkerPercent = $limitWorker > 0 ? ($workforce / $limitWorker) * 100 : 0;
+                $actualDwPercent     = $limitDw > 0 ? ($dailyWorker / $limitDw) * 100 : 0;
 
                 // ==============================
                 // STATUS
                 // ==============================
                 $statusSpend  = $expense > $limitSpend ? 'OVER' : 'SAFE';
                 $statusWorker = $workforce > $limitWorker ? 'OVER' : 'SAFE';
+                $statusDw     = $dailyWorker > $limitDw ? 'OVER' : 'SAFE';
 
                 $result[] = [
                     'branch_id'   => $bId,
@@ -896,18 +942,23 @@ class DashboardService
 
                     'spend_ratio'  => $spendRatio,
                     'worker_ratio' => $workerRatio,
+                    'dw_ratio'     => $dwRatio,
 
                     'limit_spend'  => $limitSpend,
                     'limit_worker' => $limitWorker,
+                    'limit_dw'     => $limitDw,
 
-                    'expense'   => $expense,
-                    'workforce' => $workforce,
+                    'expense'      => $expense,
+                    'workforce'    => $workforce,
+                    'daily_worker' => $dailyWorker,
 
                     'actual_spend_percent'  => $actualSpendPercent,
                     'actual_worker_percent' => $actualWorkerPercent,
+                    'actual_dw_percent'     => $actualDwPercent,
 
                     'status_spend'  => $statusSpend,
-                    'status_worker' => $statusWorker
+                    'status_worker' => $statusWorker,
+                    'status_dw'     => $statusDw,
                 ];
             }
         }
@@ -920,6 +971,8 @@ class DashboardService
         $workerRatio = (float) ($dept['worker_ratio'] ?? 0);
         $estimated   = (float) ($dept['estimated'] ?? 0);
         $workforce   = (float) ($dept['workforce'] ?? 0);
+        $dwRatio = (float) ($dept['dw_ratio'] ?? 0);
+        $daily_worker   = (float) ($dept['daily_worker'] ?? 0);
 
         // ======================
         // LIMIT WORKER
@@ -934,16 +987,38 @@ class DashboardService
             : 0;
 
         // ======================
+        // LIMIT DW
+        // ======================
+        $limitDw = $estimated * ($dwRatio / 100);
+
+        // ======================
+        // PERCENT
+        // ======================
+        $actualDwPercent = $limitDw > 0
+            ? ($daily_worker / $limitDw) * 100
+            : 0;
+
+        // ======================
         // STATUS
         // ======================
         $statusWorker = $workforce > $limitWorker ? 'OVER' : 'SAFE';
+
+        // ======================
+        // STATUS DW
+        // ======================
+        $statuDw = $daily_worker > $limitDw ? 'OVER' : 'SAFE';
 
         return [
             'worker_ratio'          => $workerRatio,
             'limit_worker'          => $limitWorker,
             'workforce'             => $workforce,
             'actual_worker_percent' => $actualWorkerPercent,
-            'status_worker'         => $statusWorker
+            'status_worker'         => $statusWorker,
+            'dw_ratio'              => $dwRatio,
+            'limit_dw'              => $limitDw,
+            'daily_worker'          => $daily_worker,
+            'actual_dw_percent'     => $actualDwPercent,
+            'status_dw'             => $statuDw,
         ];
     }
 }

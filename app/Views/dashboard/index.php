@@ -228,7 +228,7 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-lg-6">
+                        <div class="col-lg-4">
                             <!-- SPEND RATIO -->
                             <div class="mt-3">
                                 <small>Spend Ratio (<?= $dept['spend_ratio'] ?>%)</small>
@@ -242,7 +242,7 @@
                                 </small>
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-4">
                             <!-- WORKER RATIO -->
                             <div class="mt-3">
                                 <small>Worker Ratio (<?= $dept['worker_ratio'] ?>%)</small>
@@ -256,7 +256,21 @@
                                 </small>
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-4">
+                            <!-- DW RATIO -->
+                            <div class="mt-3">
+                                <small>DW Ratio (<?= $dept['dw_ratio'] ?>%)</small>
+                                <div class="progress" style="height:6px;">
+                                    <div class="progress-bar bg-warning"
+                                         style="width: <?= $dept['dw_ratio'] ?>%">
+                                    </div>
+                                </div>
+                                <small>
+                                    Rp <?= number_format(($dept['target'] * $dept['dw_ratio'] / 100),0,',','.') ?>
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
                             <!-- SPEND LIMIT BY ESTIMATED + ACTUAL -->
                             <div class="mt-3">
                                 <small>
@@ -326,7 +340,7 @@
 
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-4">
                             <!-- WORKER LIMIT BY ESTIMATED -->
                             <div class="mt-3">
                                 <small>
@@ -365,6 +379,48 @@
 
                                 <div class="fw-bold fs-6 pt-1" id="workforce-value">
                                     Rp <?= number_format($dept['workforce'],0,',','.') ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <!-- WORKER LIMIT BY ESTIMATED -->
+                            <div class="mt-3">
+                                <small>
+                                    DW Limit
+                                    <?= number_format(
+                                        $dept['target'] > 0 
+                                            ? (($dept['estimated'] * $dept['dw_ratio'] / 100) / $dept['target']) * 100 
+                                            : 0
+                                    ,2) ?>%
+                                </small>
+
+                                <div class="progress" style="height:6px;">
+                                    <div class="progress-bar bg-warning"
+                                         style="width: <?= $dept['target'] > 0 
+                                            ? (($dept['estimated'] * $dept['dw_ratio'] / 100) / $dept['target']) * 100 
+                                            : 0 ?>%">
+                                    </div>
+                                </div>
+
+                                <div class="fs-6 pt-1">
+                                    Rp <?= number_format(($dept['estimated'] * $dept['dw_ratio'] / 100),0,',','.') ?>
+                                </div>
+
+                                <!-- ======================
+                                     ACTUAL DW
+                                ====================== -->
+                                <div class="fw-bold fs-6 pt-2" id="daily_worker-percent-value">
+                                    Actual DW <?= number_format($dept['actual_dw_percent'],2) ?>%
+                                </div>
+
+                                <div class="progress" style="height:6px;">
+                                    <div class="progress-bar <?= $dept['daily_worker'] > $dept['limit_dw'] ? 'bg-danger' : 'bg-success' ?>"
+                                         style="width: <?= min($dept['actual_dw_percent'],100) ?>%">
+                                    </div>
+                                </div>
+
+                                <div class="fw-bold fs-6 pt-1" id="workforce-value">
+                                    Rp <?= number_format($dept['daily_worker'],0,',','.') ?>
                                 </div>
                             </div>
                         </div>
@@ -634,6 +690,10 @@ function updateUI(data) {
   document.getElementById('workforce-value').innerText = formatRupiah(dept.workforce || 0);
 
   document.getElementById('workforce-percent-value').innerText = 'Actual Workforce ' + (dept.actual_worker_percent || 0).toFixed(2) + '%';
+
+  document.getElementById('daily_worker-value').innerText = formatRupiah(dept.daily_worker || 0);
+
+  document.getElementById('daily_worker-percent-value').innerText = 'Actual DW ' + (dept.actual_dw_percent || 0).toFixed(2) + '%';
 
   // ======================
   // UPDATE CHART
