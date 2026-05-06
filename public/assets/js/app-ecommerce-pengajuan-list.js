@@ -132,7 +132,6 @@ $(function () {
                 </div>
                 <div>
                   <span class="fw-medium">${name}</span><br>
-                  <small class="text-muted">${full.jabatan}</small>
                 </div>
               </div>
             `;

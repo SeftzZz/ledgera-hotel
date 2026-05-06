@@ -31,6 +31,8 @@ class DashboardService
         $approval  = $this->getApprovalStats($companyId);
         $department= $this->getDepartmentSummary($companyId, $branchId, $order['estimated'], $categoryId);
 
+        // dd($department);
+
         return [
             // ACCOUNTING
             'revenue' => $summary['revenue'],
@@ -848,6 +850,163 @@ class DashboardService
                 }
 
                 // ==============================
+                // EXPENSE DATA
+                // ==============================
+                $expenseData = [];
+
+                if (!empty($trxTypes)) {
+
+                    $in = implode(',', array_fill(0, count($trxTypes), '?'));
+
+                    $paramsExpenseData = array_merge(
+                        [$companyId, $bId, $startDate, $endDate],
+                        $trxTypes
+                    );
+
+                    $expenseRows = $db->query("
+                        SELECT
+
+                            t.id as transaction_id,
+                            t.trx_type,
+                            t.reference_no,
+                            t.amount as trx_amount,
+
+                            jh.id as journal_id,
+                            jh.journal_no,
+                            jh.journal_date,
+                            jh.description as journal_description,
+
+                            coa.account_code,
+                            coa.account_name,
+
+                            jd.debit,
+                            jd.credit,
+
+                            fp.id as pengajuan_id,
+                            fp.nama,
+                            fp.divisi,
+                            fp.jabatan,
+
+                            fpd.id as pengajuan_detail_id,
+                            fpd.sparepart,
+                            fpd.qty,
+                            fpd.harga,
+                            fpd.purpose,
+                            fpd.no_po,
+
+                            pur.id as purchasing_id,
+                            pur.nama_po,
+
+                            (
+                                COALESCE(jd.debit,0) - COALESCE(jd.credit,0)
+                            ) as amount
+
+                        FROM transactions t
+
+                        JOIN journal_headers jh
+                            ON jh.id = t.journal_id
+
+                        JOIN journal_details jd
+                            ON jd.journal_id = jh.id
+
+                        JOIN coa
+                            ON coa.id = jd.account_id
+
+                        LEFT JOIN form_pengajuan fp
+                            ON fp.id = CAST(
+                                REPLACE(t.reference_no, 'PG-', '')
+                                AS UNSIGNED
+                            )
+
+                        LEFT JOIN form_pengajuan_detail fpd
+                            ON fpd.pengajuan_id = fp.id
+
+                        LEFT JOIN form_purchasing pur
+                            ON pur.pengajuan_id = fp.id
+
+                        WHERE t.company_id = ?
+                          AND t.branch_id = ?
+
+                          AND jh.status = 'posted'
+
+                          AND jh.created_at BETWEEN ? AND ?
+
+                          AND coa.account_type IN ('expense','cogs')
+
+                          AND t.trx_type IN ($in)
+
+                          AND t.trx_type != 'expense_payroll'
+
+                        ORDER BY jh.created_at DESC
+                    ", $paramsExpenseData)->getResultArray();
+
+                    foreach ($expenseRows as $er) {
+
+                        $expenseData[] = [
+
+                            // ======================
+                            // TRANSACTION
+                            // ======================
+                            'transaction_id' => $er['transaction_id'],
+                            'trx_type'       => $er['trx_type'],
+                            'reference_no'   => $er['reference_no'],
+                            'trx_amount'     => (float)$er['trx_amount'],
+
+                            // ======================
+                            // JOURNAL
+                            // ======================
+                            'journal' => [
+                                'journal_id'   => $er['journal_id'],
+                                'journal_no'   => $er['journal_no'],
+                                'journal_date' => $er['journal_date'],
+                                'description'  => $er['journal_description'],
+                            ],
+
+                            // ======================
+                            // ACCOUNT
+                            // ======================
+                            'account' => [
+                                'code'   => $er['account_code'],
+                                'name'   => $er['account_name'],
+                                'debit'  => (float)$er['debit'],
+                                'credit' => (float)$er['credit'],
+                                'amount' => (float)$er['amount'],
+                            ],
+
+                            // ======================
+                            // REQUEST
+                            // ======================
+                            'pengajuan' => [
+                                'id'       => $er['pengajuan_id'],
+                                'nama'     => $er['nama'],
+                                'divisi'   => $er['divisi'],
+                                'jabatan'  => $er['jabatan'],
+                            ],
+
+                            // ======================
+                            // ITEM
+                            // ======================
+                            'item' => [
+                                'detail_id'  => $er['pengajuan_detail_id'],
+                                'sparepart'  => $er['sparepart'],
+                                'qty'        => (float)$er['qty'],
+                                'harga'      => (float)$er['harga'],
+                                'purpose'    => $er['purpose'],
+                                'no_po'      => $er['no_po'],
+                            ],
+
+                            // ======================
+                            // PURCHASING
+                            // ======================
+                            'purchasing' => [
+                                'id'      => $er['purchasing_id'],
+                                'nama_po' => $er['nama_po'],
+                            ],
+                        ];
+                    }
+                }
+
+                // ==============================
                 // WORKFORCE
                 // ==============================
                 $workforce = 0;
@@ -959,6 +1118,9 @@ class DashboardService
                     'status_spend'  => $statusSpend,
                     'status_worker' => $statusWorker,
                     'status_dw'     => $statusDw,
+
+                    'trx_types'     => $trxTypes,
+                    'expense_data'  => $expenseData,
                 ];
             }
         }

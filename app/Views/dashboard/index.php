@@ -430,6 +430,31 @@
         </div>
         <?php endforeach; ?>
 
+        <div class="col-lg-12 mb-4">
+            <!-- Order List Table -->
+            <div class="card h-100">
+              <div class="card-datatable table-responsive">
+                <table class="datatables-expense table border-top">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th></th>
+                      <th>Date</th>
+                      <th>Department</th>
+                      <th>Account</th>
+                      <th>Item</th>
+                      <th>Qty</th>
+                      <th>Amount</th>
+                      <th>Requester</th>
+                      <th>PO</th>
+                      <th>Journal</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
+        </div>
+
         <!--/ Delivery Performance -->
         <!-- Reasons for delivery exceptions -->
         <?php foreach ($branches as $i => $branch): ?>
