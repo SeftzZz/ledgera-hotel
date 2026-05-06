@@ -69,7 +69,7 @@ class DashboardService
             'historyOutstanding' => $history['historyOutstanding'],
 
             // META
-            'title' => 'Dashboard',
+            'title' => 'Expense department',
             'month' => $month,
             'year'  => $year,
         ];

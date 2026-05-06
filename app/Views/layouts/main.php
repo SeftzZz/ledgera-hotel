@@ -7,7 +7,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-        <title><?= $title ?> | Accounting System</title>
+        <title><?= $title ?> | Heycorp System</title>
 
         <meta name="description" content="hey work connects hospitality professionals with trusted hotels for flexible daily and casual job opportunities." />
 

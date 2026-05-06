@@ -532,7 +532,7 @@ class JournalController extends BaseController
 
                         $db->table('inventori')
                             ->where('id', $existing['id'])
-                            ->set('qty', 'qty + ' . (int)$item['qty'], false)
+                            ->set('qty', 'qty - ' . (int)$item['qty'], false)
                             ->update();
 
                     } else {
