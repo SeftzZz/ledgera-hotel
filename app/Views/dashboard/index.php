@@ -554,6 +554,7 @@
   console.log(window.dashboardData);
 </script>
 <script src="<?= base_url('assets/js/app-logistics-dashboard.js' ) ?>"></script>
+<script src="<?= base_url('assets/js/app-expense-dashboard.js' ) ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 (function () {
