@@ -19,7 +19,7 @@ class BranchController extends BaseController
     {
         $companyModel = new \App\Models\CompanyModel();
 
-        return view('master_data/branch/index', [
+        return $this->render('master_data/branch/index', [
             'title'     => 'Branch',
             'companies' => $companyModel
                             ->where('deleted_at', null)
@@ -60,7 +60,7 @@ class BranchController extends BaseController
             ')
             ->join('companies', 'companies.id = branches.company_id', 'left')
             ->join('branches_target', 'branches_target.branch_id = branches.id', 'left')
-            ->where('branches.id', session('branch_id'))
+            ->where('companies.id', session('company_id'))
             ->groupBy('branches.id');
 
         // TOTAL
@@ -136,7 +136,7 @@ class BranchController extends BaseController
 
     public function ratio($branch_id, $id)
     {
-        return view('master_data/branch/ratio', [
+        return $this->render('master_data/branch/ratio', [
             'title'     => 'Branch Ratio',
             'branch_id' => $branch_id,
             'target_id' => $id,

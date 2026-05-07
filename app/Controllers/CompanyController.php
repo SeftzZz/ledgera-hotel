@@ -18,7 +18,7 @@ class CompanyController extends BaseController
 
     public function index()
     {
-        return view('master_data/company/index', [
+        return $this->render('master_data/company/index', [
             'title' => 'Company'
         ]);
     }

@@ -10,14 +10,14 @@ class Orders extends BaseController
 
   public function index()
   {
-    return view('ecommerce/order-list', [
+    return $this->render('ecommerce/order-list', [
       'title' => 'Order List'
     ]);
   }
 
   public function detail($id)
   {
-    return view('ecommerce/order-detail', [
+    return $this->render('ecommerce/order-detail', [
       'title' => 'Order Detail',
       'order_id' => $id
     ]);
@@ -53,7 +53,7 @@ class Orders extends BaseController
         $u['total_spent']  = (float) $u['total_spent'];
     }
 
-    return view('ecommerce/order-add', [
+    return $this->render('ecommerce/order-add', [
       'title'        => 'Order Add',
       'order_number' => $orderNumber,
       'customers'    => $users

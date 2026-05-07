@@ -29,9 +29,7 @@ class ItemModel extends Model
 
     public function getItems()
     {
-        $branchId = session('branch_id');
-
-        return $this->db->table('branch_items')
+        $builder = $this->db->table('branch_items')
             ->select('
                 items.id,
                 items.category_id,
@@ -49,8 +47,22 @@ class ItemModel extends Model
             ->join('categories', 'categories.id = items.category_id', 'left')
 
             ->where('items.status', 'available')
-            ->where('branch_items.branch_id', $branchId) // 🔥 INI YANG DITAMBAH
+            ->where('branch_items.company_id', session('company_id'));
 
+        // =========================
+        // FILTER BRANCH
+        // =========================
+        if (
+            !session('is_super_admin') &&
+            !empty(session('branch_id'))
+        ) {
+            $builder->where(
+                'branch_items.branch_id',
+                session('branch_id')
+            );
+        }
+
+        return $builder
             ->orderBy('items.id', 'ASC')
             ->get()
             ->getResultArray();

@@ -102,7 +102,7 @@ class IncomeStatementController extends BaseController
         $grossProfit = $totalRevenue - $totalCogs;
         $netProfit   = $grossProfit - $totalExpense;
 
-        return view('accounting/income_statement/index', [
+        return $this->render('accounting/income_statement/index', [
             'title'         => 'Income Statement',
             'revenue'       => $revenue,
             'expense'       => $expense,

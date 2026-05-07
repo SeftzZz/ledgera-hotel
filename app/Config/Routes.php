@@ -33,6 +33,7 @@ $routes->get('logout', 'Auth\Login::logout');
 // DASHBOARD (WEB)
 $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
 $routes->get('dashboard/data', 'DashboardController::data', ['filter' => 'auth']);
+$routes->get('department-expense', 'DashboardController::department_expense', ['filter' => 'auth']);
 
 // =========================
 // MASTER DATA
@@ -71,6 +72,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->post('store', 'TaxController::store');
     });
 
+    $routes->post('switch-company', 'DashboardController::switchCompany');
 });
 
 // =========================

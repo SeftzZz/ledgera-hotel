@@ -19,7 +19,7 @@ class JournalController extends BaseController
 
     public function index()
     {
-        return view('accounting/journal/index', [
+        return $this->render('accounting/journal/index', [
             'title' => 'Journal'
         ]);
     }
@@ -27,32 +27,101 @@ class JournalController extends BaseController
     public function datatable()
     {
         $request = service('request');
+        $db      = \Config\Database::connect();
 
         $searchValue = $request->getPost('search')['value'] ?? null;
-        $length      = (int)$request->getPost('length');
-        $start       = (int)$request->getPost('start');
-        $draw        = (int)$request->getPost('draw');
+        $length      = (int) $request->getPost('length');
+        $start       = (int) $request->getPost('start');
+        $draw        = (int) $request->getPost('draw');
 
-        $builder = $this->headerModel
-            ->select('journal_headers.*, 
-                      COALESCE(SUM(journal_details.debit),0) as total')
-            ->join('journal_details','journal_details.journal_id = journal_headers.id','left')
-            ->groupBy('journal_headers.id');
+        $companyId = (int) session('company_id');
+        $branchId  = (int) session('branch_id');
+        $isSuper   = session('is_super_admin');
 
-        $recordsTotal = (clone $builder)->countAllResults(false);
+        // =========================
+        // BASE QUERY
+        // =========================
+        $baseBuilder = $db->table('journal_headers')
+            ->where('journal_headers.company_id', $companyId);
 
+        // =========================
+        // FILTER BRANCH
+        // =========================
+        if (!$isSuper && !empty($branchId)) {
+
+            $baseBuilder->where(
+                'journal_headers.branch_id',
+                $branchId
+            );
+        }
+
+        // =========================
+        // TOTAL RECORDS
+        // =========================
+        $totalBuilder = clone $baseBuilder;
+
+        $recordsTotal = $totalBuilder
+            ->countAllResults();
+
+        // =========================
+        // DATA QUERY
+        // =========================
+        $dataBuilder = $db->table('journal_headers')
+            ->select('
+                journal_headers.*,
+                COALESCE(
+                    SUM(journal_details.debit),
+                    0
+                ) as total
+            ')
+            ->join(
+                'journal_details',
+                'journal_details.journal_id = journal_headers.id',
+                'left'
+            )
+            ->where('journal_headers.company_id', $companyId);
+
+        // =========================
+        // FILTER BRANCH
+        // =========================
+        if (!$isSuper && !empty($branchId)) {
+
+            $dataBuilder->where(
+                'journal_headers.branch_id',
+                $branchId
+            );
+        }
+
+        // =========================
+        // SEARCH
+        // =========================
         if ($searchValue) {
-            $builder->groupStart()
-                ->like('journal_no', $searchValue)
-                ->orLike('description', $searchValue)
+
+            $dataBuilder->groupStart()
+                ->like('journal_headers.journal_no', $searchValue)
+                ->orLike('journal_headers.description', $searchValue)
             ->groupEnd();
         }
 
-        $recordsFiltered = (clone $builder)->countAllResults(false);
+        // =========================
+        // GROUP BY
+        // =========================
+        $dataBuilder->groupBy('journal_headers.id');
 
-        $rows = $builder
-            ->orderBy('journal_headers.id','DESC')
-            ->limit($length,$start)
+        // =========================
+        // FILTERED RECORDS
+        // =========================
+        $filteredBuilder = clone $dataBuilder;
+
+        $recordsFiltered = $filteredBuilder
+            ->countAllResults();
+
+        // =========================
+        // GET DATA
+        // =========================
+        $rows = $dataBuilder
+            ->orderBy('journal_headers.id', 'DESC')
+            ->limit($length, $start)
             ->get()
             ->getResultArray();
 
@@ -61,28 +130,65 @@ class JournalController extends BaseController
 
         foreach ($rows as $row) {
 
-            $badge = match($row['status']) {
-                'draft'     => '<span class="badge bg-label-secondary">Draft</span>',
-                'submitted' => '<span class="badge bg-label-warning">Submitted</span>',
-                'approved'  => '<span class="badge bg-label-info">Approved</span>',
-                'posted'    => '<span class="badge bg-label-success">Posted</span>',
-                default     => '<span class="badge bg-label-dark">Unknown</span>',
+            $badge = match ($row['status']) {
+
+                'draft' =>
+                    '<span class="badge bg-label-secondary">
+                        Draft
+                    </span>',
+
+                'submitted' =>
+                    '<span class="badge bg-label-warning">
+                        Submitted
+                    </span>',
+
+                'approved' =>
+                    '<span class="badge bg-label-info">
+                        Approved
+                    </span>',
+
+                'posted' =>
+                    '<span class="badge bg-label-success">
+                        Posted
+                    </span>',
+
+                default =>
+                    '<span class="badge bg-label-dark">
+                        Unknown
+                    </span>',
             };
 
             $btnPost = $row['status'] === 'posted'
-                ? '<button class="btn btn-sm btn-success" disabled>Posted</button>'
-                : '<button class="btn btn-sm btn-success btn-post" data-id="'.$row['id'].'">Post</button>';
+
+                ? '<button class="btn btn-sm btn-success" disabled>
+                        Posted
+                   </button>'
+
+                : '<button
+                        class="btn btn-sm btn-success btn-post"
+                        data-id="' . $row['id'] . '">
+                        Post
+                   </button>';
 
             $result[] = [
-                'no'          => $no++.'.',
+                'no'          => $no++ . '.',
                 'journal_no'  => esc($row['journal_no']),
-                'date'        => date('d-m-Y', strtotime($row['journal_date'])),
+                'date'        => date(
+                    'd-m-Y',
+                    strtotime($row['journal_date'])
+                ),
                 'description' => esc($row['description']),
                 'status'      => $badge,
-                'action'      => '
+
+                'action' => '
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-primary btn-view" data-id="'.$row['id'].'">View</button>
-                        '.$btnPost.'
+                        <button
+                            class="btn btn-sm btn-primary btn-view"
+                            data-id="' . $row['id'] . '">
+                            View
+                        </button>
+
+                        ' . $btnPost . '
                     </div>
                 '
             ];
@@ -532,7 +638,7 @@ class JournalController extends BaseController
 
                         $db->table('inventori')
                             ->where('id', $existing['id'])
-                            ->set('qty', 'qty + ' . (int)$item['qty'], false)
+                            ->set('qty', 'qty - ' . (int)$item['qty'], false)
                             ->update();
 
                     } else {

@@ -41,7 +41,7 @@ class OpeningBalanceController extends BaseController
             $openingData[$row['coa_id']] = $row['opening_balance'];
         }
 
-        return view('accounting/opening_balance/index', [
+        return $this->render('accounting/opening_balance/index', [
             'title'         => 'Opening Balance',
             'accounts'      => $accounts,
             'year'          => $year,

@@ -34,40 +34,75 @@ class TransactionController extends BaseController
             ->where('tax_codes.deleted_at', '0000-00-00 00:00:00')
             ->findAll();
 
-        return view('accounting/transaction/index', [
+        return $this->render('accounting/transaction/index', [
             'title'           => 'Transaction',
             'trxTypes'        => (new \App\Models\TransactionAccountMapModel())->findAll(),
             'paymentAccounts' => $paymentAccounts,
-            'taxCodes'        => $taxCodes   // 🔥 tambah ini
+            'taxCodes'        => $taxCodes
         ]);
     }
     
     public function datatable()
     {
         $request = service('request');
+        $db      = \Config\Database::connect();
 
         $searchValue = $request->getPost('search')['value'] ?? null;
-        $length      = (int)$request->getPost('length');
-        $start       = (int)$request->getPost('start');
-        $draw        = (int)$request->getPost('draw');
+        $length      = (int) $request->getPost('length');
+        $start       = (int) $request->getPost('start');
+        $draw        = (int) $request->getPost('draw');
 
-        $builder = $this->transactionModel
-            ->select('transactions.*');
+        $companyId = (int) session('company_id');
 
-        $recordsTotal = $this->transactionModel->countAll();
+        // DEBUG
+        // dd($companyId);
 
+        // =========================
+        // BASE QUERY
+        // =========================
+        $baseBuilder = $db->table('transactions')
+            ->where('company_id', $companyId);
+
+        // =========================
+        // TOTAL
+        // =========================
+        $totalBuilder = clone $baseBuilder;
+
+        $recordsTotal = $totalBuilder
+            ->countAllResults();
+
+        // =========================
+        // FILTER QUERY
+        // =========================
+        $dataBuilder = $db->table('transactions')
+            ->where('company_id', $companyId);
+
+        // =========================
+        // SEARCH
+        // =========================
         if ($searchValue) {
-            $builder->groupStart()
+
+            $dataBuilder->groupStart()
                 ->like('reference_no', $searchValue)
                 ->orLike('trx_type', $searchValue)
             ->groupEnd();
         }
 
-        $recordsFiltered = $builder->countAllResults(false);
+        // =========================
+        // FILTERED COUNT
+        // =========================
+        $filteredBuilder = clone $dataBuilder;
 
-        $rows = $builder
-            ->orderBy('id','DESC')
-            ->limit($length,$start)
+        $recordsFiltered = $filteredBuilder
+            ->countAllResults();
+
+        // =========================
+        // GET DATA
+        // =========================
+        $rows = $dataBuilder
+            ->select('*')
+            ->orderBy('id', 'DESC')
+            ->limit($length, $start)
             ->get()
             ->getResultArray();
 
@@ -77,14 +112,17 @@ class TransactionController extends BaseController
         foreach ($rows as $row) {
 
             $result[] = [
-                'no'           => $no++.'.',
+                'no'           => $no++ . '.',
                 'reference_no' => esc($row['reference_no']),
-                'date'         => date('d-m-Y', strtotime($row['trx_date'])),
+                'date'         => date(
+                    'd-m-Y',
+                    strtotime($row['trx_date'])
+                ),
                 'type'         => esc($row['trx_type']),
-                'amount'       => number_format($row['amount'], 2),
-                // 'action'       => '
-                //     <button class="btn btn-sm btn-primary btn-view" data-id="'.$row['id'].'">View</button>
-                // '
+                'amount'       => number_format(
+                    $row['amount'],
+                    2
+                ),
             ];
         }
 

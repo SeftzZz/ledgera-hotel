@@ -22,7 +22,7 @@ class MaintenanceController extends BaseController
         $builder = $this->roomModel
             ->where('deleted_at', null);
 
-        return view('maintenance/index', [
+        return $this->render('maintenance/index', [
             'title' => 'Maintenance',
             'rooms' => $builder
                 ->orderBy('room_no', 'ASC')
@@ -579,7 +579,7 @@ class MaintenanceController extends BaseController
 
     public function rooms()
     {
-        return view('maintenance/rooms', [
+        return $this->render('maintenance/rooms', [
             'title' => 'Rooms'
         ]);
     }

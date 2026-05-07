@@ -17,7 +17,7 @@ class Purchasing extends BaseController
             'category_id' => session('category_id'),
         ]);
 
-        return view('purchasing/index', $data);
+        return $this->render('purchasing/index', $data);
     }
 
     public function print($id)
@@ -63,7 +63,7 @@ class Purchasing extends BaseController
             $total += $i['qty'] * $i['harga'];
         }
 
-        return view('purchasing/print', [
+        return $this->render('purchasing/print', [
             'title'   => 'Print',
             'po'      => $po,
             'items'   => $items,

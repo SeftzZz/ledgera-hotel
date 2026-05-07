@@ -281,6 +281,7 @@ class BranchController extends BaseApiController
 
         $spend = $db->table('ratio_spend')
             ->where('target_id', $target_id)
+            ->where('company_id', session('company_id'))
             ->where('is_active', 1)
             ->where('label', 'OVER')
             ->get()
@@ -288,6 +289,7 @@ class BranchController extends BaseApiController
 
         $worker = $db->table('ratio_worker')
             ->where('target_id', $target_id)
+            ->where('company_id', session('company_id'))
             ->where('is_active', 1)
             ->where('label', 'OVER')
             ->get()
@@ -295,6 +297,7 @@ class BranchController extends BaseApiController
 
         $dw = $db->table('ratio_dw')
             ->where('target_id', $target_id)
+            ->where('company_id', session('company_id'))
             ->where('is_active', 1)
             ->where('label', 'OVER')
             ->get()
@@ -418,6 +421,7 @@ class BranchController extends BaseApiController
         \Config\Database::connect()
             ->table('ratio_spend')
             ->insert([
+                'company_id' => session('company_id'),
                 'hotel_id' => $data['hotel_id'],
                 'department_category' => $data['department_category'],
                 'min_value' => $data['min_value'] ?? 0,
@@ -445,6 +449,7 @@ class BranchController extends BaseApiController
         \Config\Database::connect()
             ->table('ratio_worker')
             ->insert([
+                'company_id' => session('company_id'),
                 'hotel_id' => $data['hotel_id'],
                 'department_category' => $data['department_category'],
                 'min_value' => $data['min_value'] ?? 0,
@@ -472,6 +477,7 @@ class BranchController extends BaseApiController
         \Config\Database::connect()
             ->table('ratio_dw')
             ->insert([
+                'company_id' => session('company_id'),
                 'hotel_id' => $data['hotel_id'],
                 'department_category' => $data['department_category'],
                 'min_value' => $data['min_value'] ?? 0,

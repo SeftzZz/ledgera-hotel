@@ -58,27 +58,27 @@
 								                        </div>
 								                        <div class="col-md-6 mb-3">
 								                            <label class="form-label">Account Code *</label>
-										            		<input type="text" class="form-control" name="kode_coa" required>
+										            		<input type="text" class="form-control" name="kode_coa" placeholder="1100" required>
 								                        </div>
 								                    </div>
 								                    <div class="row">
 								                        <div class="col-md-6 mb-3">
 								                            <label class="form-label">Account Name *</label>
-										            		<input type="text" class="form-control" name="nama_coa" required>
+										            		<input type="text" class="form-control" name="nama_coa" placeholder="Kas" required>
 								                        </div>
 								                        <div class="col-md-6 mb-3">
 								                            <label class="form-label">Account Type *</label>
-										            		<input type="text" class="form-control" name="tipe_coa" required>
+										            		<input type="text" class="form-control" name="tipe_coa" placeholder="asset" required>
 								                        </div>
 								                    </div>
 								                    <div class="row">
 								                        <div class="col-md-6 mb-3">
 								                            <label class="form-label">Parent Code</label>
-										            		<input type="text" class="form-control" name="induk_coa">
+										            		<input type="text" class="form-control" name="induk_coa" placeholder="1000">
 								                        </div>
 								                        <div class="col-md-6 mb-3">
 								                            <label class="form-label">Cashflow Type</label>
-										            		<input type="text" class="form-control" name="aruskas_coa">
+										            		<input type="text" class="form-control" name="aruskas_coa" placeholder="operating">
 								                        </div>
 								                    </div>
 								                    <div class="row">
@@ -454,7 +454,7 @@
 							            $('#edit_kode_coa').val(d.account_code);
 							            $('#edit_nama_coa').val(d.account_name);
 							            $('#edit_tipe_coa').val(d.account_type);
-							            $('#edit_induk_coa').val(d.parent_id);
+							            $('#edit_induk_coa').val(d.parent_account_code).trigger('change');
 							            $('#edit_aruskas_coa').val(d.cashflow_type);
 							            $('#edit_status_coa').val(d.is_active);
 										$('#hidden_edit_kantor_coa').val(d.company_id);

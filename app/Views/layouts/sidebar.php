@@ -292,20 +292,6 @@
                 </a>
             </li>
 
-            <li class="menu-item <?= ($segment1=='equity' && $segment2=='')?'active':'' ?>">
-                <a href="<?= base_url('equity') ?>" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-wallet"></i>
-                    <div>Equity</div>
-                </a>
-            </li>
-
-            <li class="menu-item <?= ($segment1=='approval' && $segment2=='')?'active':'' ?>">
-                <a href="<?= base_url('approval') ?>" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-checks"></i>
-                    <div>Approval</div>
-                </a>
-            </li>
-
             <li class="menu-item <?= ($segment1=='closing' && $segment2=='')?'active':'' ?>">
                 <a href="<?= base_url('closing') ?>" class="menu-link">
                     <i class="menu-icon tf-icons ti ti-calendar-check"></i>

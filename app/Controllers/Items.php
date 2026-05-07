@@ -10,7 +10,7 @@ class Items extends BaseController
 
   public function index()
   {
-    return view('ecommerce/item-list', [
+    return $this->render('ecommerce/item-list', [
       'title' => 'Items'
     ]);
   }
@@ -40,7 +40,7 @@ class Items extends BaseController
       ]
     ];
 
-    return view('ecommerce/item-add', [
+    return $this->render('ecommerce/item-add', [
       'title'      => 'Items Add',
       'categories' => $categories,
       'branches'   => $branches,
@@ -50,7 +50,7 @@ class Items extends BaseController
 
   public function itemCategory()
   {
-    return view('ecommerce/item-category', [
+    return $this->render('ecommerce/item-category', [
       'title' => 'Categories'
     ]);
   }

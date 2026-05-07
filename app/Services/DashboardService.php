@@ -31,6 +31,8 @@ class DashboardService
         $approval  = $this->getApprovalStats($companyId);
         $department= $this->getDepartmentSummary($companyId, $branchId, $order['estimated'], $categoryId);
 
+        // dd($department);
+
         return [
             // ACCOUNTING
             'revenue' => $summary['revenue'],
@@ -67,7 +69,7 @@ class DashboardService
             'historyOutstanding' => $history['historyOutstanding'],
 
             // META
-            'title' => 'Dashboard',
+            'title' => 'Expense department',
             'month' => $month,
             'year'  => $year,
         ];
@@ -713,6 +715,12 @@ class DashboardService
         $isOwner = session('is_owner');
 
         // ==============================
+        // 📅 BULAN AKTIF (REALTIME)
+        // ==============================
+        $startDate = date('Y-m-01 00:00:00');
+        $endDate   = date('Y-m-t 23:59:59');
+
+        // ==============================
         // GET BRANCHES
         // ==============================
         if ($isOwner) {
@@ -727,9 +735,6 @@ class DashboardService
                 ->getResultArray();
         }
 
-        // ==============================
-        // RESULT
-        // ==============================
         $result = [];
 
         foreach ($branches as $b) {
@@ -737,7 +742,7 @@ class DashboardService
             $bId = $b['id'];
 
             // ==============================
-            // GET CATEGORY PER BRANCH (FIXED)
+            // GET CATEGORY
             // ==============================
             $where = "WHERE c.status='active' AND c.branch_id = ?";
             $params = [$bId];
@@ -754,7 +759,7 @@ class DashboardService
             ", $params)->getResultArray();
 
             // ==============================
-            // TARGET PER BRANCH
+            // TARGET
             // ==============================
             $rowTarget = $db->table('branches_target')
                 ->select('target')
@@ -765,7 +770,7 @@ class DashboardService
             $target = (float)($rowTarget['target'] ?? 0);
 
             // ==============================
-            // RATIO PER BRANCH
+            // RATIO
             // ==============================
             $ratioSpend = $db->query("
                 SELECT department_category, MAX(max_value) as max_value
@@ -781,8 +786,16 @@ class DashboardService
                 GROUP BY department_category
             ", [$bId])->getResultArray();
 
+            $ratioDw = $db->query("
+                SELECT department_category, MAX(max_value) as max_value
+                FROM ratio_dw
+                WHERE hotel_id = ?
+                GROUP BY department_category
+            ", [$bId])->getResultArray();
+
             $spendMap  = array_column($ratioSpend, 'max_value', 'department_category');
             $workerMap = array_column($ratioWorker, 'min_value', 'department_category');
+            $dwMap     = array_column($ratioDw, 'max_value', 'department_category');
 
             foreach ($categories as $cat) {
 
@@ -790,11 +803,12 @@ class DashboardService
 
                 $spendRatio  = (float)($spendMap[$catName] ?? 0);
                 $workerRatio = (float)($workerMap[$catName] ?? 0);
+                $dwRatio     = (float)($dwMap[$catName] ?? 0);
 
                 $trxTypes = $this->getTrxByCategory($cat['id']);
 
                 // ==============================
-                // EXPENSE (PER BRANCH)
+                // EXPENSE (REALTIME BULAN)
                 // ==============================
                 $expense = 0;
 
@@ -802,7 +816,10 @@ class DashboardService
 
                     $in = implode(',', array_fill(0, count($trxTypes), '?'));
 
-                    $paramsExp = array_merge([$companyId, $bId], $trxTypes);
+                    $paramsExp = array_merge(
+                        [$companyId, $bId, $startDate, $endDate],
+                        $trxTypes
+                    );
 
                     $rowExp = $db->query("
                         SELECT
@@ -819,6 +836,7 @@ class DashboardService
                         WHERE jh.company_id = ?
                           AND jh.branch_id = ?
                           AND jh.status = 'posted'
+                          AND jh.created_at BETWEEN ? AND ?
                           AND EXISTS (
                               SELECT 1
                               FROM transactions t
@@ -832,7 +850,164 @@ class DashboardService
                 }
 
                 // ==============================
-                // WORKFORCE (PER BRANCH + CATEGORY)
+                // EXPENSE DATA
+                // ==============================
+                $expenseData = [];
+
+                if (!empty($trxTypes)) {
+
+                    $in = implode(',', array_fill(0, count($trxTypes), '?'));
+
+                    $paramsExpenseData = array_merge(
+                        [$companyId, $bId, $startDate, $endDate],
+                        $trxTypes
+                    );
+
+                    $expenseRows = $db->query("
+                        SELECT
+
+                            t.id as transaction_id,
+                            t.trx_type,
+                            t.reference_no,
+                            t.amount as trx_amount,
+
+                            jh.id as journal_id,
+                            jh.journal_no,
+                            jh.journal_date,
+                            jh.description as journal_description,
+
+                            coa.account_code,
+                            coa.account_name,
+
+                            jd.debit,
+                            jd.credit,
+
+                            fp.id as pengajuan_id,
+                            fp.nama,
+                            fp.divisi,
+                            fp.jabatan,
+
+                            fpd.id as pengajuan_detail_id,
+                            fpd.sparepart,
+                            fpd.qty,
+                            fpd.harga,
+                            fpd.purpose,
+                            fpd.no_po,
+
+                            pur.id as purchasing_id,
+                            pur.nama_po,
+
+                            (
+                                COALESCE(jd.debit,0) - COALESCE(jd.credit,0)
+                            ) as amount
+
+                        FROM transactions t
+
+                        JOIN journal_headers jh
+                            ON jh.id = t.journal_id
+
+                        JOIN journal_details jd
+                            ON jd.journal_id = jh.id
+
+                        JOIN coa
+                            ON coa.id = jd.account_id
+
+                        LEFT JOIN form_pengajuan fp
+                            ON fp.id = CAST(
+                                REPLACE(t.reference_no, 'PG-', '')
+                                AS UNSIGNED
+                            )
+
+                        LEFT JOIN form_pengajuan_detail fpd
+                            ON fpd.pengajuan_id = fp.id
+
+                        LEFT JOIN form_purchasing pur
+                            ON pur.pengajuan_id = fp.id
+
+                        WHERE t.company_id = ?
+                          AND t.branch_id = ?
+
+                          AND jh.status = 'posted'
+
+                          AND jh.created_at BETWEEN ? AND ?
+
+                          AND coa.account_type IN ('expense','cogs')
+
+                          AND t.trx_type IN ($in)
+
+                          AND t.trx_type != 'expense_payroll'
+
+                        ORDER BY jh.created_at DESC
+                    ", $paramsExpenseData)->getResultArray();
+
+                    foreach ($expenseRows as $er) {
+
+                        $expenseData[] = [
+
+                            // ======================
+                            // TRANSACTION
+                            // ======================
+                            'transaction_id' => $er['transaction_id'],
+                            'trx_type'       => $er['trx_type'],
+                            'reference_no'   => $er['reference_no'],
+                            'trx_amount'     => (float)$er['trx_amount'],
+
+                            // ======================
+                            // JOURNAL
+                            // ======================
+                            'journal' => [
+                                'journal_id'   => $er['journal_id'],
+                                'journal_no'   => $er['journal_no'],
+                                'journal_date' => $er['journal_date'],
+                                'description'  => $er['journal_description'],
+                            ],
+
+                            // ======================
+                            // ACCOUNT
+                            // ======================
+                            'account' => [
+                                'code'   => $er['account_code'],
+                                'name'   => $er['account_name'],
+                                'debit'  => (float)$er['debit'],
+                                'credit' => (float)$er['credit'],
+                                'amount' => (float)$er['amount'],
+                            ],
+
+                            // ======================
+                            // REQUEST
+                            // ======================
+                            'pengajuan' => [
+                                'id'       => $er['pengajuan_id'],
+                                'nama'     => $er['nama'],
+                                'divisi'   => $er['divisi'],
+                                'jabatan'  => $er['jabatan'],
+                            ],
+
+                            // ======================
+                            // ITEM
+                            // ======================
+                            'item' => [
+                                'detail_id'  => $er['pengajuan_detail_id'],
+                                'sparepart'  => $er['sparepart'],
+                                'qty'        => (float)$er['qty'],
+                                'harga'      => (float)$er['harga'],
+                                'purpose'    => $er['purpose'],
+                                'no_po'      => $er['no_po'],
+                            ],
+
+                            // ======================
+                            // PURCHASING
+                            // ======================
+                            'purchasing' => [
+                                'id'      => $er['purchasing_id'],
+                                'nama_po' => $er['nama_po'],
+                            ],
+                        ];
+                    }
+                }
+
+                // ==============================
+                // WORKFORCE
                 // ==============================
                 $workforce = 0;
 
@@ -854,11 +1029,43 @@ class DashboardService
                         WHERE jh.company_id = ?
                           AND jh.branch_id = ?
                           AND jh.status = 'posted'
+                          AND jh.created_at BETWEEN ? AND ?
                           AND t.category_id = ?
                           AND t.trx_type IN ('expense_payroll','expense_salary')
-                    ", [$companyId, $bId, $cat['id']])->getRowArray();
+                    ", [$companyId, $bId, $startDate, $endDate, $cat['id']])->getRowArray();
 
                     $workforce = (float)($rowWorker['workforce'] ?? 0);
+                }
+
+                // ==============================
+                // DAILY WORKER
+                // ==============================
+                $dailyWorker = 0;
+
+                if ($dwRatio > 0) {
+
+                    $rowDw = $db->query("
+                        SELECT
+                            SUM(
+                                CASE 
+                                    WHEN coa.account_type = 'expense'
+                                    THEN COALESCE(jd.debit,0) - COALESCE(jd.credit,0)
+                                    ELSE 0
+                                END
+                            ) as dailyWorker
+                        FROM journal_details jd
+                        JOIN journal_headers jh ON jh.id = jd.journal_id
+                        JOIN transactions t ON t.journal_id = jh.id
+                        JOIN coa ON coa.id = jd.account_id
+                        WHERE jh.company_id = ?
+                          AND jh.branch_id = ?
+                          AND jh.status = 'posted'
+                          AND jh.created_at BETWEEN ? AND ?
+                          AND t.category_id = ?
+                          AND t.trx_type IN ('expense_payroll','expense_salary')
+                    ", [$companyId, $bId, $startDate, $endDate, $cat['id']])->getRowArray();
+
+                    $dailyWorker = (float)($rowDw['dailyWorker'] ?? 0);
                 }
 
                 // ==============================
@@ -866,23 +1073,21 @@ class DashboardService
                 // ==============================
                 $limitSpend  = $target * ($spendRatio / 100);
                 $limitWorker = $estimated * ($workerRatio / 100);
+                $limitDw     = $estimated * ($dwRatio / 100);
 
                 // ==============================
                 // PERCENT
                 // ==============================
-                $actualSpendPercent = $limitSpend > 0
-                    ? ($expense / $limitSpend) * 100
-                    : 0;
-
-                $actualWorkerPercent = $limitWorker > 0
-                    ? ($workforce / $limitWorker) * 100
-                    : 0;
+                $actualSpendPercent  = $limitSpend > 0 ? ($expense / $limitSpend) * 100 : 0;
+                $actualWorkerPercent = $limitWorker > 0 ? ($workforce / $limitWorker) * 100 : 0;
+                $actualDwPercent     = $limitDw > 0 ? ($dailyWorker / $limitDw) * 100 : 0;
 
                 // ==============================
                 // STATUS
                 // ==============================
                 $statusSpend  = $expense > $limitSpend ? 'OVER' : 'SAFE';
                 $statusWorker = $workforce > $limitWorker ? 'OVER' : 'SAFE';
+                $statusDw     = $dailyWorker > $limitDw ? 'OVER' : 'SAFE';
 
                 $result[] = [
                     'branch_id'   => $bId,
@@ -896,18 +1101,26 @@ class DashboardService
 
                     'spend_ratio'  => $spendRatio,
                     'worker_ratio' => $workerRatio,
+                    'dw_ratio'     => $dwRatio,
 
                     'limit_spend'  => $limitSpend,
                     'limit_worker' => $limitWorker,
+                    'limit_dw'     => $limitDw,
 
-                    'expense'   => $expense,
-                    'workforce' => $workforce,
+                    'expense'      => $expense,
+                    'workforce'    => $workforce,
+                    'daily_worker' => $dailyWorker,
 
                     'actual_spend_percent'  => $actualSpendPercent,
                     'actual_worker_percent' => $actualWorkerPercent,
+                    'actual_dw_percent'     => $actualDwPercent,
 
                     'status_spend'  => $statusSpend,
-                    'status_worker' => $statusWorker
+                    'status_worker' => $statusWorker,
+                    'status_dw'     => $statusDw,
+
+                    'trx_types'     => $trxTypes,
+                    'expense_data'  => $expenseData,
                 ];
             }
         }
@@ -920,6 +1133,8 @@ class DashboardService
         $workerRatio = (float) ($dept['worker_ratio'] ?? 0);
         $estimated   = (float) ($dept['estimated'] ?? 0);
         $workforce   = (float) ($dept['workforce'] ?? 0);
+        $dwRatio = (float) ($dept['dw_ratio'] ?? 0);
+        $daily_worker   = (float) ($dept['daily_worker'] ?? 0);
 
         // ======================
         // LIMIT WORKER
@@ -934,16 +1149,38 @@ class DashboardService
             : 0;
 
         // ======================
+        // LIMIT DW
+        // ======================
+        $limitDw = $estimated * ($dwRatio / 100);
+
+        // ======================
+        // PERCENT
+        // ======================
+        $actualDwPercent = $limitDw > 0
+            ? ($daily_worker / $limitDw) * 100
+            : 0;
+
+        // ======================
         // STATUS
         // ======================
         $statusWorker = $workforce > $limitWorker ? 'OVER' : 'SAFE';
+
+        // ======================
+        // STATUS DW
+        // ======================
+        $statuDw = $daily_worker > $limitDw ? 'OVER' : 'SAFE';
 
         return [
             'worker_ratio'          => $workerRatio,
             'limit_worker'          => $limitWorker,
             'workforce'             => $workforce,
             'actual_worker_percent' => $actualWorkerPercent,
-            'status_worker'         => $statusWorker
+            'status_worker'         => $statusWorker,
+            'dw_ratio'              => $dwRatio,
+            'limit_dw'              => $limitDw,
+            'daily_worker'          => $daily_worker,
+            'actual_dw_percent'     => $actualDwPercent,
+            'status_dw'             => $statuDw,
         ];
     }
 }

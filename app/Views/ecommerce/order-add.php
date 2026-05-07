@@ -11,14 +11,59 @@
                     <div class="card invoice-preview-card">
                       <div class="card-body">
                         <div class="row m-sm-4 m-0">
+                          <?php
+
+                          $logo   = session('branch_logo');
+                          $name   = session('branch_name');
+                          $addr   = session('branch_address');
+
+                          // =========================
+                          // SUPER ADMIN FALLBACK
+                          // =========================
+                          if (session('is_super_admin')) {
+
+                              $logo = session('company_logo') ?? 'uploads/logos/default.png';
+                              $name = session('company_name') ?? 'Company';
+                              $addr = session('company_address') ?? '-';
+                          }
+                          ?>
+
                           <div class="col-md-7 mb-md-0 mb-4 ps-0">
-                            <div class="d-flex svg-illustration mb-4 gap-2 align-items-center">
-                              <div class="app-brand-logo demo">
-                                <img src="../../<?= session('branch_logo') ?>" alt="Avatar" width="100%" />
+
+                              <div class="d-flex svg-illustration mb-4 gap-2 align-items-center">
+
+                                  <div class="app-brand-logo demo">
+
+                                      <?php if (!empty($logo) && file_exists(FCPATH . $logo)): ?>
+
+                                          <img
+                                              src="<?= base_url($logo) ?>"
+                                              alt="Logo"
+                                              width="100%"
+                                          >
+
+                                      <?php else: ?>
+
+                                          <img
+                                              src="<?= base_url('uploads/logos/default.png') ?>"
+                                              alt="Logo"
+                                              width="100%"
+                                          >
+
+                                      <?php endif; ?>
+
+                                  </div>
+
+                                  <span class="app-brand-text fw-bold fs-4">
+                                      <?= esc($name) ?>
+                                  </span>
+
                               </div>
-                              <span class="app-brand-text fw-bold fs-4"> <?= session('branch_name') ?></span>
-                            </div>
-                            <p class="mb-2"><?= session('branch_address') ?></p>
+
+                              <p class="mb-2">
+                                  <?= esc($addr) ?>
+                              </p>
+
                           </div>
                           <div class="col-md-5">
                             <dl class="row mb-2">

@@ -114,7 +114,7 @@ class TrialBalanceController extends BaseController
             ];
         }
 
-        return view('accounting/trial_balance/index', [
+        return $this->render('accounting/trial_balance/index', [
             'title' => 'Trial Balance',
             'data' => $trialData,
             'grandDebit' => $grandDebit,

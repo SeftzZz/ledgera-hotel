@@ -13,13 +13,47 @@ class PurchasingController extends BaseController
     {
         $db = \Config\Database::connect();
 
-        $data = $db->table('form_pengajuan p')
+        $builder = $db->table('form_pengajuan p')
             ->select('
                 p.*,
                 COUNT(d.id) as total_item,
                 COALESCE(SUM(d.qty * d.harga),0) as total_harga
             ')
-            ->join('form_pengajuan_detail d', 'd.pengajuan_id = p.id', 'left')
+            ->join(
+                'form_pengajuan_detail d',
+                'd.pengajuan_id = p.id',
+                'left'
+            );
+
+        // =========================
+        // FILTER COMPANY
+        // =========================
+        if (!empty(session('company_id'))) {
+
+            $builder->where(
+                'p.company_id',
+                (int) session('company_id')
+            );
+        }
+
+        // =========================
+        // FILTER BRANCH
+        // =========================
+        // Super admin:
+        // lihat semua branch
+        // =========================
+        if (
+            !session('is_super_admin') &&
+            !empty(session('branch_id'))
+        ) {
+
+            $builder->where(
+                'p.branch_id',
+                (int) session('branch_id')
+            );
+        }
+
+        $data = $builder
             ->groupBy('p.id')
             ->orderBy('p.id', 'DESC')
             ->get()
@@ -132,48 +166,76 @@ class PurchasingController extends BaseController
     {
         $db = \Config\Database::connect();
 
+        $companyId = (int) session('company_id');
+        $branchId  = (int) session('branch_id');
+        $isSuper   = session('is_super_admin');
+
+        // ======================
+        // WHERE
+        // ======================
+        $where = " company_id = {$companyId} ";
+
+        if (!$isSuper && !empty($branchId)) {
+            $where .= " AND branch_id = {$branchId} ";
+        }
+
         // ======================
         // TOTAL
         // ======================
-        $total = $db->table('form_pengajuan')
-            ->countAllResults();
+        $total = $db->query("
+            SELECT COUNT(*) as total
+            FROM form_pengajuan
+            WHERE {$where}
+        ")->getRow()->total ?? 0;
 
         // ======================
-        // PENGAJUAN (PENDING)
+        // PENGAJUAN
         // ======================
-        $pending = $db->table('form_pengajuan')
-            ->where('status', 'Pengajuan')
-            ->countAllResults();
+        $pending = $db->query("
+            SELECT COUNT(*) as total
+            FROM form_pengajuan
+            WHERE {$where}
+              AND status = 'Pengajuan'
+        ")->getRow()->total ?? 0;
 
         // ======================
         // PROSES
         // ======================
-        $proses = $db->table('form_pengajuan')
-            ->where('status', 'Proses')
-            ->countAllResults();
+        $proses = $db->query("
+            SELECT COUNT(*) as total
+            FROM form_pengajuan
+            WHERE {$where}
+              AND status = 'Proses'
+        ")->getRow()->total ?? 0;
 
         // ======================
         // SELESAI
         // ======================
-        $selesai = $db->table('form_pengajuan')
-            ->where('status', 'Selesai')
-            ->countAllResults();
+        $selesai = $db->query("
+            SELECT COUNT(*) as total
+            FROM form_pengajuan
+            WHERE {$where}
+              AND status = 'Selesai'
+        ")->getRow()->total ?? 0;
 
         // ======================
-        // HARI INI
+        // TODAY
         // ======================
-        $today = $db->table('form_pengajuan')
-            ->where('DATE(created_at)', date('Y-m-d'))
-            ->countAllResults();
+        $today = $db->query("
+            SELECT COUNT(*) as total
+            FROM form_pengajuan
+            WHERE {$where}
+              AND DATE(created_at) = CURDATE()
+        ")->getRow()->total ?? 0;
 
         return $this->response->setJSON([
             'status' => true,
             'data' => [
-                'pengajuan' => $pending,
-                'proses'    => $proses,
-                'selesai'   => $selesai,
-                'total'     => $total,
-                'today'     => $today
+                'pengajuan' => (int) $pending,
+                'proses'    => (int) $proses,
+                'selesai'   => (int) $selesai,
+                'total'     => (int) $total,
+                'today'     => (int) $today
             ]
         ]);
     }

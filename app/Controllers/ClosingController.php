@@ -16,7 +16,7 @@ class ClosingController extends BaseController
 
     public function index()
     {
-        return view('closing/index', [
+        return $this->render('closing/index', [
             'title' => 'Closing Period'
         ]);
     }
