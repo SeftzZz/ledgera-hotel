@@ -500,63 +500,104 @@ class Orders extends BaseApiController
 
     public function orders()
     {
-      $db = \Config\Database::connect();
+        $db = \Config\Database::connect();
 
-      $orders = $db->table('orders')
-        ->select("
-          orders.id,
-          orders.order_number,
-          orders.created_at,
-          orders.total_amount,
-          orders.status,
-          users.name as customer,
-          users.email,
-          users.photo,
-          branches.branch_name as branch,
-          payments.payment_method,
-          payments.status as payment_status
-        ")
-        ->join('users','users.id = orders.user_id','left')
-        ->join('branches','branches.id = orders.branch_id','left')
-        ->join('payments','payments.order_id = orders.id','left')
-        ->orderBy('orders.id','DESC')
-        ->get()
-        ->getResultArray();
+        $builder = $db->table('orders')
+            ->select("
+                orders.id,
+                orders.order_number,
+                orders.created_at,
+                orders.total_amount,
+                orders.status,
+                users.name as customer,
+                users.email,
+                users.photo,
+                branches.branch_name as branch,
+                payments.payment_method,
+                payments.status as payment_status
+            ")
+            ->join('users', 'users.id = orders.user_id', 'left')
+            ->join('branches', 'branches.id = orders.branch_id', 'left')
+            ->join('payments', 'payments.order_id = orders.id', 'left');
 
-      $result = [];
+        // =========================
+        // FILTER COMPANY
+        // =========================
+        if (!empty(session('company_id'))) {
+            $builder->where('branches.company_id', session('company_id'));
+        }
 
-      foreach ($orders as $row) {
+        // =========================
+        // FILTER BRANCH
+        // =========================
+        if (
+            !session('is_super_admin') &&
+            !empty(session('branch_id'))
+        ) {
+            $builder->where(
+                'branches.id',
+                session('branch_id')
+            );
+        }
 
-        $date = date('Y-m-d', strtotime($row['created_at']));
-        $time = date('H:i:s', strtotime($row['created_at']));
+        $orders = $builder
+            ->orderBy('orders.id', 'DESC')
+            ->get()
+            ->getResultArray();
 
-        // payment mapping
-        $payment = 2;
-        if ($row['payment_status'] == 'paid') $payment = 1;
-        if ($row['payment_status'] == 'failed') $payment = 3;
+        $result = [];
 
-        // order status mapping
-        $status = 1;
-        if ($row['status'] == 'paid') $status = 2;
-        if ($row['status'] == 'processing') $status = 3;
-        if ($row['status'] == 'ready') $status = 4;
+        foreach ($orders as $row) {
 
-        $result[] = [
-          "id" => $row['id'],
-          "order" => $row['order_number'],
-          "date" => $date,
-          "time" => $time,
-          "customer" => $row['customer'],
-          "email" => $row['email'],
-          "avatar" => $row['photo'],
-          "payment" => $payment,
-          "status" => $status,
-          "method" => $row['payment_method'],
-          "method_number" => $row['branch']
-        ];
-      }
+            $date = date('Y-m-d', strtotime($row['created_at']));
+            $time = date('H:i:s', strtotime($row['created_at']));
 
-      return $this->success($result);
+            // =========================
+            // PAYMENT MAPPING
+            // =========================
+            $payment = 2;
+
+            if ($row['payment_status'] == 'paid') {
+                $payment = 1;
+            }
+
+            if ($row['payment_status'] == 'failed') {
+                $payment = 3;
+            }
+
+            // =========================
+            // ORDER STATUS MAPPING
+            // =========================
+            $status = 1;
+
+            if ($row['status'] == 'paid') {
+                $status = 2;
+            }
+
+            if ($row['status'] == 'processing') {
+                $status = 3;
+            }
+
+            if ($row['status'] == 'ready') {
+                $status = 4;
+            }
+
+            $result[] = [
+                "id"            => $row['id'],
+                "order"         => $row['order_number'],
+                "date"          => $date,
+                "time"          => $time,
+                "customer"      => $row['customer'],
+                "email"         => $row['email'],
+                "avatar"        => $row['photo'],
+                "payment"       => $payment,
+                "status"        => $status,
+                "method"        => $row['payment_method'],
+                "method_number" => $row['branch']
+            ];
+        }
+
+        return $this->success($result);
     }
 
     public function summary()

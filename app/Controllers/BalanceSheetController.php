@@ -134,7 +134,7 @@ class BalanceSheetController extends BaseController
         // =============================
         $totalEquity += $netProfit;
 
-        return view('accounting/balance_sheet/index', [
+        return $this->render('accounting/balance_sheet/index', [
             'title' => 'Balance Sheet',
             'assets' => $assets,
             'liabilities' => $liabilities,
@@ -214,7 +214,7 @@ class BalanceSheetController extends BaseController
     //         ];
     //     }
 
-    //     return view('accounting/balance_sheet/debug_coa', [
+    //     return $this->render('accounting/balance_sheet/debug_coa', [
     //         'data' => $debug
     //     ]);
     // }

@@ -8,14 +8,14 @@ class InventoryController extends BaseController
 {
     public function index()
     {
-        return view('inventory/index', [
+        return $this->render('inventory/index', [
             'title' => 'Inventory List',
         ]);
     }
 
     public function detail($id = null)
     {
-        return view('inventory/detail', [
+        return $this->render('inventory/detail', [
             'title' => 'Detail Pengajuan',
             'id' => $id
         ]);
@@ -25,7 +25,31 @@ class InventoryController extends BaseController
     {
         $db = \Config\Database::connect();
 
-        $data = $db->table('form_pengajuan')
+        $builder = $db->table('form_pengajuan');
+
+        // =========================
+        // ALWAYS FILTER COMPANY
+        // =========================
+        $builder->where(
+            'company_id',
+            (int) session('company_id')
+        );
+
+        // =========================
+        // FILTER BRANCH
+        // =========================
+        if (
+            !session('is_super_admin') &&
+            session('branch_id')
+        ) {
+
+            $builder->where(
+                'branch_id',
+                (int) session('branch_id')
+            );
+        }
+
+        $data = $builder
             ->orderBy('id', 'DESC')
             ->get()
             ->getResultArray();
@@ -37,7 +61,7 @@ class InventoryController extends BaseController
 
     public function pengajuan()
     {
-        return view('inventory/pengajuan', [
+        return $this->render('inventory/pengajuan', [
             'title' => 'Form Pengajuan',
             'order_number' => 'PGJ-' . date('ymdHis')
         ]);
@@ -45,7 +69,7 @@ class InventoryController extends BaseController
 
     public function pengajuan_detail($id = null)
     {
-        return view('inventory/detail', [
+        return $this->render('inventory/detail', [
             'title' => 'Detail Pengajuan',
             'id' => $id
         ]);

@@ -8,7 +8,7 @@ class ReportController extends BaseController
 {
     public function index()
     {
-        return view('report/index', [
+        return $this->render('report/index', [
             'title' => 'Financial Reports'
         ]);
     }
@@ -25,7 +25,7 @@ class ReportController extends BaseController
 
         $rows = (new ReportService())->profitLoss($companyId, $month, $year);
 
-        return view('report/profit_loss', [
+        return $this->render('report/profit_loss', [
             'title' => 'Profit & Loss',
             'month' => $month,
             'year'  => $year,

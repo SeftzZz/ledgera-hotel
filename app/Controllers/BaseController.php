@@ -6,7 +6,7 @@ use CodeIgniter\Controller;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
-
+use App\Models\CompanyModel;
 /**
  * BaseController provides a convenient place for loading components
  * and performing functions that are needed by all your controllers.
@@ -21,25 +21,32 @@ use Psr\Log\LoggerInterface;
 abstract class BaseController extends Controller
 {
     /**
-     * Be sure to declare properties for any property fetch you initialized.
-     * The creation of dynamic property is deprecated in PHP 8.2.
+     * Global data untuk semua view
      */
+    protected array $globalData = [];
 
-    // protected $session;
-
-    /**
-     * @return void
-     */
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
-        // Load here all helpers you want to be available in your controllers that extend BaseController.
-        // Caution: Do not put the this below the parent::initController() call below.
-        // $this->helpers = ['form', 'url'];
-
-        // Caution: Do not edit this line.
         parent::initController($request, $response, $logger);
 
-        // Preload any models, libraries, etc, here.
-        // $this->session = service('session');
+        // ======================
+        // LOAD GLOBAL DATA
+        // ======================
+        $this->loadGlobalData();
+    }
+
+    protected function loadGlobalData()
+    {
+        $companyModel = new CompanyModel();
+
+        $this->globalData['companies'] = $companyModel->findAll();
+    }
+
+    /**
+     * Helper render agar otomatis inject global data
+     */
+    protected function render(string $view, array $data = [])
+    {
+        return view($view, array_merge($this->globalData, $data));
     }
 }

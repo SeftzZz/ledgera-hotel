@@ -10,7 +10,7 @@ class Chats extends BaseController
 
     public function index()
     {
-        return view('ecommerce/chat-list', [
+        return $this->render('ecommerce/chat-list', [
             'title'   => 'Chats'
         ]);
     }

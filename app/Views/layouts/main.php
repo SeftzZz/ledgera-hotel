@@ -159,5 +159,22 @@
                 }
             });
         </script>
+        <script>
+            $(document).on('click', '.switch-company', function () {
+
+                const id = $(this).data('id');
+
+                $.post('/switch-company', {
+                    company_id: id
+                }, function (res) {
+
+                    if (res.status) {
+                        location.reload();
+                    }
+
+                });
+
+            });
+        </script>
     </body>
 </html>

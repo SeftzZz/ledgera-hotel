@@ -13,7 +13,31 @@ class InventoryController extends BaseController
     {
         $db = \Config\Database::connect();
 
-        $data = $db->table('form_pengajuan')
+        $builder = $db->table('form_pengajuan');
+
+        // =========================
+        // ALWAYS FILTER COMPANY
+        // =========================
+        $builder->where(
+            'company_id',
+            (int) session('company_id')
+        );
+
+        // =========================
+        // FILTER BRANCH
+        // =========================
+        if (
+            !session('is_super_admin') &&
+            session('branch_id')
+        ) {
+
+            $builder->where(
+                'branch_id',
+                (int) session('branch_id')
+            );
+        }
+
+        $data = $builder
             ->orderBy('id', 'DESC')
             ->get()
             ->getResultArray();
@@ -139,20 +163,76 @@ class InventoryController extends BaseController
     {
         $db = \Config\Database::connect();
 
-        $pengajuan = $db->table('form_pengajuan')->where('status', 'Pengajuan')->countAllResults();
-        $proses    = $db->table('form_pengajuan')->where('status', 'Proses')->countAllResults();
-        $selesai   = $db->table('form_pengajuan')->where('status', 'Selesai')->countAllResults();
-        $today     = $db->table('form_pengajuan')->where('DATE(created_at)', date('Y-m-d'))->countAllResults();
-        $total     = $db->table('form_pengajuan')->countAllResults();
+        $companyId = (int) session('company_id');
+        $branchId  = (int) session('branch_id');
+        $isSuper   = session('is_super_admin');
+
+        // ======================
+        // WHERE
+        // ======================
+        $where = " company_id = {$companyId} ";
+
+        if (!$isSuper && !empty($branchId)) {
+            $where .= " AND branch_id = {$branchId} ";
+        }
+
+        // ======================
+        // TOTAL
+        // ======================
+        $total = $db->query("
+            SELECT COUNT(*) as total
+            FROM form_pengajuan
+            WHERE {$where}
+        ")->getRow()->total ?? 0;
+
+        // ======================
+        // PENGAJUAN
+        // ======================
+        $pending = $db->query("
+            SELECT COUNT(*) as total
+            FROM form_pengajuan
+            WHERE {$where}
+              AND status = 'Pengajuan'
+        ")->getRow()->total ?? 0;
+
+        // ======================
+        // PROSES
+        // ======================
+        $proses = $db->query("
+            SELECT COUNT(*) as total
+            FROM form_pengajuan
+            WHERE {$where}
+              AND status = 'Proses'
+        ")->getRow()->total ?? 0;
+
+        // ======================
+        // SELESAI
+        // ======================
+        $selesai = $db->query("
+            SELECT COUNT(*) as total
+            FROM form_pengajuan
+            WHERE {$where}
+              AND status = 'Selesai'
+        ")->getRow()->total ?? 0;
+
+        // ======================
+        // TODAY
+        // ======================
+        $today = $db->query("
+            SELECT COUNT(*) as total
+            FROM form_pengajuan
+            WHERE {$where}
+              AND DATE(created_at) = CURDATE()
+        ")->getRow()->total ?? 0;
 
         return $this->response->setJSON([
             'status' => true,
             'data' => [
-                'pengajuan' => $pengajuan,
-                'proses'    => $proses,
-                'selesai'   => $selesai,
-                'total'     => $total,
-                'today'     => $today
+                'pengajuan' => (int) $pending,
+                'proses'    => (int) $proses,
+                'selesai'   => (int) $selesai,
+                'total'     => (int) $total,
+                'today'     => (int) $today
             ]
         ]);
     }
@@ -161,7 +241,7 @@ class InventoryController extends BaseController
     {
         $db = \Config\Database::connect();
 
-        $data = $db->table('inventori i')
+        $builder = $db->table('inventori i')
             ->select('
                 i.vendor_item_id,
                 i.sparepart,
@@ -173,7 +253,21 @@ class InventoryController extends BaseController
             ')
             ->join('vendor_items vi', 'vi.id = i.vendor_item_id', 'left')
             ->join('vendors v', 'v.id = i.vendor_id', 'left')
-            ->where('i.is_delete', 0)
+
+            ->where('i.is_delete', 0);
+
+        // =========================
+        // FILTER COMPANY
+        // =========================
+        if (!empty(session('company_id'))) {
+
+            $builder->where(
+                'v.company_id',
+                (int) session('company_id')
+            );
+        }
+
+        $data = $builder
             ->groupBy('i.vendor_item_id')
             ->orderBy('i.sparepart', 'ASC')
             ->get()
@@ -189,51 +283,70 @@ class InventoryController extends BaseController
     {
         $db = \Config\Database::connect();
 
+        $companyId = (int) session('company_id');
+
         // =========================
-        // TOTAL ITEM (distinct barang)
+        // TOTAL ITEM
         // =========================
-        $totalItems = $db->table('inventori')
-            ->select('COUNT(DISTINCT vendor_item_id) as total')
-            ->where('is_delete', 0)
-            ->get()
-            ->getRow()
-            ->total ?? 0;
+        $totalItems = $db->query("
+            SELECT COUNT(DISTINCT i.vendor_item_id) as total
+            FROM inventori i
+            LEFT JOIN vendors v
+                ON v.id = i.vendor_id
+            WHERE i.is_delete = 0
+              AND v.company_id = {$companyId}
+        ")->getRow()->total ?? 0;
 
         // =========================
         // STOK HABIS
         // =========================
         $stokHabis = $db->query("
             SELECT COUNT(*) as total FROM (
-                SELECT vendor_item_id, SUM(qty) - SUM(is_used) as sisa
-                FROM inventori
-                WHERE is_delete = 0
-                GROUP BY vendor_item_id
+                SELECT
+                    i.vendor_item_id,
+                    SUM(i.qty) - SUM(i.is_used) as sisa
+                FROM inventori i
+                LEFT JOIN vendors v
+                    ON v.id = i.vendor_id
+                WHERE i.is_delete = 0
+                  AND v.company_id = {$companyId}
+                GROUP BY i.vendor_item_id
                 HAVING sisa <= 0
             ) x
         ")->getRow()->total ?? 0;
 
         // =========================
-        // STOK RENDAH (<=10)
+        // STOK RENDAH
         // =========================
         $stokLow = $db->query("
             SELECT COUNT(*) as total FROM (
-                SELECT vendor_item_id, SUM(qty) - SUM(is_used) as sisa
-                FROM inventori
-                WHERE is_delete = 0
-                GROUP BY vendor_item_id
+                SELECT
+                    i.vendor_item_id,
+                    SUM(i.qty) - SUM(i.is_used) as sisa
+                FROM inventori i
+                LEFT JOIN vendors v
+                    ON v.id = i.vendor_id
+                WHERE i.is_delete = 0
+                  AND v.company_id = {$companyId}
+                GROUP BY i.vendor_item_id
                 HAVING sisa > 0 AND sisa <= 10
             ) x
         ")->getRow()->total ?? 0;
 
         // =========================
-        // STOK TERSEDIA (>0)
+        // STOK TERSEDIA
         // =========================
         $available = $db->query("
             SELECT COUNT(*) as total FROM (
-                SELECT vendor_item_id, SUM(qty) - SUM(is_used) as sisa
-                FROM inventori
-                WHERE is_delete = 0
-                GROUP BY vendor_item_id
+                SELECT
+                    i.vendor_item_id,
+                    SUM(i.qty) - SUM(i.is_used) as sisa
+                FROM inventori i
+                LEFT JOIN vendors v
+                    ON v.id = i.vendor_id
+                WHERE i.is_delete = 0
+                  AND v.company_id = {$companyId}
+                GROUP BY i.vendor_item_id
                 HAVING sisa > 0
             ) x
         ")->getRow()->total ?? 0;
@@ -241,10 +354,15 @@ class InventoryController extends BaseController
         // =========================
         // MASUK HARI INI
         // =========================
-        $today = $db->table('inventori')
-            ->where('is_delete', 0)
-            ->where('DATE(created_at)', date('Y-m-d'))
-            ->countAllResults();
+        $today = $db->query("
+            SELECT COUNT(*) as total
+            FROM inventori i
+            LEFT JOIN vendors v
+                ON v.id = i.vendor_id
+            WHERE i.is_delete = 0
+              AND v.company_id = {$companyId}
+              AND DATE(i.created_at) = CURDATE()
+        ")->getRow()->total ?? 0;
 
         // =========================
         // RESPONSE
@@ -252,11 +370,11 @@ class InventoryController extends BaseController
         return $this->response->setJSON([
             'status' => true,
             'data' => [
-                'total_items' => (int)$totalItems,
-                'available'   => (int)$available,
-                'stok_habis'  => (int)$stokHabis,
-                'stok_low'    => (int)$stokLow,
-                'today'       => (int)$today
+                'total_items' => (int) $totalItems,
+                'available'   => (int) $available,
+                'stok_habis'  => (int) $stokHabis,
+                'stok_low'    => (int) $stokLow,
+                'today'       => (int) $today
             ]
         ]);
     }

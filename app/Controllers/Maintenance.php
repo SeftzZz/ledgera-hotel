@@ -28,7 +28,7 @@ class Maintenance extends BaseController
             ->get()
             ->getResultArray();
 
-        return view('maintenance/maintenance-add', [
+        return $this->render('maintenance/maintenance-add', [
             'title'         => 'Add Maintenance',
             'vendor_items'  => $vendorItems
         ]);

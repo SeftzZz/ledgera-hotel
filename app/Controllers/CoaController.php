@@ -29,7 +29,7 @@ class CoaController extends BaseController
                 ->findAll()
         ];
 
-        return view('coa/index', $data);
+        return $this->render('coa/index', $data);
     }
 
     // DATATABLE SERVER SIDE
@@ -221,7 +221,14 @@ class CoaController extends BaseController
 
         $id = $this->request->getPost('id');
 
-        $coa = $this->coaModel->find($id);
+        $coa = $this->coaModel
+            ->select('
+                coa.*,
+                parent.account_code as parent_account_code
+            ')
+            ->join('coa parent', 'parent.id = coa.parent_id', 'left')
+            ->where('coa.id', $id)
+            ->first();
 
         if (!$coa) {
             return $this->response->setJSON([
@@ -243,6 +250,7 @@ class CoaController extends BaseController
         }
 
         $id = $this->request->getPost('id');
+
         $coa = $this->coaModel->find($id);
 
         if (!$coa) {
@@ -252,12 +260,34 @@ class CoaController extends BaseController
             ]);
         }
 
+        // =========================
+        // GET PARENT ACCOUNT CODE
+        // =========================
+        $parentCode = $this->request->getPost('induk_coa');
+
+        $parentId = null;
+
+        if (!empty($parentCode)) {
+
+            $parent = $this->coaModel
+                ->select('id')
+                ->where('account_code', $parentCode)
+                ->first();
+
+            if ($parent) {
+                $parentId = $parent['id'];
+            }
+        }
+
+        // =========================
+        // UPDATE DATA
+        // =========================
         $data = [
             'company_id'    => $this->request->getPost('kantor_coa'),
             'account_code'  => $this->request->getPost('kode_coa'),
             'account_name'  => $this->request->getPost('nama_coa'),
             'account_type'  => $this->request->getPost('tipe_coa'),
-            'parent_id'     => $this->request->getPost('induk_coa'),
+            'parent_id'     => $parentId,
             'cashflow_type' => $this->request->getPost('aruskas_coa'),
             'is_active'     => $this->request->getPost('status_coa'),
             'updated_at'    => date('Y-m-d H:i:s'),
@@ -265,6 +295,7 @@ class CoaController extends BaseController
         ];
 
         if ($this->coaModel->update($id, $data)) {
+
             return $this->response->setJSON([
                 'status'  => true,
                 'message' => 'Data updated successfully'
@@ -289,7 +320,7 @@ class CoaController extends BaseController
             ->orderBy('account_code', 'ASC')
             ->findAll();
 
-        return view('accounting/equity/opening_balance', [
+        return $this->render('accounting/equity/opening_balance', [
             'title'  => 'Opening Balance',
             'accounts' => $accounts
         ]);

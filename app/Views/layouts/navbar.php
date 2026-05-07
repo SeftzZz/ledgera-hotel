@@ -47,30 +47,42 @@
                             ?>
 
                             <div class="navbar-nav align-items-center">
-                                <div class="d-flex align-items-center gap-2">
-                                    <!-- Logo / Initial -->
-                                    <div class="avatar avatarNav-sm">
-                                        <?php if (!empty($companyLogo) && file_exists(FCPATH . $companyLogo)): ?>
-                                            <img src="<?= base_url($companyLogo) ?>" class="rounded-circleColor" />
-                                        <?php else: ?>
-                                            <span class="avatar-initial rounded-circle bg-label-primary">
-                                                <?= esc($companyInitials) ?>
-                                            </span>
-                                        <?php endif; ?>
+                                <div class="dropdown">
+                                    <div class="d-flex align-items-center gap-2 cursor-pointer"
+                                         data-bs-toggle="dropdown">
+
+                                        <!-- Logo -->
+                                        <div class="avatar avatarNav-sm">
+                                            <?php if (!empty($companyLogo) && file_exists(FCPATH . $companyLogo)): ?>
+                                                <img src="<?= base_url($companyLogo) ?>" class="rounded-circleColor" />
+                                            <?php else: ?>
+                                                <span class="avatar-initial rounded-circle bg-label-primary">
+                                                    <?= esc($companyInitials) ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <!-- Info -->
+                                        <div class="d-none d-md-flex flex-column lh-sm">
+                                            <span class="fw-medium text-body"><?= esc($companyName) ?></span>
+                                            <small class="text-muted"><?= esc($companyLoc) ?></small>
+                                        </div>
+
+                                        <i class="ti ti-chevron-down"></i>
                                     </div>
 
-                                    <!-- Company Info -->
-                                    <div class="d-none d-md-flex flex-column lh-sm">
-                                        <span class="fw-medium text-body"><?= esc($companyName) ?></span>
-                                        <small class="text-muted"><?= esc($companyLoc) ?></small>
-                                    </div>
-
-                                    <!-- Website -->
-                                    <?php if (!empty($companyWebsite)): ?>
-                                        <a href="<?= 'https://' . esc($companyWebsite) ?>" target="_blank" class="ms-2 text-body d-none d-lg-inline">
-                                            <i class="ti ti-world ti-md"></i><?= esc($companyWebsite) ?>
-                                        </a>
-                                    <?php endif; ?>
+                                    <!-- DROPDOWN -->
+                                    <ul class="dropdown-menu">
+                                        <?php foreach ($companies as $c): ?>
+                                            <li>
+                                                <a class="dropdown-item switch-company <?= $c['id'] == $companyId ? 'active' : '' ?>"
+                                                   href="javascript:void(0)"
+                                                   data-id="<?= $c['id'] ?>">
+                                                    <?= esc($c['company_name']) ?>
+                                                </a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
                                 </div>
                             </div>
                             <!-- /Info hotel -->

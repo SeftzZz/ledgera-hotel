@@ -72,6 +72,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->post('store', 'TaxController::store');
     });
 
+    $routes->post('switch-company', 'DashboardController::switchCompany');
 });
 
 // =========================

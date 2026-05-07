@@ -37,6 +37,7 @@ class BusinessPartnerController extends BaseController
         $data = $this->request->getJSON(true);
 
         $id = $this->model->insert([
+            'company_id'=> session('company_id'),
             'name'      => $data['name'] ?? '',
             'kode'      => $data['kode'] ?? '',
             'no_po'     => $data['no_po'] ?? '',
@@ -129,9 +130,11 @@ class BusinessPartnerController extends BaseController
     public function items($vendorId = null)
     {
         $data = \Config\Database::connect()
-            ->table('vendor_items')
-            ->where('vendor_id', $vendorId)
-            ->where('is_delete', 0)
+            ->table('vendor_items vi')
+            ->join('vendors v', 'v.id = vi.vendor_id', 'left')
+            ->where('company_id', session('company_id'))
+            ->where('vi.vendor_id', $vendorId)
+            ->where('vi.is_delete', 0)
             ->get()
             ->getResultArray();
 
@@ -154,6 +157,7 @@ class BusinessPartnerController extends BaseController
                 v.kode as vendor_kode
             ')
             ->join('vendors v', 'v.id = vi.vendor_id', 'left')
+            ->where('company_id', session('company_id'))
             ->where('vi.is_delete', 0)
             ->get()
             ->getResultArray();

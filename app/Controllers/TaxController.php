@@ -16,7 +16,7 @@ class TaxController extends BaseController
 
     public function index()
     {
-        return view('master_data/tax/index', [
+        return $this->render('master_data/tax/index', [
             'title' => 'Tax Codes'
         ]);
     }
@@ -101,6 +101,7 @@ class TaxController extends BaseController
         $data = $this->request->getPost();
 
         $this->model->insert([
+            'company_id'=> session('company_id'),
             'tax_code'  => $data['tax_code'],
             'tax_name'  => $data['tax_name'],
             'tax_rate'  => $data['tax_rate'],

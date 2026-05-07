@@ -16,7 +16,7 @@ class BusinessPartnerController extends BaseController
 
     public function index()
     {
-        return view('master_data/partner/index', [
+        return $this->render('master_data/partner/index', [
             'title' => 'Business Partner'
         ]);
     }
@@ -102,6 +102,7 @@ class BusinessPartnerController extends BaseController
         $data = $this->request->getPost();
 
         $this->model->insert([
+            'company_id'=> session('company_id'),
             'name'      => $data['name'],
             'kode'      => $data['kode'],
             'no_po'     => $data['no_po'],
@@ -121,7 +122,7 @@ class BusinessPartnerController extends BaseController
 
     public function detail($id)
     {
-        return view('master_data/partner/items', [
+        return $this->render('master_data/partner/items', [
             'title' => 'Business Partner Items',
             'vendor_id' => $id
         ]);

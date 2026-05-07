@@ -207,10 +207,10 @@
                 displayLength: 10,
                 buttons: [
                     {
-          extend: 'collection',
-          className: 'btn btn-label-primary dropdown-toggle me-2 waves-effect waves-light',
-          text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
-          buttons: [
+                      extend: 'collection',
+                      className: 'btn btn-label-primary dropdown-toggle me-2 waves-effect waves-light',
+                      text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
+                      buttons: [
                         {
                           extend: 'print',
                           text: '<i class="ti ti-printer me-1" ></i>Print',

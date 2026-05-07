@@ -16,7 +16,7 @@ class DashboardController extends BaseController
             'category_id' => session('category_id'),
         ]);
 
-        return view('dashboard/index', $data);
+        return $this->render('dashboard/index', $data);
     }
 
     public function data()
@@ -115,6 +115,23 @@ class DashboardController extends BaseController
         return $this->response->setJSON([
             'status' => true,
             'data'   => $rows
+        ]);
+    }
+
+    public function switchCompany()
+    {
+        $companyId = $this->request->getPost('company_id');
+
+        if (!$companyId) {
+            return $this->response->setJSON([
+                'status' => false
+            ]);
+        }
+
+        session()->set('company_id', $companyId);
+
+        return $this->response->setJSON([
+            'status' => true
         ]);
     }
 }
