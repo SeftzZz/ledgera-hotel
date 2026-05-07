@@ -392,6 +392,68 @@ class MaintenanceController extends BaseController
             }
         }
 
+        // ================= CREATE TRANSACTION =================
+        $service = new \App\Services\TransactionService();
+
+        $companyId = session()->get('company_id');
+        $branchId  = session()->get('branch_id');
+        $categoryId = (int) session()->get('category_id');
+
+        $trxType = 'expense_other';
+
+        if ($categoryId === 10) {
+            $trxType = 'expense_maintenance';
+        }
+
+        if ($categoryId === 3) {
+            $trxType = 'expense_housekeeping';
+        }
+
+        // ================= HITUNG TOTAL =================
+        $totalAmount = 0;
+
+        if ($items) {
+            foreach ($items as $item) {
+                // ambil inventori
+                $inv = $db->table('inventori')
+                    ->where('id', $item['id'])
+                    ->get()
+                    ->getRowArray();
+
+                if (!$inv) continue;
+
+                // ambil harga dari form_pengajuan_detail
+                $detail = $db->table('form_pengajuan_detail')
+                    ->where('sparepart', $inv['sparepart'])
+                    ->orderBy('id', 'DESC') // ambil harga terakhir
+                    ->get()
+                    ->getRowArray();
+
+                $harga = $detail['harga'] ?? 0;
+                $pangajuanId = $detail['pengajuan_id'] ?? 0;
+
+                $subtotal = (int)$item['qty'] * (float)$harga;
+
+                $totalAmount += $subtotal;
+            }
+        }
+
+        // ================= INSERT TRANSACTION =================
+        $trxId = $service->create([
+            'company_id'         => $companyId,
+            'branch_id'          => $branchId > 0 ? $branchId : null,
+            'branch_name'        => session()->get('branch_name'),
+            'trx_date'           => date('Y-m-d'),
+            'trx_type'           => $trxType,
+            'reference_no'       => "PG-" . $pangajuanId,
+            'amount'             => $totalAmount,
+            'payment_account_id' => 3,
+
+            // TAX
+            'tax_code_id'        => 0,
+            'tax_mode'           => 'exclusive'
+        ]);
+
         // ================= INSERT LOG =================
         $db->table('maintenance_logs')->insert([
             'maintenance_id' => $id,
