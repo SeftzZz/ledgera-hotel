@@ -57,7 +57,7 @@
         { data: 'item.no_po' },
         { data: 'journal.journal_no' }
       ],
-
+      destroy: true,
       columnDefs: [
 
         // RESPONSIVE
