@@ -572,7 +572,7 @@
     // console.log('TOKEN:', token);
 
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsUrl = `${protocol}://${window.location.hostname}:4002?token=${token}`;
+    const wsUrl = `${protocol}://${window.location.hostname}?token=${token}`;
 
     console.log('CONNECT TO:', wsUrl);
 
