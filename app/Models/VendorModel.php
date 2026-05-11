@@ -10,6 +10,7 @@ class VendorModel extends Model
     protected $primaryKey = 'id';
 
     protected $allowedFields = [
+        'company_id',
         'name',
         'kode',
         'no_po',
