@@ -7,7 +7,7 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
         <a href="<?= base_url('dashboard') ?>" class="app-brand-link">
-            <img src="<?= base_url('assets/img/logo-smb.png') ?>" width="50%" />
+            <img src="<?= base_url('uploads/logos/heycorp-logo.png') ?>" width="90%" />
             <span class="app-brand-text demo menu-text fw-bold"></span>
         </a>
 

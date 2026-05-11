@@ -12,7 +12,7 @@
         <meta name="description" content="hey work connects hospitality professionals with trusted hotels for flexible daily and casual job opportunities." />
 
         <!-- Favicon -->
-        <link rel="icon" type="image/x-icon" href="<?= base_url('assets/img/favicon/favicon.ico') ?>" />
+        <link rel="icon" type="image/x-icon" href="<?= base_url('assets/img/favicon/favicon.png') ?>" />
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />

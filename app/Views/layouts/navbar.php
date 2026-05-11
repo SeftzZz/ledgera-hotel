@@ -11,24 +11,37 @@
                             <!-- Info Company -->
                             <?php
                                 use App\Models\CompanyModel;
-                                $companyId      = session()->get('company_id') ?? 0;
 
-                                // Default
-                                if ($companyId == 0) {
-                                    $companyName    = 'Ledgera Apps';
-                                    $companyLoc     = 'Jakarta, Indonesia';
-                                    $companyWebsite = 'www.ledgera.com';
-                                    $companyLogo    = 'uploads/logos/Logo-48.png';
-                                }
+                                $companyId = session()->get('company_id') ?? 0;
+                                $userRole  = session()->get('user_role');
 
+                                // =========================
+                                // DEFAULT
+                                // =========================
+                                $companyName    = 'Heyorp System';
+                                $companyLoc     = 'Bogor Kota, Indonesia';
+                                $companyWebsite = 'www.heycorp.id';
+                                $companyLogo    = 'uploads/logos/heycorp-logo.png';
+
+                                // =========================
+                                // GET COMPANY
+                                // =========================
                                 if ($companyId != 0) {
+
                                     $companyModel = new CompanyModel();
+
                                     $company = $companyModel
-                                        ->select('company_name, company_addr, company_web, company_logo')
+                                        ->select('
+                                            company_name,
+                                            company_addr,
+                                            company_web,
+                                            company_logo
+                                        ')
                                         ->where('id', $companyId)
                                         ->first();
 
                                     if ($company) {
+
                                         $companyName    = $company['company_name'];
                                         $companyLoc     = $company['company_addr'];
                                         $companyWebsite = $company['company_web'];
@@ -36,54 +49,127 @@
                                     }
                                 }
 
-                                // Inisial Company
+                                // =========================
+                                // INITIALS
+                                // =========================
                                 $companyInitials = '';
+
                                 foreach (explode(' ', $companyName) as $w) {
+
                                     if ($w !== '') {
-                                        $companyInitials .= strtoupper(substr($w, 0, 1));
+
+                                        $companyInitials .= strtoupper(
+                                            substr($w, 0, 1)
+                                        );
                                     }
                                 }
+
                                 $companyInitials = substr($companyInitials, 0, 2);
+
+                                // =========================
+                                // ONLY ADMIN CAN SWITCH
+                                // =========================
+                                $canSwitchCompany = in_array(
+                                    $userRole,
+                                    ['admin', 'super_admin']
+                                );
                             ?>
 
                             <div class="navbar-nav align-items-center">
+
                                 <div class="dropdown">
-                                    <div class="d-flex align-items-center gap-2 cursor-pointer"
-                                         data-bs-toggle="dropdown">
+
+                                    <!-- ========================= -->
+                                    <!-- CLICKABLE ONLY FOR ADMIN -->
+                                    <!-- ========================= -->
+                                    <div class="d-flex align-items-center gap-2 <?= $canSwitchCompany ? 'cursor-pointer' : '' ?>"
+                                         <?= $canSwitchCompany ? 'data-bs-toggle="dropdown"' : '' ?>>
 
                                         <!-- Logo -->
                                         <div class="avatar avatarNav-sm">
+
                                             <?php if (!empty($companyLogo) && file_exists(FCPATH . $companyLogo)): ?>
-                                                <img src="<?= base_url($companyLogo) ?>" class="rounded-circleColor" />
+
+                                                <img
+                                                    src="<?= base_url($companyLogo) ?>"
+                                                    class="rounded-circleColor"
+                                                />
+
                                             <?php else: ?>
+
                                                 <span class="avatar-initial rounded-circle bg-label-primary">
                                                     <?= esc($companyInitials) ?>
                                                 </span>
+
                                             <?php endif; ?>
+
                                         </div>
 
-                                        <!-- Info -->
+                                        <!-- Company Info -->
                                         <div class="d-none d-md-flex flex-column lh-sm">
-                                            <span class="fw-medium text-body"><?= esc($companyName) ?></span>
-                                            <small class="text-muted"><?= esc($companyLoc) ?></small>
+
+                                            <span class="fw-medium text-body">
+                                                <?= esc($companyName) ?>
+                                            </span>
+
+                                            <small class="text-muted">
+                                                <?= esc($companyLoc) ?>
+                                            </small>
+
                                         </div>
 
-                                        <i class="ti ti-chevron-down"></i>
+                                        <!-- Website -->
+                                        <?php if (!empty($companyWebsite)): ?>
+
+                                            <a href="<?= 'https://' . esc($companyWebsite) ?>"
+                                               target="_blank"
+                                               class="ms-2 text-body d-none d-lg-inline">
+
+                                                <i class="ti ti-world ti-md"></i>
+                                                <?= esc($companyWebsite) ?>
+
+                                            </a>
+
+                                        <?php endif; ?>
+
+                                        <!-- Dropdown Icon -->
+                                        <?php if ($canSwitchCompany): ?>
+
+                                            <i class="ti ti-chevron-down"></i>
+
+                                        <?php endif; ?>
+
                                     </div>
 
-                                    <!-- DROPDOWN -->
-                                    <ul class="dropdown-menu">
-                                        <?php foreach ($companies as $c): ?>
-                                            <li>
-                                                <a class="dropdown-item switch-company <?= $c['id'] == $companyId ? 'active' : '' ?>"
-                                                   href="javascript:void(0)"
-                                                   data-id="<?= $c['id'] ?>">
-                                                    <?= esc($c['company_name']) ?>
-                                                </a>
-                                            </li>
-                                        <?php endforeach; ?>
-                                    </ul>
+                                    <!-- ========================= -->
+                                    <!-- DROPDOWN ONLY ADMIN -->
+                                    <!-- ========================= -->
+                                    <?php if ($canSwitchCompany): ?>
+
+                                        <ul class="dropdown-menu">
+
+                                            <?php foreach ($companies as $c): ?>
+
+                                                <li>
+
+                                                    <a class="dropdown-item switch-company <?= $c['id'] == $companyId ? 'active' : '' ?>"
+                                                       href="javascript:void(0)"
+                                                       data-id="<?= $c['id'] ?>">
+
+                                                        <?= esc($c['company_name']) ?>
+
+                                                    </a>
+
+                                                </li>
+
+                                            <?php endforeach; ?>
+
+                                        </ul>
+
+                                    <?php endif; ?>
+
                                 </div>
+
                             </div>
                             <!-- /Info hotel -->
 
