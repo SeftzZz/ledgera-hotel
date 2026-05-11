@@ -113,11 +113,13 @@ class InventoryController extends BaseController
         $tanggalFormatted = date('d-m-Y', strtotime($tanggal));
 
         $db->table('form_pengajuan')->insert([
-            'nama'     => $data['nama'] ?? '',
-            'divisi'   => $data['divisi'] ?? '',
-            'jabatan'  => $data['jabatan'] ?? '',
-            'tanggal'  => $tanggalFormatted,
-            'status'   => 'Pengajuan'
+            'company_id'    => $data['company_id'],
+            'branch_id'     => $data['branch_id'],
+            'nama'          => $data['nama'],
+            'divisi'        => $data['divisi'],
+            'jabatan'       => $data['jabatan'],
+            'tanggal'       => $tanggalFormatted,
+            'status'        => 'Pengajuan'
         ]);
 
         $pengajuanId = $db->insertID();

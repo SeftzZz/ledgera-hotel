@@ -258,6 +258,18 @@ $(function () {
 
     try {
 
+      const payload = {
+        company_id: window.companyId,
+        branch_id: window.branchId,
+        nama: $('#nama').val(),
+        divisi: $('#divisi').val(),
+        jabatan: $('#jabatan').val(),
+        tanggal: $('#tanggal').val(),
+        items: items
+      }
+
+      console.log(payload);
+      
       // =========================
       // 1. SIMPAN PENGAJUAN
       // =========================
@@ -268,6 +280,7 @@ $(function () {
           Authorization: 'Bearer ' + window.jwtToken
         },
         body: JSON.stringify({
+          company_id: window.companyId,
           branch_id: window.branchId,
           nama: $('#nama').val(),
           divisi: $('#divisi').val(),

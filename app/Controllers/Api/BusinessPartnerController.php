@@ -181,6 +181,7 @@ class BusinessPartnerController extends BaseController
                 'vendor_id' => $data['vendor_id'],
                 'sparepart' => $data['sparepart'],
                 'type'      => $data['type'],
+                'satuan'    => $data['satuan'],
                 'harga'     => $data['harga'],
                 'no_seri'   => $data['no_seri'],
                 'status'    => $data['status'] ?? 'Aktif',
