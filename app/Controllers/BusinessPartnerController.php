@@ -96,7 +96,7 @@ class BusinessPartnerController extends BaseController
         $data = $this->request->getPost();
 
         $this->model->insert([
-            'company_id'=> session('company_id'),
+            'company_id'=> $data['company_id'],
             'name'      => $data['partner_name'],
             'kode'      => $data['partner_code'],
             'no_po'     => $data['no_po'],

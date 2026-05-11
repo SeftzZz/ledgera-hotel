@@ -32,7 +32,7 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <form id="formAddTax">
-
+                    <input type="text" name="company_id" value="<?= session('company_id') ?>">
                     <div class="modal-header">
                         <h5 class="modal-title">
                             Add New Tax Code
