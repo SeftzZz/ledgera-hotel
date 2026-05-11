@@ -151,9 +151,11 @@
                         <div class="col-md-6 mb-3">
                           <label class="form-label">Type *</label>
                           <select name="type" id="edit_type" class="form-select" required>
+                            <option value="">Select Type</option>
                             <option value="Sayur">Sayur</option>
                             <option value="Buah">Buah</option>
                             <option value="Elektrik">Elektrik</option>
+                            <option value="Umum">Umum</option>
                           </select>
                         </div>
 
@@ -174,6 +176,19 @@
                       </div>
 
                       <div class="row">
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Satuan</label>
+                          <select name="satuan" class="form-select" required>
+                            <option value="">Select Satuan</option>
+                            <option value="kg">Kg</option>
+                            <option value="bal">Bal</option>
+                            <option value="pack">Pack</option>
+                            <option value="pcs">Pcs</option>
+                            <option value="can">Can</option>
+                            <option value="galon">Galon</option>
+                          </select>
+                        </div>
+                        
                         <div class="col-md-6 mb-3">
                           <label class="form-label">Status</label>
                           <select name="status" id="edit_status" class="form-select">
@@ -408,37 +423,79 @@
 
             $('.dtVendorItems tbody').on('click', '.btn-delete', function () {
 
-              let id = $(this).data('id');
+              let tr = $(this).closest('tr');
+
+              // SUPPORT RESPONSIVE
+              if (tr.hasClass('child')) {
+                tr = tr.prev();
+              }
+
+              let data = table.row(tr).data();
+
+              let id = data.id;
 
               Swal.fire({
+
                 title: 'Delete item?',
-                text: "This action cannot be undone",
+
+                text: 'This action cannot be undone',
+
                 icon: 'warning',
+
                 showCancelButton: true,
+
                 confirmButtonText: 'Yes, delete'
+
               }).then((result) => {
 
                 if (result.isConfirmed) {
 
                   $.ajax({
+
                     url: `/api/partners/items/${id}`,
+
                     type: 'DELETE',
+
                     headers: {
                       Authorization: 'Bearer ' + window.jwtToken
                     },
+
                     success: function (res) {
 
                       if (res.status) {
 
-                        Swal.fire('Deleted!', 'Item removed', 'success');
+                        Swal.fire(
+                          'Deleted!',
+                          'Item removed',
+                          'success'
+                        );
 
-                        $('.dtVendorItems').DataTable().ajax.reload();
+                        table.ajax.reload(null, false);
 
                       } else {
-                        Swal.fire('Error', res.message, 'error');
+
+                        Swal.fire(
+                          'Error',
+                          res.message,
+                          'error'
+                        );
+
                       }
 
+                    },
+
+                    error: function (xhr) {
+
+                      console.error(xhr.responseText);
+
+                      Swal.fire(
+                        'Error',
+                        'Server error',
+                        'error'
+                      );
+
                     }
+
                   });
 
                 }
