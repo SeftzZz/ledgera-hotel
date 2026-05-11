@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: May 07, 2026 at 05:11 PM
+-- Generation Time: May 11, 2026 at 06:02 PM
 -- Server version: 10.11.10-MariaDB-log
 -- PHP Version: 8.3.27
 
@@ -1919,9 +1919,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `company_id`, `branch_id`, `category_id`, `role`, `name`, `email`, `phone`, `password`, `photo`, `is_active`, `last_login_at`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) VALUES
-(1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-05-07 16:07:06', '2026-01-18 12:25:53', 1, '2026-05-07 16:07:06', NULL, NULL, NULL),
-(2, 1, 3, 4, 'hotel_fo', 'Syahwal Ramadhan', 'syahwal.86@gmail.com', '895330907220', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '2.png', 'active', '2026-05-07 14:58:06', '2026-01-18 18:59:55', 1, '2026-05-07 14:58:06', NULL, NULL, NULL),
-(3, 1, 3, 0, 'hotel_gm', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '3.png', 'active', '2026-05-07 14:42:20', '2026-01-19 10:53:08', 1, '2026-05-07 14:42:20', NULL, NULL, NULL),
+(1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-05-07 16:38:53', '2026-01-18 12:25:53', 1, '2026-05-07 16:38:53', NULL, NULL, NULL),
+(2, 1, 3, 4, 'hotel_fo', 'Syahwal Ramadhan', 'syahwal.86@gmail.com', '895330907220', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '2.png', 'active', '2026-05-07 16:32:43', '2026-01-18 18:59:55', 1, '2026-05-07 16:32:43', NULL, NULL, NULL),
+(3, 1, 3, 0, 'hotel_gm', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '3.png', 'active', '2026-05-11 15:34:48', '2026-01-19 10:53:08', 1, '2026-05-11 15:34:48', NULL, NULL, NULL),
 (17, 1, 3, 1, 'hotel_fnb_production', 'Aji Kitchen', 'aji.kitchen@gmail.com', '-', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', NULL, 'active', '2026-05-07 14:42:35', '2026-04-08 15:28:02', NULL, '2026-05-07 14:42:35', NULL, NULL, NULL),
 (18, 0, 4, 8, NULL, 'User IT', 'it@heywork.id', '081234567890', '$2y$10$fL85xpOpYQBc8P0iNoJfH.BxzXS7p2vCb4ZMQSbZUQttpsupuEKzy', NULL, 'active', NULL, '2026-04-09 01:39:28', NULL, '2026-04-09 01:39:28', NULL, NULL, NULL),
 (19, 0, 3, 0, '', 'FPP', 'fpp@gmail.com', '0812', '$2y$10$/oRPi6wi/t7INHPytXYlNe6IJVkmQ31Dum5wdTV7B/GpL1xGABqdu', NULL, 'active', NULL, '2026-04-29 17:07:05', NULL, '2026-04-29 17:07:05', NULL, NULL, NULL);
