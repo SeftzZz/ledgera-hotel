@@ -4,7 +4,11 @@
 
 'use strict';
 
-const targetId = window.location.pathname.split('/').pop();
+const pathParts = window.location.pathname.split('/');
+
+const hotelId  = pathParts[2]; // 3
+const targetId = pathParts[4]; // 2
+
 let TARGET = 0;
 function formatRupiah(num) {
   return 'Rp ' + (num || 0).toLocaleString('id-ID');
@@ -382,7 +386,8 @@ $(function () {
     formData.forEach(i => data[i.name] = i.value);
 
     // 🔥 TAMBAHKAN HOTEL ID
-    data.hotel_id = targetId;
+    data.hotel_id = hotelId;
+    data.target_id = targetId;
 
     // =============================
     // MAPPING TYPE → API

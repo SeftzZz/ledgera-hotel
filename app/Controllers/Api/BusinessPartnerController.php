@@ -131,10 +131,35 @@ class BusinessPartnerController extends BaseController
     {
         $data = \Config\Database::connect()
             ->table('vendor_items vi')
+
+            ->select('
+                vi.id,
+                vi.vendor_id,
+                vi.sparepart,
+                vi.type,
+                vi.harga,
+                vi.no_seri,
+                vi.satuan,
+                vi.status,
+                vi.is_delete,
+                vi.created_at,
+                vi.updated_at,
+
+                v.company_id,
+                v.name,
+                v.kode,
+                v.no_po,
+                v.pic,
+                v.phone,
+                v.address
+            ')
+
             ->join('vendors v', 'v.id = vi.vendor_id', 'left')
-            ->where('company_id', session('company_id'))
+
+            ->where('v.company_id', session('company_id'))
             ->where('vi.vendor_id', $vendorId)
             ->where('vi.is_delete', 0)
+
             ->get()
             ->getResultArray();
 

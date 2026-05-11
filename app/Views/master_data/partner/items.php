@@ -56,7 +56,7 @@
                       <div class="row">
 
                         <div class="col-md-6 mb-3">
-                          <label class="form-label">Sparepart *</label>
+                          <label class="form-label">Nama Item *</label>
                           <input type="text" name="sparepart" class="form-control" required>
                         </div>
 
@@ -206,7 +206,7 @@
 
             let vendorId = $('#vendor_id').val();
 
-            $('.dtVendorItems').DataTable({
+            const table = $('.dtVendorItems').DataTable({
               processing: true,
               ajax: {
                 url: `/api/partners/${vendorId}/items`,
@@ -241,12 +241,6 @@
                   }
                 },
                 {
-                  targets: 3,
-                  render: function (data) {
-                    return data;
-                  }
-                },
-                {
                   targets: 5,
                   render: function (data) {
                     return 'Rp ' + parseInt(data).toLocaleString('id-ID');
@@ -262,21 +256,23 @@
                 },
                 {
                   targets: -1,
-                  render: function (data, type, full) {
+                  orderable: false,
+                  searchable: false,
+                  render: function () {
                     return `
                       <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-icon btn-primary btn-edit" data-id="${full.id}">
+                        <button class="btn btn-sm btn-icon btn-primary btn-edit">
                           <i class="ti ti-pencil"></i>
                         </button>
-                        <button class="btn btn-sm btn-icon btn-danger btn-delete" data-id="${full.id}">
+
+                        <button class="btn btn-sm btn-icon btn-danger btn-delete">
                           <i class="ti ti-trash"></i>
                         </button>
                       </div>
                     `;
                   }
                 }
-              ],
-              order: [[1, 'asc']]
+              ]
             });
 
             $('#btnAddItem').on('click', function () {
@@ -325,9 +321,21 @@
 
             });
 
+            // ===========================
+            // EDIT
+            // ===========================
             $('.dtVendorItems tbody').on('click', '.btn-edit', function () {
 
-              let id = $(this).data('id');
+              let tr = $(this).closest('tr');
+
+              // SUPPORT RESPONSIVE DATATABLE
+              if (tr.hasClass('child')) {
+                tr = tr.prev();
+              }
+
+              let data = table.row(tr).data();
+
+              let id = data.id;
 
               $.ajax({
                 url: `/api/partners/items/${id}`,
@@ -351,7 +359,9 @@
                     $('#modalEditItem').modal('show');
 
                   } else {
+
                     Swal.fire('Error', res.message, 'error');
+
                   }
 
                 }

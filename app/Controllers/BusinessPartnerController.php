@@ -70,12 +70,6 @@ class BusinessPartnerController extends BaseController
                 <a href="'.base_url('partner/detail/'.$row['id']).'" class="btn btn-sm btn-icon btn-info">
                   <i class="ti ti-eye"></i>
                 </a>
-                <button class="btn btn-sm btn-icon btn-primary btn-edit" data-id="'.$row['id'].'">
-                  <i class="ti ti-pencil"></i>
-                </button>
-                <button class="btn btn-sm btn-icon btn-danger btn-delete" data-id="'.$row['id'].'">
-                  <i class="ti ti-trash"></i>
-                </button>
               </div>
             ';
 
@@ -103,8 +97,8 @@ class BusinessPartnerController extends BaseController
 
         $this->model->insert([
             'company_id'=> session('company_id'),
-            'name'      => $data['name'],
-            'kode'      => $data['kode'],
+            'name'      => $data['partner_name'],
+            'kode'      => $data['partner_code'],
             'no_po'     => $data['no_po'],
             'pic'       => $data['pic'],
             'phone'     => $data['phone'],
