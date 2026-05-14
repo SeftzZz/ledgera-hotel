@@ -26,36 +26,145 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <form id="formAddPartner">
+                    <input type="hidden" name="company_id" value="<?= session('company_id') ?>">
                     <div class="modal-header">
-                        <h5 class="modal-title">Add Business Partner</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <h5 class="modal-title">
+                            Add Business Partner
+                        </h5>
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal">
+                        </button>
                     </div>
 
                     <div class="modal-body">
+
                         <div class="row">
+
+                            <!-- CODE -->
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Code *</label>
-                                <input type="text" name="partner_code" class="form-control" required>
+                                <label class="form-label">
+                                    Code *
+                                </label>
+
+                                <input type="text"
+                                       name="partner_code"
+                                       class="form-control"
+                                       required>
                             </div>
 
+                            <!-- NAME -->
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Name *</label>
-                                <input type="text" name="partner_name" class="form-control" required>
+                                <label class="form-label">
+                                    Name *
+                                </label>
+
+                                <input type="text"
+                                       name="partner_name"
+                                       class="form-control"
+                                       required>
                             </div>
 
+                            <!-- TYPE -->
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Type *</label>
-                                <select name="partner_type" class="form-select" required>
-                                    <option selected value="Vendor">Vendor</option>
+                                <label class="form-label">
+                                    Type *
+                                </label>
+
+                                <select name="partner_type"
+                                        class="form-select"
+                                        required>
+
+                                    <option value="Vendor" selected>
+                                        Vendor
+                                    </option>
+
                                 </select>
                             </div>
+
+                            <!-- NO PO -->
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    No PO
+                                </label>
+
+                                <input type="text"
+                                       name="no_po"
+                                       class="form-control">
+                            </div>
+
+                            <!-- PIC -->
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    PIC
+                                </label>
+
+                                <input type="text"
+                                       name="pic"
+                                       class="form-control">
+                            </div>
+
+                            <!-- PHONE -->
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    Phone
+                                </label>
+
+                                <input type="text"
+                                       name="phone"
+                                       class="form-control">
+                            </div>
+
+                            <!-- ADDRESS -->
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">
+                                    Address
+                                </label>
+
+                                <textarea name="address"
+                                          class="form-control"
+                                          rows="3"></textarea>
+                            </div>
+
+                            <!-- STATUS -->
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    Status
+                                </label>
+
+                                <select name="status"
+                                        class="form-select">
+
+                                    <option value="Aktif" selected>
+                                        Aktif
+                                    </option>
+
+                                    <option value="Non Aktif">
+                                        Non Aktif
+                                    </option>
+
+                                </select>
+                            </div>
+
                         </div>
+
                     </div>
 
                     <div class="modal-footer">
-                        <button class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save</button>
+
+                        <button class="btn btn-label-secondary"
+                                data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button type="submit"
+                                class="btn btn-primary">
+                            Save
+                        </button>
+
                     </div>
+
                 </form>
             </div>
         </div>

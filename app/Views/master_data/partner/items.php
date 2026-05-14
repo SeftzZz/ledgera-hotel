@@ -56,7 +56,7 @@
                       <div class="row">
 
                         <div class="col-md-6 mb-3">
-                          <label class="form-label">Sparepart *</label>
+                          <label class="form-label">Nama Item *</label>
                           <input type="text" name="sparepart" class="form-control" required>
                         </div>
 
@@ -151,9 +151,11 @@
                         <div class="col-md-6 mb-3">
                           <label class="form-label">Type *</label>
                           <select name="type" id="edit_type" class="form-select" required>
+                            <option value="">Select Type</option>
                             <option value="Sayur">Sayur</option>
                             <option value="Buah">Buah</option>
                             <option value="Elektrik">Elektrik</option>
+                            <option value="Umum">Umum</option>
                           </select>
                         </div>
 
@@ -174,6 +176,19 @@
                       </div>
 
                       <div class="row">
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">Satuan</label>
+                          <select name="satuan" class="form-select" required>
+                            <option value="">Select Satuan</option>
+                            <option value="kg">Kg</option>
+                            <option value="bal">Bal</option>
+                            <option value="pack">Pack</option>
+                            <option value="pcs">Pcs</option>
+                            <option value="can">Can</option>
+                            <option value="galon">Galon</option>
+                          </select>
+                        </div>
+                        
                         <div class="col-md-6 mb-3">
                           <label class="form-label">Status</label>
                           <select name="status" id="edit_status" class="form-select">
@@ -206,7 +221,7 @@
 
             let vendorId = $('#vendor_id').val();
 
-            $('.dtVendorItems').DataTable({
+            const table = $('.dtVendorItems').DataTable({
               processing: true,
               ajax: {
                 url: `/api/partners/${vendorId}/items`,
@@ -241,12 +256,6 @@
                   }
                 },
                 {
-                  targets: 3,
-                  render: function (data) {
-                    return data;
-                  }
-                },
-                {
                   targets: 5,
                   render: function (data) {
                     return 'Rp ' + parseInt(data).toLocaleString('id-ID');
@@ -262,21 +271,23 @@
                 },
                 {
                   targets: -1,
-                  render: function (data, type, full) {
+                  orderable: false,
+                  searchable: false,
+                  render: function () {
                     return `
                       <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-icon btn-primary btn-edit" data-id="${full.id}">
+                        <button class="btn btn-sm btn-icon btn-primary btn-edit">
                           <i class="ti ti-pencil"></i>
                         </button>
-                        <button class="btn btn-sm btn-icon btn-danger btn-delete" data-id="${full.id}">
+
+                        <button class="btn btn-sm btn-icon btn-danger btn-delete">
                           <i class="ti ti-trash"></i>
                         </button>
                       </div>
                     `;
                   }
                 }
-              ],
-              order: [[1, 'asc']]
+              ]
             });
 
             $('#btnAddItem').on('click', function () {
@@ -325,9 +336,21 @@
 
             });
 
+            // ===========================
+            // EDIT
+            // ===========================
             $('.dtVendorItems tbody').on('click', '.btn-edit', function () {
 
-              let id = $(this).data('id');
+              let tr = $(this).closest('tr');
+
+              // SUPPORT RESPONSIVE DATATABLE
+              if (tr.hasClass('child')) {
+                tr = tr.prev();
+              }
+
+              let data = table.row(tr).data();
+
+              let id = data.id;
 
               $.ajax({
                 url: `/api/partners/items/${id}`,
@@ -351,7 +374,9 @@
                     $('#modalEditItem').modal('show');
 
                   } else {
+
                     Swal.fire('Error', res.message, 'error');
+
                   }
 
                 }
@@ -398,37 +423,79 @@
 
             $('.dtVendorItems tbody').on('click', '.btn-delete', function () {
 
-              let id = $(this).data('id');
+              let tr = $(this).closest('tr');
+
+              // SUPPORT RESPONSIVE
+              if (tr.hasClass('child')) {
+                tr = tr.prev();
+              }
+
+              let data = table.row(tr).data();
+
+              let id = data.id;
 
               Swal.fire({
+
                 title: 'Delete item?',
-                text: "This action cannot be undone",
+
+                text: 'This action cannot be undone',
+
                 icon: 'warning',
+
                 showCancelButton: true,
+
                 confirmButtonText: 'Yes, delete'
+
               }).then((result) => {
 
                 if (result.isConfirmed) {
 
                   $.ajax({
+
                     url: `/api/partners/items/${id}`,
+
                     type: 'DELETE',
+
                     headers: {
                       Authorization: 'Bearer ' + window.jwtToken
                     },
+
                     success: function (res) {
 
                       if (res.status) {
 
-                        Swal.fire('Deleted!', 'Item removed', 'success');
+                        Swal.fire(
+                          'Deleted!',
+                          'Item removed',
+                          'success'
+                        );
 
-                        $('.dtVendorItems').DataTable().ajax.reload();
+                        table.ajax.reload(null, false);
 
                       } else {
-                        Swal.fire('Error', res.message, 'error');
+
+                        Swal.fire(
+                          'Error',
+                          res.message,
+                          'error'
+                        );
+
                       }
 
+                    },
+
+                    error: function (xhr) {
+
+                      console.error(xhr.responseText);
+
+                      Swal.fire(
+                        'Error',
+                        'Server error',
+                        'error'
+                      );
+
                     }
+
                   });
 
                 }

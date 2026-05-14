@@ -157,13 +157,13 @@ class CoaController extends BaseController
                 ';
             }
 
-            if (hasPermission('coa.delete') && session()->get('user_id') != $row['id']) {
-                $actionBtn .= '
-                    <button class="btn btn-sm btn-icon btn-danger btn-delete" data-id="'.$row['id'].'" title="Delete">
-                        <i class="ti ti-trash"></i>
-                    </button>
-                ';
-            }
+            // if (hasPermission('coa.delete') && session()->get('user_id') != $row['id']) {
+            //     $actionBtn .= '
+            //         <button class="btn btn-sm btn-icon btn-danger btn-delete" data-id="'.$row['id'].'" title="Delete">
+            //             <i class="ti ti-trash"></i>
+            //         </button>
+            //     ';
+            // }
 
             $actionBtn .= '</div>';
 
@@ -191,16 +191,44 @@ class CoaController extends BaseController
     public function store()
     {
         $request = service('request');
+
+        // =========================
+        // GET PARENT BY ACCOUNT CODE
+        // =========================
+        $parentCode = $request->getPost('induk_coa');
+
+        $parent = null;
+
+        if (!empty($parentCode)) {
+
+            $parent = $this->coaModel
+                ->where('account_code', $parentCode)
+                ->first();
+        }
+
+        // =========================
+        // DATA
+        // =========================
         $data = [
+
             'company_id'    => $request->getPost('kantor_coa'),
+
             'account_code'  => $request->getPost('kode_coa'),
+
             'account_name'  => $request->getPost('nama_coa'),
+
             'account_type'  => $request->getPost('tipe_coa'),
-            'parent_id'     => $request->getPost('induk_coa'),
+
+            // 🔥 FIX
+            'parent_id'     => $parent['id'] ?? null,
+
             'cashflow_type' => $request->getPost('aruskas_coa'),
+
             'is_active'     => $request->getPost('status_coa'),
+
             'created_at'    => date('Y-m-d H:i:s'),
             'created_by'    => session()->get('user_id'),
+
             'updated_at'    => date('Y-m-d H:i:s'),
             'updated_by'    => session()->get('user_id')
         ];

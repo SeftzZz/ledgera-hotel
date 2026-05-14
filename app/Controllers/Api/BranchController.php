@@ -458,6 +458,7 @@ class BranchController extends BaseApiController
             ->insert([
                 'company_id' => session('company_id'),
                 'hotel_id' => $data['hotel_id'],
+                'target_id' => $data['target_id'],
                 'department_category' => $data['department_category'],
                 'min_value' => $data['min_value'] ?? 0,
                 'max_value' => $data['max_value'],
