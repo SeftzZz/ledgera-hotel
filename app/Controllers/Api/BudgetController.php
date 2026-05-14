@@ -71,6 +71,7 @@ class BudgetController extends BaseController
             // =========================
             $categoryRow = $db->table('categories')
                 ->select('id, name')
+                ->where('branch_id', $branchId)
                 ->where('LOWER(name)', strtolower($department)) // 🔥 lebih aman
                 ->limit(1)
                 ->get()

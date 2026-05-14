@@ -273,7 +273,7 @@ class JournalController extends BaseController
         foreach ($details as $d) {
 
             // 🔥 82 = platform fee
-            if ((int)$d['account_id'] === 82) {
+            if ((int)$d['account_id'] === 82 || (int)$d['account_id'] === 86) {
                 $platformFeeAmount += (float)$d['debit'];
             }
 
