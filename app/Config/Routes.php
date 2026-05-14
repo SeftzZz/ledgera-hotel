@@ -186,12 +186,12 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
 
 // USER (WEB)
 $routes->group('', ['filter' => 'auth'], function ($routes) {
-    $routes->get('users', 'UserController::index',['filter' => 'permission:users.view']);
-    $routes->post('users/datatable', 'UserController::datatable',['filter' => 'permission:users.view']);
-    $routes->post('users/store', 'UserController::store', ['filter' => 'permission:users.create']);
-    $routes->post('users/get', 'UserController::getById', ['filter' => 'permission:users.edit']);
-    $routes->post('users/update', 'UserController::update', ['filter' => 'permission:users.edit']);
-    $routes->post('users/delete', 'UserController::delete', ['filter' => 'permission:users.delete']);
+    $routes->get('users', 'UserController::index');
+    $routes->post('users/datatable', 'UserController::datatable');
+    $routes->post('users/store', 'UserController::store');
+    $routes->post('users/get', 'UserController::getById');
+    $routes->post('users/update', 'UserController::update');
+    $routes->post('users/delete', 'UserController::delete');
 });
 
 // COA (WEB)
@@ -341,7 +341,7 @@ $routes->group('api', ['filter' => 'jwt'], function ($routes) {
 
     // Journals
     $routes->get('journals',                    'Api\JournalController::index');
-    $routes->post('journals',                    'Api\JournalController::create', ['filter' => 'permission:journal.create']);
+    $routes->post('journals',                    'Api\JournalController::create');
     // $routes->post('journals',                   'Api\JournalController::store');
     $routes->get('journals/(:num)',             'Api\JournalController::show/$1');
     $routes->post('journals/(:num)/submit',     'Api\JournalController::submit/$1');

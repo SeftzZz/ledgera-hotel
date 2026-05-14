@@ -326,12 +326,6 @@
                 </a>
             </li>
 
-            <li class="menu-item <?= ($uri=='roles')?'active':'' ?>">
-                <a href="<?= base_url('roles') ?>" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-shield"></i>
-                    <div>Roles & Permissions</div>
-                </a>
-            </li>
         <?php endif; ?>
 
         <!-- LOGOUT -->
