@@ -275,6 +275,41 @@ class BranchController extends BaseApiController
         ]);
     }
 
+    public function showByName($name = null)
+    {
+        if (empty($name)) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Branche Name wajib ada'
+            ]);
+        }
+
+        $db = \Config\Database::connect();
+
+        $data = $db->table('branches')
+            ->select('
+                branches.id,
+                branches.company_id,
+                branches.branch_code,
+                branches.branch_name
+            ')
+            ->where('branches.branch_name', $name)
+            ->get()
+            ->getRowArray();
+
+        if (!$data) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Data tidak ditemukan'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status' => true,
+            'data'   => $data
+        ]);
+    }
+
     public function ratio($target_id)
     {
         $db = \Config\Database::connect();

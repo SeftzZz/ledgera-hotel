@@ -258,7 +258,6 @@ $routes->get('income-statement', 'IncomeStatementController::index');
 $routes->get('branches',              'Api\BranchController::index');
 $routes->post('branches',             'Api\BranchController::store');
 $routes->get('branches/(:num)',       'Api\BranchController::show/$1');
-$routes->get('branches/(:num)',       'Api\BranchController::show/$1');
 
 // =========================
 // API – PUBLIC
@@ -286,16 +285,17 @@ $routes->group('api', ['filter' => 'jwt'], function ($routes) {
     $routes->delete('companies/(:num)',  'Api\CompanyController::delete/$1');
 
     // Branches
-    $routes->get('branches',              'Api\BranchController::index');
-    $routes->post('branches',             'Api\BranchController::store');
-    $routes->get('branches/(:num)',       'Api\BranchController::show/$1');
-    $routes->post('branches/update',      'Api\BranchController::update');
-    $routes->get('branches/ratio/(:num)', 'Api\BranchController::ratio/$1');
-    $routes->get('branches/target/(:num)', 'Api\BranchController::target/$1');
+    $routes->get('branches',                    'Api\BranchController::index');
+    $routes->post('branches',                   'Api\BranchController::store');
+    $routes->get('branches/(:num)',             'Api\BranchController::show/$1');
+    $routes->post('branches/update',            'Api\BranchController::update');
+    $routes->get('branches/ratio/(:num)',       'Api\BranchController::ratio/$1');
+    $routes->get('branches/target/(:num)',      'Api\BranchController::target/$1');
     $routes->get('branches/target-list/(:num)', 'Api\BranchController::targetList/$1');
-    $routes->post('branches/ratio-spend',      'Api\BranchController::storeSpend');
+    $routes->post('branches/ratio-spend',       'Api\BranchController::storeSpend');
     $routes->post('branches/ratio-worker',      'Api\BranchController::storeWorker');
-    $routes->post('branches/ratio-dw',      'Api\BranchController::storeDw');
+    $routes->post('branches/ratio-dw',          'Api\BranchController::storeDw');
+    $routes->get('branches-name/(:any)',        'Api\BranchController::showByName/$1');
 
     // Fiscal Years
     $routes->get('fiscal-years',                   'Api\FiscalYearController::index');
