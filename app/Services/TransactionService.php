@@ -49,6 +49,7 @@ class TransactionService
         if (!empty($trx['department'])) {
 
             $category = $db->table('categories')
+                ->where('branch_id', $trx['branch_id'])
                 ->where('LOWER(name)', strtolower(trim($trx['department'])))
                 ->get()
                 ->getRowArray();
@@ -80,7 +81,6 @@ class TransactionService
         $map = $mapModel
             ->where('trx_type', $trx['trx_type'])
             ->first();
-
         if (!$map) {
             throw new \Exception("Mapping not found for trx_type: {$trx['trx_type']}");
         }
@@ -242,7 +242,6 @@ class TransactionService
                 ];
 
                 $bankCredit = $baseAmount - $taxAmount;
-
             }
 
             if ($tax && $tax['tax_type'] === 'fee') {
@@ -513,6 +512,9 @@ class TransactionService
             }
         }
 
+        // =====================================
+        // RECEIVE PAYMENT
+        // =====================================
         elseif ($type === 'receive_payment') {
 
             $amount = (float) $trx['amount'];
@@ -530,6 +532,9 @@ class TransactionService
             ];
         }
 
+        // =====================================
+        // LOAN INSTALLMENT
+        // =====================================
         elseif ($type === 'loan_installment') {
 
             $principal = (float) $trx['principal'];

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: May 11, 2026 at 06:02 PM
+-- Generation Time: May 14, 2026 at 09:29 PM
 -- Server version: 10.11.10-MariaDB-log
 -- PHP Version: 8.3.27
 
@@ -163,7 +163,9 @@ INSERT INTO `branches` (`id`, `company_id`, `branch_code`, `branch_name`, `branc
 (4, 1, 'HW', 'HeyWork', '', '', 2, 0.00, 0.00, 0.00, 0, 0.00),
 (5, 1, 'HM', 'HeyMeal', '', '', NULL, 0.00, 0.00, 0.00, 0, 0.00),
 (6, 1, 'SS', 'Salam Supply', '', '', NULL, 0.00, 0.00, 0.00, 0, 0.00),
-(10, 1, 'HC', 'HeyCorp', NULL, NULL, NULL, 0.00, 0.00, 0.00, 0, 0.00);
+(10, 1, 'HC', 'HeyCorp', NULL, NULL, NULL, 0.00, 0.00, 0.00, 0, 0.00),
+(12, 1, 'YTC', 'Yata Tech Corp', NULL, NULL, NULL, 0.00, 0.00, 0.00, 0, 0.00),
+(13, 7, 'CTH01', 'Contoh I', NULL, NULL, NULL, 0.00, 0.00, 0.00, 0, 0.00);
 
 -- --------------------------------------------------------
 
@@ -193,7 +195,10 @@ INSERT INTO `branches_target` (`id`, `company_id`, `branch_id`, `target`, `room_
 (18, 1, 10, 550000000, 50, 50, 50, 50),
 (19, 1, 10, 750000000, 50, 50, 50, 50),
 (21, 1, 3, 550000000, 40, 60, 21, 79),
-(22, 1, 3, 750000000, 40, 60, 21, 79);
+(22, 1, 3, 750000000, 40, 60, 21, 79),
+(23, 1, 12, 100000000, 70, 30, 10, 90),
+(24, 1, 12, 150000000, 70, 30, 10, 90),
+(25, 7, 13, 50000000, 70, 30, 10, 90);
 
 -- --------------------------------------------------------
 
@@ -204,9 +209,9 @@ INSERT INTO `branches_target` (`id`, `company_id`, `branch_id`, `target`, `room_
 CREATE TABLE `branch_items` (
   `id` bigint(20) NOT NULL,
   `company_id` int(11) NOT NULL,
-  `branch_id` int(20) DEFAULT NULL,
+  `branch_id` int(11) DEFAULT NULL,
   `item_id` bigint(20) DEFAULT NULL,
-  `variant_id` bigint(1) DEFAULT NULL,
+  `variant_id` bigint(20) DEFAULT NULL,
   `price` decimal(12,2) DEFAULT NULL,
   `tax_type` enum('pb1','ppn','fee','none') DEFAULT 'none',
   `stock` int(11) DEFAULT 0,
@@ -245,7 +250,9 @@ INSERT INTO `branch_items` (`id`, `company_id`, `branch_id`, `item_id`, `variant
 (26, 1, 2, 35, NULL, 0.00, 'pb1', 0, 'available'),
 (27, 1, 3, 36, NULL, 0.00, 'fee', 0, 'available'),
 (28, 1, 3, 37, NULL, 0.00, 'fee', 0, 'available'),
-(29, 1, 4, 38, NULL, 0.00, 'none', 0, 'available');
+(29, 1, 4, 38, NULL, 0.00, 'none', 0, 'available'),
+(30, 7, 13, 39, NULL, 0.00, 'none', 0, 'available'),
+(31, 7, 13, 40, NULL, 0.00, 'none', 0, 'available');
 
 -- --------------------------------------------------------
 
@@ -255,7 +262,7 @@ INSERT INTO `branch_items` (`id`, `company_id`, `branch_id`, `item_id`, `variant
 
 CREATE TABLE `branch_opening_hours` (
   `id` bigint(20) NOT NULL,
-  `branch_id` int(20) DEFAULT NULL,
+  `branch_id` int(11) DEFAULT NULL,
   `day_of_week` enum('monday','tuesday','wednesday','thursday','friday','saturday','sunday') DEFAULT NULL,
   `open_time` time DEFAULT NULL,
   `close_time` time DEFAULT NULL,
@@ -284,7 +291,7 @@ INSERT INTO `branch_opening_hours` (`id`, `branch_id`, `day_of_week`, `open_time
 
 CREATE TABLE `branch_referral_rules` (
   `id` bigint(20) NOT NULL,
-  `branch_id` int(20) NOT NULL,
+  `branch_id` int(11) NOT NULL,
   `referrer_reward_type` enum('points','wallet','voucher','free_drink') DEFAULT 'points',
   `referrer_reward_value` decimal(12,2) DEFAULT 0.00,
   `referee_reward_type` enum('points','wallet','voucher','free_drink') DEFAULT 'points',
@@ -333,25 +340,11 @@ INSERT INTO `business_partners` (`id`, `company_id`, `partner_type`, `partner_co
 
 CREATE TABLE `carts` (
   `id` bigint(20) NOT NULL,
-  `user_id` int(20) DEFAULT NULL,
-  `branch_id` int(20) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `branch_id` int(11) DEFAULT NULL,
   `status` enum('active','checked_out','expired') DEFAULT 'active',
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `carts`
---
-
-INSERT INTO `carts` (`id`, `user_id`, `branch_id`, `status`, `created_at`) VALUES
-(1, 2, 3, 'checked_out', '2026-04-28 15:05:06'),
-(2, 19, 3, 'checked_out', '2026-04-30 08:40:25'),
-(3, 2, 3, 'checked_out', '2026-04-30 13:04:26'),
-(4, 18, 4, 'checked_out', '2026-04-30 13:26:57'),
-(5, 2, 3, 'checked_out', '2026-04-30 14:45:30'),
-(6, 2, 3, 'checked_out', '2026-04-30 14:46:34'),
-(7, 2, 3, 'checked_out', '2026-05-01 05:34:15'),
-(8, 18, 4, 'checked_out', '2026-05-01 05:41:26');
 
 -- --------------------------------------------------------
 
@@ -361,26 +354,12 @@ INSERT INTO `carts` (`id`, `user_id`, `branch_id`, `status`, `created_at`) VALUE
 
 CREATE TABLE `cart_items` (
   `id` int(11) NOT NULL,
-  `cart_id` int(11) DEFAULT NULL,
-  `item_id` int(11) DEFAULT NULL,
+  `cart_id` bigint(20) DEFAULT NULL,
+  `item_id` bigint(20) DEFAULT NULL,
   `quantity` decimal(10,2) DEFAULT NULL,
   `price` decimal(15,2) DEFAULT NULL,
   `created_at` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `cart_items`
---
-
-INSERT INTO `cart_items` (`id`, `cart_id`, `item_id`, `quantity`, `price`, `created_at`) VALUES
-(1, 1, 10, 5.00, 5000000.00, '2026-04-28'),
-(2, 2, 10, 1.00, 450000.00, '2026-04-30'),
-(3, 3, 10, 1.00, 8000000.00, '0000-00-00'),
-(4, 4, 38, 1.00, 60000.00, NULL),
-(5, 5, 10, 1.00, 750000.00, '0000-00-00'),
-(6, 6, 10, 4.00, 1200000.00, '0000-00-00'),
-(7, 7, 10, 10.00, 1200000.00, '0000-00-00'),
-(8, 8, 38, 1.00, 40000.00, NULL);
 
 -- --------------------------------------------------------
 
@@ -411,7 +390,9 @@ INSERT INTO `categories` (`id`, `branch_id`, `name`, `icon`, `status`) VALUES
 (8, 3, 'IT', NULL, 'active'),
 (9, 3, 'POMEC', NULL, 'active'),
 (10, 3, 'Engineering', NULL, 'active'),
-(11, 4, 'Human Resources', NULL, 'active');
+(11, 4, 'Human Resources', NULL, 'active'),
+(12, 13, 'Kitchen', NULL, 'active'),
+(13, 13, 'Front Office', NULL, 'active');
 
 -- --------------------------------------------------------
 
@@ -421,7 +402,8 @@ INSERT INTO `categories` (`id`, `branch_id`, `name`, `icon`, `status`) VALUES
 
 CREATE TABLE `category_trx_map` (
   `id` int(11) NOT NULL,
-  `category_id` int(11) DEFAULT NULL,
+  `company_id` int(11) NOT NULL,
+  `category_id` bigint(20) DEFAULT NULL,
   `trx_type` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -429,43 +411,39 @@ CREATE TABLE `category_trx_map` (
 -- Dumping data for table `category_trx_map`
 --
 
-INSERT INTO `category_trx_map` (`id`, `category_id`, `trx_type`) VALUES
-(4, 2, 'expense_bar'),
-(5, 2, 'expense_shisha'),
-(6, 2, 'expense_catering'),
-(7, 2, 'expense_buffet'),
-(8, 3, 'expense_cleaning'),
-(9, 3, 'expense_floor'),
-(10, 3, 'expense_pest_control'),
-(12, 5, 'expense_reimburse'),
-(13, 6, 'expense_hrd'),
-(14, 6, 'expense_payroll'),
-(15, 7, 'expense_marketing'),
-(16, 7, 'expense_branding'),
-(17, 7, 'expense_photoshoot'),
-(18, 8, 'expense_other'),
-(19, 9, 'expense_pomec'),
-(20, 9, 'expense_maintenance'),
-(21, 10, 'expense_maintenance'),
-(22, 10, 'expense_fuel_gas'),
-(24, 2, 'sales_beverage'),
-(25, 2, 'sales_shisha'),
-(26, 3, 'sales_service'),
-(27, 4, 'sales'),
-(28, 7, 'sales_package'),
-(29, 5, 'sales'),
-(30, 6, 'sales'),
-(31, 8, 'sales'),
-(32, 9, 'sales'),
-(33, 10, 'sales'),
-(34, 1, 'purchase_inventory'),
-(35, 1, 'inventory_usage_food'),
-(36, 2, 'inventory_usage_beverage'),
-(37, 1, 'purchase_inventory_partial'),
-(38, 6, 'expense_payroll'),
-(40, 5, 'expense_payroll'),
-(41, 4, 'expense_electric'),
-(42, 1, 'expense_kitchen');
+INSERT INTO `category_trx_map` (`id`, `company_id`, `category_id`, `trx_type`) VALUES
+(4, 1, 2, 'expense_bar'),
+(5, 1, 2, 'expense_shisha'),
+(6, 1, 2, 'expense_catering'),
+(7, 1, 2, 'expense_buffet'),
+(8, 1, 3, 'expense_cleaning'),
+(9, 1, 3, 'expense_floor'),
+(10, 1, 3, 'expense_pest_control'),
+(12, 1, 5, 'expense_reimburse'),
+(13, 1, 6, 'expense_hrd'),
+(14, 1, 6, 'expense_payroll'),
+(15, 1, 7, 'expense_marketing'),
+(16, 1, 7, 'expense_branding'),
+(17, 1, 7, 'expense_photoshoot'),
+(18, 1, 8, 'expense_other'),
+(19, 1, 9, 'expense_pomec'),
+(20, 1, 9, 'expense_maintenance'),
+(21, 1, 10, 'expense_maintenance'),
+(22, 1, 10, 'expense_fuel_gas'),
+(24, 1, 2, 'sales_beverage'),
+(25, 1, 2, 'sales_shisha'),
+(26, 1, 3, 'sales_service'),
+(27, 1, 4, 'sales'),
+(28, 1, 7, 'sales_package'),
+(29, 1, 5, 'sales'),
+(30, 1, 6, 'sales'),
+(31, 1, 8, 'sales'),
+(32, 1, 9, 'sales'),
+(33, 1, 10, 'sales'),
+(34, 1, 1, 'purchase_inventory'),
+(35, 1, 1, 'inventory_usage_food'),
+(36, 1, 2, 'inventory_usage_beverage'),
+(37, 1, 1, 'purchase_inventory_partial');
 
 -- --------------------------------------------------------
 
@@ -475,22 +453,10 @@ INSERT INTO `category_trx_map` (`id`, `category_id`, `trx_type`) VALUES
 
 CREATE TABLE `chats` (
   `id` bigint(20) NOT NULL,
-  `user_id` int(20) DEFAULT NULL,
-  `branch_id` int(20) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `branch_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `chats`
---
-
-INSERT INTO `chats` (`id`, `user_id`, `branch_id`, `created_at`) VALUES
-(1, 1, 3, '2026-03-10 01:26:30'),
-(2, 2, 3, '2026-03-15 16:19:55'),
-(3, 3, 2, '2026-03-15 16:22:28'),
-(5, 18, 3, '2026-04-16 15:18:10'),
-(6, 17, 3, '2026-04-16 15:18:11'),
-(7, 3, 3, '2026-04-16 15:18:12');
 
 -- --------------------------------------------------------
 
@@ -506,18 +472,6 @@ CREATE TABLE `chat_messages` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `chat_messages`
---
-
-INSERT INTO `chat_messages` (`id`, `chat_id`, `sender_type`, `message`, `created_at`) VALUES
-(1, 1, 'user', 'Hello', '2026-03-10 01:26:45'),
-(2, 1, 'user', 'Hi', '2026-03-15 15:31:14'),
-(3, 1, 'admin', 'Halo', '2026-03-15 15:35:36'),
-(5, 1, 'admin', 'Oke', '2026-03-15 15:37:32'),
-(6, 2, 'admin', 'Halo', '2026-03-15 16:21:27'),
-(7, 3, 'admin', 'Halo', '2026-03-15 16:22:32');
-
 -- --------------------------------------------------------
 
 --
@@ -525,20 +479,20 @@ INSERT INTO `chat_messages` (`id`, `chat_id`, `sender_type`, `message`, `created
 --
 
 CREATE TABLE `coa` (
-  `id` int(1) NOT NULL,
-  `company_id` int(1) NOT NULL,
+  `id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
   `account_code` varchar(20) DEFAULT NULL,
   `account_name` varchar(100) DEFAULT NULL,
   `account_type` enum('asset','liability','equity','revenue','expense','cogs') DEFAULT NULL,
-  `parent_id` int(1) DEFAULT NULL,
+  `parent_id` int(11) DEFAULT NULL,
   `cashflow_type` enum('operating','investing','financing') DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT 1,
   `created_at` datetime DEFAULT NULL,
-  `created_by` int(1) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `updated_by` int(1) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
   `deleted_at` datetime DEFAULT NULL,
-  `deleted_by` int(1) DEFAULT NULL
+  `deleted_by` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -618,7 +572,82 @@ INSERT INTO `coa` (`id`, `company_id`, `account_code`, `account_name`, `account_
 (80, 1, '5227', 'Beban Floor Operational', 'expense', 18, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (81, 1, '5228', 'Beban Reimburse Housebank', 'expense', 18, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (82, 1, '5229', 'Beban Platform Fee', 'expense', 18, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
-(83, 1, '5230', 'Beban Kredit', 'expense', 18, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL);
+(83, 1, '5230', 'Beban Kredit', 'expense', 18, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(84, 1, '6107', 'HPP Finance', 'cogs', 19, 'operating', 1, '2026-05-11 21:04:33', 3, '2026-05-11 21:04:33', 3, NULL, NULL),
+(85, 7, '1000', 'Aset', 'asset', NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(86, 7, '2000', 'Kewajiban', 'liability', NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(87, 7, '3000', 'Ekuitas', 'equity', NULL, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(88, 7, '4000', 'Pendapatan', 'revenue', NULL, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(89, 7, '5000', 'Beban', 'expense', NULL, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(90, 7, '6000', 'Harga Pokok Penjualan', 'cogs', NULL, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(91, 7, '1101', 'Kas', 'asset', 85, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(92, 7, '1102', 'Bank', 'asset', 85, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(93, 7, '1103', 'Kas Kecil', 'asset', 85, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(94, 7, '1201', 'Piutang Usaha', 'asset', 85, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(95, 7, '1301', 'Persediaan', 'asset', 85, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(96, 7, '1401', 'PPN Masukan', 'asset', 85, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(97, 7, '1500', 'Kelompok Aset Tetap', 'asset', 85, 'investing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(98, 7, '1501', 'Aset Tetap', 'asset', 85, 'investing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(99, 7, '1502', 'Akumulasi Penyusutan', 'asset', 85, 'investing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(100, 7, '2101', 'Utang Usaha', 'liability', 86, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(101, 7, '2102', 'Utang Gaji', 'liability', 86, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(102, 7, '2201', 'Utang Pajak', 'liability', 86, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(103, 7, '2202', 'PPN Keluaran', 'liability', 86, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(104, 7, '2301', 'Utang Bank', 'liability', 86, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(105, 7, '2401', 'Utang PB1', 'liability', 86, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(106, 7, '3100', 'Modal', 'equity', 87, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(107, 7, '3200', 'Laba Ditahan', 'equity', 87, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(108, 7, '3300', 'Prive', 'equity', 87, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(109, 7, '3400', 'Saldo Laba Tahun Berjalan', 'equity', 87, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(110, 7, '4101', 'Penjualan', 'revenue', 88, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(111, 7, '4102', 'Pendapatan Jasa', 'revenue', 88, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(112, 7, '4103', 'Pendapatan Kamar', 'revenue', 88, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(113, 7, '4104', 'Pendapatan Service', 'revenue', 88, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(114, 7, '4105', 'Pendapatan Food', 'revenue', 88, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(115, 7, '4106', 'Pendapatan Beverage', 'revenue', 88, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(116, 7, '4107', 'Pendapatan Shisha', 'revenue', 88, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(117, 7, '4108', 'Pendapatan Catering', 'revenue', 88, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(118, 7, '4109', 'Pendapatan Paket', 'revenue', 88, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(119, 7, '4110', 'Pendapatan Service Charge', 'revenue', 88, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(120, 7, '4111', 'Pendapatan Elqahua', 'revenue', 88, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(121, 7, '4201', 'Pendapatan Lain-lain', 'revenue', 88, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(122, 7, '5101', 'Beban Gaji', 'expense', 89, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(123, 7, '5201', 'Beban Operasional', 'expense', 89, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(124, 7, '5202', 'Beban Listrik', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(125, 7, '5203', 'Beban Sewa', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(126, 7, '5204', 'Beban Internet', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(127, 7, '5205', 'Beban Transportasi', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(128, 7, '5206', 'Beban Perlengkapan & Peralatan', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(129, 7, '5207', 'Beban Air', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(130, 7, '5208', 'Beban Gas', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(131, 7, '5209', 'Beban Kitchen', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(132, 7, '5210', 'Beban Bar', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(133, 7, '5211', 'Beban Shisha', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(134, 7, '5212', 'Beban Catering', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(135, 7, '5213', 'Beban Buffet', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(136, 7, '5214', 'Beban Fuel & Gas', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(137, 7, '5216', 'Beban Photoshoot', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(138, 7, '5217', 'Beban Pest Control', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(139, 7, '5218', 'Beban Marketing', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(140, 7, '5219', 'Beban Branding', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(141, 7, '5220', 'Beban Maintenance', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(142, 7, '5221', 'Beban Payroll', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(143, 7, '5222', 'Beban HRD', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(144, 7, '5223', 'Beban POMEC', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(145, 7, '5224', 'Beban Lain-lain', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(146, 7, '5225', 'Beban Cleaning Supply', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(147, 7, '5226', 'Beban Entertainment', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(148, 7, '5227', 'Beban Floor Operational', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(149, 7, '5228', 'Beban Reimburse Housebank', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(150, 7, '5229', 'Beban Platform Fee', 'expense', 89, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(151, 7, '5230', 'Beban Kredit', 'expense', 89, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(152, 7, '6101', 'HPP Penjualan', 'cogs', 90, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(153, 7, '6102', 'HPP Food', 'cogs', 90, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(154, 7, '6103', 'HPP Beverage', 'cogs', 90, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(155, 7, '6104', 'HPP Shisha', 'cogs', 90, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(156, 7, '6105', 'HPP Catering', 'cogs', 90, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(157, 7, '6106', 'HPP Buffet', 'cogs', 90, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(158, 7, '6107', 'HPP Finance', 'cogs', 90, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -627,15 +656,15 @@ INSERT INTO `coa` (`id`, `company_id`, `account_code`, `account_name`, `account_
 --
 
 CREATE TABLE `coa_opening_balances` (
-  `id` int(1) NOT NULL,
-  `company_id` int(1) NOT NULL,
-  `coa_id` int(1) NOT NULL,
+  `id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `coa_id` int(11) NOT NULL,
   `opening_balance` decimal(18,2) DEFAULT 0.00,
   `period_year` smallint(4) NOT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
-  `created_by` int(1) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `updated_by` int(1) DEFAULT NULL
+  `updated_by` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
@@ -645,7 +674,7 @@ CREATE TABLE `coa_opening_balances` (
 --
 
 CREATE TABLE `companies` (
-  `id` int(1) NOT NULL,
+  `id` int(11) NOT NULL,
   `company_code` varchar(20) DEFAULT NULL,
   `company_name` varchar(100) NOT NULL,
   `company_addr` varchar(250) DEFAULT NULL,
@@ -653,11 +682,11 @@ CREATE TABLE `companies` (
   `company_logo` varchar(250) DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `created_by` int(1) NOT NULL,
+  `created_by` int(11) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `updated_by` int(1) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
   `deleted_at` datetime DEFAULT NULL,
-  `deleted_by` int(1) DEFAULT NULL
+  `deleted_by` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -669,7 +698,8 @@ INSERT INTO `companies` (`id`, `company_code`, `company_name`, `company_addr`, `
 (3, 'COMP02', 'COMPANY 1', '-', NULL, NULL, 1, '2026-03-27 18:00:42', 3, NULL, NULL, NULL, NULL),
 (4, 'COMP03', 'COMPANY 2', '-', NULL, NULL, 1, '2026-03-27 18:01:08', 3, NULL, NULL, NULL, NULL),
 (5, 'COMP04', 'COMPANY 3', '-', NULL, NULL, 1, '2026-03-27 18:01:26', 3, NULL, NULL, NULL, NULL),
-(6, 'COMP05', 'COMPANY 4', '-', NULL, NULL, 1, '2026-03-27 18:01:51', 3, NULL, NULL, NULL, NULL);
+(6, 'COMP05', 'COMPANY 4', '-', NULL, NULL, 1, '2026-03-27 18:01:51', 3, NULL, NULL, NULL, NULL),
+(7, 'CMP001', 'Contoh I', 'Bogor, Jawa Barat', NULL, NULL, 1, '2026-05-13 14:19:32', 1, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -692,7 +722,8 @@ CREATE TABLE `fiscal_years` (
 
 INSERT INTO `fiscal_years` (`id`, `company_id`, `year_name`, `start_date`, `end_date`, `is_active`) VALUES
 (1, 1, 'FY 2025', '2025-01-01', '2025-12-31', 1),
-(2, 1, 'FY 2026', '2026-01-01', '2026-12-31', 1);
+(2, 1, 'FY 2026', '2026-01-01', '2026-12-31', 1),
+(3, 7, 'FY 2026', '2026-01-01', '2026-12-31', 1);
 
 -- --------------------------------------------------------
 
@@ -713,17 +744,6 @@ CREATE TABLE `form_pengajuan` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `form_pengajuan`
---
-
-INSERT INTO `form_pengajuan` (`id`, `company_id`, `branch_id`, `order_id`, `nama`, `divisi`, `jabatan`, `tanggal`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 3, 0, 'Rama', 'Front Office', 'FOM', '06-05-2026', 'Selesai', '2026-05-06 13:23:00', '2026-05-06 13:27:19'),
-(2, 1, 3, 0, 'Aji', 'Kitchen / Culinary', 'SPV', '06-05-2026', 'Selesai', '2026-05-06 14:23:16', '2026-05-07 13:16:17'),
-(3, 1, 3, 0, 'Rama', 'Front Office', 'FOM', '06-05-2026', 'Selesai', '2026-05-06 16:56:05', '2026-05-06 19:06:52'),
-(4, 1, 3, 0, 'Rama', 'Front Office', 'FOM', '06-05-2026', 'Selesai', '2026-05-06 17:06:13', '2026-05-06 17:07:14'),
-(5, 1, 3, 0, 'Aji', 'Kitchen / Culinary', 'SPV', '07-05-2026', 'Selesai', '2026-05-07 13:09:50', '2026-05-07 13:12:01');
 
 -- --------------------------------------------------------
 
@@ -746,17 +766,6 @@ CREATE TABLE `form_pengajuan_detail` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `form_pengajuan_detail`
---
-
-INSERT INTO `form_pengajuan_detail` (`id`, `pengajuan_id`, `vendor_item_id`, `sparepart`, `kondisi`, `qty`, `harga`, `purpose`, `no_po`, `is_bon`, `is_delete`, `created_at`) VALUES
-(1, 1, 1, 'Lampu LED 20 Watt', '-', 5.00, 10000, 'expense', 'SS/0526-0001', 0, 0, '2026-05-06 13:23:00'),
-(2, 2, 5, 'Beras Super Cianjur', '-', 15.00, 17500, 'expense', 'SS/0526-0001', 0, 0, '2026-05-06 14:23:16'),
-(3, 3, 1, 'Lampu LED 20 Watt', '-', 5.00, 10000, 'expense', 'SS/0526-0001', 0, 0, '2026-05-06 16:56:05'),
-(4, 4, 1, 'Lampu LED 20 Watt', '-', 5.00, 10000, 'expense', 'SS/0526-0001', 0, 0, '2026-05-06 17:06:13'),
-(5, 5, 5, 'Beras Super Cianjur', '-', 5.00, 17500, 'expense', 'SS/0526-0001', 0, 0, '2026-05-07 13:09:50');
-
 -- --------------------------------------------------------
 
 --
@@ -774,17 +783,6 @@ CREATE TABLE `form_purchasing` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `form_purchasing`
---
-
-INSERT INTO `form_purchasing` (`id`, `pengajuan_id`, `nama_po`, `divisi_po`, `jabatan_po`, `tanggal_po`, `dp_po`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Admin', 'Purchasing', 'Admin', '2026-05-06', 0.00, '2026-05-06 13:23:32', '2026-05-06 13:23:32'),
-(2, 2, 'Admin', 'Purchasing', 'Admin', '2026-05-06', 0.00, '2026-05-06 14:23:38', '2026-05-06 14:23:38'),
-(3, 3, 'Admin', 'Purchasing', 'Admin', '2026-05-06', 0.00, '2026-05-06 16:57:00', '2026-05-06 16:57:00'),
-(4, 4, 'Admin', 'Purchasing', 'Admin', '2026-05-06', 0.00, '2026-05-06 17:06:32', '2026-05-06 17:06:32'),
-(5, 5, 'Admin', 'Purchasing', 'Admin', '2026-05-07', 0.00, '2026-05-07 13:10:18', '2026-05-07 13:10:18');
 
 -- --------------------------------------------------------
 
@@ -805,17 +803,6 @@ CREATE TABLE `inventori` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `inventori`
---
-
-INSERT INTO `inventori` (`id`, `vendor_id`, `vendor_item_id`, `sparepart`, `kondisi`, `qty`, `is_used`, `is_delete`, `form_purchasing_id`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 'Lampu LED 20 Watt', '-', 0, 0, 0, 1, '2026-05-06 13:23:37', '2026-05-06 13:23:37'),
-(2, 1, 5, 'Beras Super Cianjur', '-', 15, 0, 0, 2, '2026-05-06 14:23:43', '2026-05-06 14:23:43'),
-(3, 1, 1, 'Lampu LED 20 Watt', '-', 0, 0, 0, 3, '2026-05-06 16:57:06', '2026-05-06 16:57:06'),
-(4, 1, 1, 'Lampu LED 20 Watt', '-', 0, 0, 0, 4, '2026-05-06 17:06:36', '2026-05-06 17:06:36'),
-(5, 1, 5, 'Beras Super Cianjur', '-', 0, 0, 0, 5, '2026-05-07 13:10:30', '2026-05-07 13:10:30');
 
 -- --------------------------------------------------------
 
@@ -867,7 +854,9 @@ INSERT INTO `items` (`id`, `category_id`, `name`, `description`, `image`, `price
 (35, 2, 'Paket', NULL, NULL, NULL, 'available', '2026-03-27 06:45:58', NULL),
 (36, 4, 'Request Daily Worker', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', 'daily_worker'),
 (37, 4, 'Request Casual', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', 'casual'),
-(38, 8, 'Pendapatan Service Charge', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', NULL);
+(38, 8, 'Pendapatan Service Charge', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', NULL),
+(39, 13, 'FIT', 'Revenue', '', 0.00, 'available', '2026-05-13 08:21:21', NULL),
+(40, 13, 'Request Daily Worker', 'Request pekerja', '', NULL, 'available', '2026-05-13 08:31:01', NULL);
 
 -- --------------------------------------------------------
 
@@ -900,72 +889,6 @@ CREATE TABLE `journal_details` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `journal_details`
---
-
-INSERT INTO `journal_details` (`id`, `journal_id`, `account_id`, `debit`, `credit`, `created_at`) VALUES
-(1, 1, 1, 8000000.00, 0.00, '2026-04-30 13:04:56'),
-(2, 1, 41, 0.00, 6552006.55, '2026-04-30 13:04:56'),
-(3, 1, 42, 0.00, 655200.66, '2026-04-30 13:04:56'),
-(4, 1, 37, 0.00, 792792.79, '2026-04-30 13:04:56'),
-(5, 2, 1, 450000.00, 0.00, '2026-04-30 13:05:52'),
-(6, 2, 41, 0.00, 368550.37, '2026-04-30 13:05:52'),
-(7, 2, 42, 0.00, 36855.04, '2026-04-30 13:05:52'),
-(8, 2, 37, 0.00, 44594.59, '2026-04-30 13:05:52'),
-(9, 3, 1, 25000000.00, 0.00, '2026-04-30 13:05:59'),
-(10, 3, 41, 0.00, 20475020.48, '2026-04-30 13:05:59'),
-(11, 3, 42, 0.00, 2047502.05, '2026-04-30 13:05:59'),
-(12, 3, 37, 0.00, 2477477.47, '2026-04-30 13:05:59'),
-(13, 4, 74, 600000.00, 0.00, '2026-04-30 13:18:06'),
-(14, 4, 82, 60000.00, 0.00, '2026-04-30 13:18:06'),
-(15, 4, 1, 0.00, 660000.00, '2026-04-30 13:18:06'),
-(16, 5, 1, 60000.00, 0.00, '2026-04-30 13:26:57'),
-(17, 5, 55, 0.00, 60000.00, '2026-04-30 13:26:57'),
-(18, 6, 1, 750000.00, 0.00, '2026-04-30 14:45:44'),
-(19, 6, 41, 0.00, 614250.61, '2026-04-30 14:45:44'),
-(20, 6, 42, 0.00, 61425.06, '2026-04-30 14:45:44'),
-(21, 6, 37, 0.00, 74324.33, '2026-04-30 14:45:44'),
-(22, 7, 1, 4800000.00, 0.00, '2026-04-30 14:46:44'),
-(23, 7, 41, 0.00, 3931203.93, '2026-04-30 14:46:44'),
-(24, 7, 42, 0.00, 393120.39, '2026-04-30 14:46:44'),
-(25, 7, 37, 0.00, 475675.68, '2026-04-30 14:46:44'),
-(26, 8, 1, 12000000.00, 0.00, '2026-05-01 05:34:28'),
-(27, 8, 41, 0.00, 9828009.83, '2026-05-01 05:34:28'),
-(28, 8, 42, 0.00, 982800.98, '2026-05-01 05:34:28'),
-(29, 8, 37, 0.00, 1189189.19, '2026-05-01 05:34:28'),
-(30, 9, 74, 400000.00, 0.00, '2026-05-01 05:41:17'),
-(31, 9, 82, 40000.00, 0.00, '2026-05-01 05:41:17'),
-(32, 9, 1, 0.00, 440000.00, '2026-05-01 05:41:17'),
-(33, 10, 1, 40000.00, 0.00, '2026-05-01 05:41:26'),
-(34, 10, 55, 0.00, 40000.00, '2026-05-01 05:41:26'),
-(35, 11, 3, 50000.00, 0.00, '2026-05-06 13:23:32'),
-(36, 11, 1, 0.00, 50000.00, '2026-05-06 13:23:32'),
-(37, 12, 29, 50000.00, 0.00, '2026-05-06 13:27:14'),
-(38, 12, 3, 0.00, 50000.00, '2026-05-06 13:27:14'),
-(39, 13, 3, 262500.00, 0.00, '2026-05-06 14:23:38'),
-(40, 13, 1, 0.00, 262500.00, '2026-05-06 14:23:38'),
-(41, 14, 57, 262500.00, 0.00, '2026-05-06 14:24:27'),
-(42, 14, 3, 0.00, 262500.00, '2026-05-06 14:24:27'),
-(43, 15, 3, 50000.00, 0.00, '2026-05-06 16:57:00'),
-(44, 15, 1, 0.00, 50000.00, '2026-05-06 16:57:00'),
-(45, 16, 29, 50000.00, 0.00, '2026-05-06 16:57:36'),
-(46, 16, 3, 0.00, 50000.00, '2026-05-06 16:57:36'),
-(47, 17, 3, 50000.00, 0.00, '2026-05-06 17:06:32'),
-(48, 17, 1, 0.00, 50000.00, '2026-05-06 17:06:32'),
-(49, 18, 29, 50000.00, 0.00, '2026-05-06 17:07:09'),
-(50, 18, 3, 0.00, 50000.00, '2026-05-06 17:07:09'),
-(51, 19, 29, 100000.00, 0.00, '2026-05-06 19:06:49'),
-(52, 19, 3, 0.00, 100000.00, '2026-05-06 19:06:49'),
-(53, 20, 3, 87500.00, 0.00, '2026-05-07 13:10:18'),
-(54, 20, 1, 0.00, 87500.00, '2026-05-07 13:10:18'),
-(55, 21, 60, 87500.00, 0.00, '2026-05-07 13:11:34'),
-(56, 21, 3, 0.00, 87500.00, '2026-05-07 13:11:34'),
-(57, 22, 57, 262500.00, 0.00, '2026-05-07 13:16:15'),
-(58, 22, 3, 0.00, 262500.00, '2026-05-07 13:16:15'),
-(59, 23, 3, 362500.00, 0.00, '2026-05-07 13:39:46'),
-(60, 23, 1, 0.00, 362500.00, '2026-05-07 13:39:46');
-
 -- --------------------------------------------------------
 
 --
@@ -990,35 +913,6 @@ CREATE TABLE `journal_headers` (
   `created_at` datetime DEFAULT current_timestamp(),
   `deleted_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `journal_headers`
---
-
-INSERT INTO `journal_headers` (`id`, `company_id`, `branch_id`, `fiscal_year_id`, `journal_no`, `journal_date`, `description`, `total_amount`, `period_month`, `period_year`, `status`, `is_locked`, `reversal_of`, `reverse_date`, `created_at`, `deleted_at`) VALUES
-(1, 1, 3, 2, 'JRN-1777529096611', '2026-04-30', 'sales-ORD20260430130412C4ACC3', 0.00, 4, 2026, 'posted', 0, NULL, NULL, '2026-04-30 13:04:56', '0000-00-00 00:00:00'),
-(2, 1, 3, 2, 'JRN-1777529152555', '2026-04-30', 'sales-ORD20260430083939B9C52E', 0.00, 4, 2026, 'posted', 0, NULL, NULL, '2026-04-30 13:05:52', '0000-00-00 00:00:00'),
-(3, 1, 3, 2, 'JRN-1777529159908', '2026-04-30', 'sales-ORD2026042815044805118B', 0.00, 4, 2026, 'posted', 0, NULL, NULL, '2026-04-30 13:05:59', '0000-00-00 00:00:00'),
-(4, 1, 3, 2, 'JRN-1777529886261', '2026-04-30', 'expense_payroll-HW-1777529886177', 0.00, 4, 2026, 'posted', 0, NULL, NULL, '2026-04-30 13:18:06', '0000-00-00 00:00:00'),
-(5, 1, 4, 2, 'JRN-1777530417549', '2026-04-30', 'sales_service-JRN-1777529886261', 0.00, 4, 2026, 'posted', 0, NULL, NULL, '2026-04-30 13:26:57', '0000-00-00 00:00:00'),
-(6, 1, 3, 2, 'JRN-1777535144329', '2026-04-30', 'sales-ORD20260430144513917C4C', 0.00, 4, 2026, 'posted', 0, NULL, NULL, '2026-04-30 14:45:44', '0000-00-00 00:00:00'),
-(7, 1, 3, 2, 'JRN-1777535204221', '2026-04-30', 'sales-ORD202604301446135BBE23', 0.00, 4, 2026, 'posted', 0, NULL, NULL, '2026-04-30 14:46:44', '0000-00-00 00:00:00'),
-(8, 1, 3, 2, 'JRN-1777588468845', '2026-05-01', 'sales-ORD20260501053350ED4AE8', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-01 05:34:28', '0000-00-00 00:00:00'),
-(9, 1, 3, 2, 'JRN-1777588877476', '2026-05-01', 'expense_payroll-HW-1777588877373', 0.00, 4, 2026, 'posted', 0, NULL, NULL, '2026-05-01 05:41:17', '0000-00-00 00:00:00'),
-(10, 1, 4, 2, 'JRN-1777588886921', '2026-05-01', 'sales_service-JRN-1777588877476', 0.00, 4, 2026, 'posted', 0, NULL, NULL, '2026-05-01 05:41:26', '0000-00-00 00:00:00'),
-(11, 1, 3, 2, 'JRN-1778048612163', '2026-05-06', 'purchase_inventory-PG-1', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-06 13:23:32', '0000-00-00 00:00:00'),
-(12, 1, 3, 2, 'JRN-1778048834464', '2026-05-06', 'expense_electric-PG-1', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-06 13:27:14', '0000-00-00 00:00:00'),
-(13, 1, 3, 2, 'JRN-1778052218007', '2026-05-06', 'purchase_inventory-PG-2', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-06 14:23:38', '0000-00-00 00:00:00'),
-(14, 1, 3, 2, 'JRN-1778052267604', '2026-05-06', 'inventory_usage_food-PG-2', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-06 14:24:27', '0000-00-00 00:00:00'),
-(15, 1, 3, 2, 'JRN-1778061420440', '2026-05-06', 'purchase_inventory-PG-3', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-06 16:57:00', '0000-00-00 00:00:00'),
-(16, 1, 3, 2, 'JRN-1778061456942', '2026-05-06', 'expense_electric-PG-3', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-06 16:57:36', '0000-00-00 00:00:00'),
-(17, 1, 3, 2, 'JRN-1778061992129', '2026-05-06', 'purchase_inventory-PG-4', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-06 17:06:32', '0000-00-00 00:00:00'),
-(18, 1, 3, 2, 'JRN-1778062029216', '2026-05-06', 'expense_electric-PG-4', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-06 17:07:09', '0000-00-00 00:00:00'),
-(19, 1, 3, 2, 'JRN-1778069209569', '2026-05-06', 'expense_electric-PG-3', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-06 19:06:49', '0000-00-00 00:00:00'),
-(20, 1, 3, 2, 'JRN-1778134218353', '2026-05-07', 'purchase_inventory-PG-5', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-07 13:10:18', '0000-00-00 00:00:00'),
-(21, 1, 3, 2, 'JRN-1778134294573', '2026-05-07', 'expense_kitchen-PG-5', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-07 13:11:34', '0000-00-00 00:00:00'),
-(22, 1, 3, 2, 'JRN-1778134575311', '2026-05-07', 'inventory_usage_food-PG-2', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-07 13:16:15', '0000-00-00 00:00:00'),
-(23, 1, 3, 2, 'JRN-1778135986668', '2026-05-07', 'purchase_inventory-INVT-1', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-07 13:39:46', '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -1078,19 +972,12 @@ CREATE TABLE `maintenance` (
   `started_at` date DEFAULT NULL,
   `completed_at` date DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
-  `created_by` int(1) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `updated_by` int(1) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
   `deleted_at` datetime DEFAULT NULL,
-  `deleted_by` int(1) DEFAULT NULL
+  `deleted_by` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
---
--- Dumping data for table `maintenance`
---
-
-INSERT INTO `maintenance` (`id`, `company_id`, `branch_id`, `room_id`, `location`, `issue`, `description`, `status`, `started_at`, `completed_at`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) VALUES
-(1, 1, 3, 1, 'Toilet', 'Ganti Item', 'Pergantian Lampu', 'done', '2026-05-06', '2026-05-06', '2026-05-06 20:06:11', 3, '2026-05-06 20:06:54', 3, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1130,13 +1017,6 @@ CREATE TABLE `maintenance_items` (
   `total` decimal(12,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
---
--- Dumping data for table `maintenance_items`
---
-
-INSERT INTO `maintenance_items` (`id`, `maintenance_id`, `item_name`, `qty`, `price`, `total`) VALUES
-(2, 1, 'Lampu LED 20 Watt', 5, NULL, NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -1151,15 +1031,6 @@ CREATE TABLE `maintenance_logs` (
   `created_at` datetime DEFAULT current_timestamp(),
   `created_by` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
---
--- Dumping data for table `maintenance_logs`
---
-
-INSERT INTO `maintenance_logs` (`id`, `maintenance_id`, `status`, `notes`, `created_at`, `created_by`) VALUES
-(1, 1, 'open', 'Ganti Item', '2026-05-06 20:06:11', 3),
-(2, 1, 'open', 'Pergantian Lampu', '2026-05-06 20:06:29', 3),
-(3, 1, 'done', 'Pergantian Lampu', '2026-05-06 20:06:54', 3);
 
 -- --------------------------------------------------------
 
@@ -1210,8 +1081,8 @@ CREATE TABLE `orders` (
   `check_in` date DEFAULT NULL,
   `check_out` date DEFAULT NULL,
   `note` text DEFAULT NULL,
-  `user_id` int(20) DEFAULT NULL,
-  `branch_id` int(20) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `branch_id` int(11) DEFAULT NULL,
   `cart_id` bigint(20) DEFAULT NULL,
   `subtotal` decimal(12,2) DEFAULT NULL,
   `discount` decimal(12,2) DEFAULT 0.00,
@@ -1221,20 +1092,6 @@ CREATE TABLE `orders` (
   `status` enum('pending','paid','processing','ready','completed','cancelled') DEFAULT 'pending',
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `orders`
---
-
-INSERT INTO `orders` (`id`, `order_number`, `check_in`, `check_out`, `note`, `user_id`, `branch_id`, `cart_id`, `subtotal`, `discount`, `wallet_used`, `deposit`, `total_amount`, `status`, `created_at`) VALUES
-(1, 'ORD2026042815044805118B', NULL, NULL, NULL, 2, 3, 1, 25000000.00, 0.00, 0.00, 25000000.00, 25000000.00, 'paid', '2026-04-28 15:05:06'),
-(2, 'ORD20260430083939B9C52E', '2026-04-30', '2026-05-01', 'Sarapan Nasi Uduk Saja', 19, 3, 2, 450000.00, 0.00, 0.00, 450000.00, 450000.00, 'paid', '2026-04-30 08:40:25'),
-(3, 'ORD20260430130412C4ACC3', '2026-04-30', '2026-05-02', 'RB', 2, 3, 3, 8000000.00, 0.00, 0.00, 8000000.00, 8000000.00, 'paid', '2026-04-30 13:04:26'),
-(4, 'JRN-1777529886261', NULL, NULL, NULL, 18, 4, 4, 60000.00, 0.00, 0.00, 60000.00, 60000.00, 'paid', '2026-04-30 13:26:57'),
-(5, 'ORD20260430144513917C4C', '2026-05-03', '2026-05-04', 'RB', 2, 3, 5, 750000.00, 0.00, 0.00, 750000.00, 750000.00, 'paid', '2026-04-30 14:45:30'),
-(6, 'ORD202604301446135BBE23', '2026-05-01', '2026-05-08', 'RB', 2, 3, 6, 4800000.00, 0.00, 0.00, 4800000.00, 4800000.00, 'paid', '2026-04-30 14:46:34'),
-(7, 'ORD20260501053350ED4AE8', '2026-05-01', '2026-05-02', 'RB', 2, 3, 7, 12000000.00, 0.00, 0.00, 12000000.00, 12000000.00, 'paid', '2026-05-01 05:34:15'),
-(8, 'JRN-1777588877476', NULL, NULL, NULL, 18, 4, 8, 40000.00, 0.00, 0.00, 40000.00, 40000.00, 'paid', '2026-05-01 05:41:26');
 
 -- --------------------------------------------------------
 
@@ -1251,20 +1108,6 @@ CREATE TABLE `order_items` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `order_items`
---
-
-INSERT INTO `order_items` (`id`, `order_id`, `item_id`, `quantity`, `price`, `created_at`) VALUES
-(1, 1, 10, 5.00, 5000000.00, '2026-04-28 15:05:06'),
-(2, 2, 10, 1.00, 450000.00, '2026-04-30 08:40:25'),
-(3, 3, 10, 1.00, 8000000.00, '2026-04-30 13:04:26'),
-(4, 4, 38, 1.00, 60000.00, '2026-04-30 13:26:57'),
-(5, 5, 10, 1.00, 750000.00, '2026-04-30 14:45:30'),
-(6, 6, 10, 4.00, 1200000.00, '2026-04-30 14:46:34'),
-(7, 7, 10, 10.00, 1200000.00, '2026-05-01 05:34:15'),
-(8, 8, 38, 1.00, 40000.00, '2026-05-01 05:41:26');
-
 -- --------------------------------------------------------
 
 --
@@ -1280,20 +1123,6 @@ CREATE TABLE `payments` (
   `transaction_ref` varchar(255) DEFAULT NULL,
   `paid_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `payments`
---
-
-INSERT INTO `payments` (`id`, `order_id`, `payment_method`, `amount`, `status`, `transaction_ref`, `paid_at`) VALUES
-(1, 1, 'cash', 25000000.00, 'paid', NULL, '2026-04-30 13:05:59'),
-(2, 2, 'cash', 450000.00, 'paid', NULL, '2026-04-30 13:05:52'),
-(3, 3, 'cash', 8000000.00, 'paid', NULL, '2026-04-30 13:04:56'),
-(4, 4, 'cash', 60000.00, 'paid', NULL, '2026-04-30 13:27:01'),
-(5, 5, 'cash', 750000.00, 'paid', NULL, '2026-04-30 14:45:44'),
-(6, 6, 'cash', 4800000.00, 'paid', NULL, '2026-04-30 14:46:44'),
-(7, 7, 'cash', 12000000.00, 'paid', NULL, '2026-05-01 05:34:28'),
-(8, 8, 'cash', 40000.00, 'paid', NULL, '2026-05-01 05:41:28');
 
 -- --------------------------------------------------------
 
@@ -1339,7 +1168,7 @@ INSERT INTO `permissions` (`id`, `module`, `action`, `code`) VALUES
 
 CREATE TABLE `point_rules` (
   `id` bigint(20) NOT NULL,
-  `branch_id` int(1) NOT NULL,
+  `branch_id` int(11) NOT NULL,
   `name` varchar(100) DEFAULT NULL,
   `spend_amount` int(11) NOT NULL,
   `point_amount` int(11) NOT NULL,
@@ -1363,33 +1192,13 @@ INSERT INTO `point_rules` (`id`, `branch_id`, `name`, `spend_amount`, `point_amo
 
 CREATE TABLE `point_transactions` (
   `id` bigint(20) NOT NULL,
-  `user_id` int(20) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
   `points` int(11) DEFAULT NULL,
   `type` enum('earn','redeem') DEFAULT NULL,
   `reference_type` varchar(50) DEFAULT NULL,
   `reference_id` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `point_transactions`
---
-
-INSERT INTO `point_transactions` (`id`, `user_id`, `points`, `type`, `reference_type`, `reference_id`, `created_at`) VALUES
-(1, 2, 1000, 'earn', 'order', 7, '2026-04-24 13:35:31'),
-(2, 2, 500, 'earn', 'order', 28, '2026-04-24 21:29:27'),
-(3, 2, 20000, 'earn', 'order', 30, '2026-04-24 22:39:30'),
-(4, 3, 600000, 'earn', 'order', 31, '2026-04-24 22:39:55'),
-(5, 2, 2500, 'earn', 'order', 1, '2026-04-28 15:05:06'),
-(6, 19, 50, 'earn', 'order', 2, '2026-04-29 17:14:59'),
-(7, 19, 128, 'earn', 'order', 3, '2026-04-29 17:23:01'),
-(8, 19, 130, 'earn', 'order', 2, '2026-04-29 17:25:59'),
-(9, 19, 126, 'earn', 'order', 3, '2026-04-30 07:44:52'),
-(10, 19, 45, 'earn', 'order', 2, '2026-04-30 08:40:25'),
-(11, 2, 800, 'earn', 'order', 3, '2026-04-30 13:04:26'),
-(12, 2, 75, 'earn', 'order', 5, '2026-04-30 14:45:30'),
-(13, 2, 480, 'earn', 'order', 6, '2026-04-30 14:46:34'),
-(14, 2, 1200, 'earn', 'order', 7, '2026-05-01 05:34:15');
 
 -- --------------------------------------------------------
 
@@ -1424,7 +1233,9 @@ INSERT INTO `ratio_dw` (`id`, `company_id`, `hotel_id`, `target_id`, `department
 (24, 1, 3, 2, 'Finance', 0.00, 0.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (27, 1, 3, 2, 'Human Resources', 0.00, 0.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (30, 1, 3, 2, 'Engineering', 0.00, 0.90, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(36, 1, 3, 2, 'IT', 0.00, 0.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL);
+(36, 1, 3, 2, 'IT', 0.00, 0.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(40, 7, 13, 25, 'Front Office', 0.00, 1.00, 'OVER', 1, 1, '2026-05-13 12:55:14', NULL),
+(41, 7, 13, 25, 'Front Office', 0.00, 1.00, 'OVER', 1, 1, '2026-05-13 12:55:14', NULL);
 
 -- --------------------------------------------------------
 
@@ -1463,7 +1274,9 @@ INSERT INTO `ratio_spend` (`id`, `company_id`, `hotel_id`, `target_id`, `departm
 (36, 1, 3, 2, 'IT', 0.00, 0.40, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (37, 1, 3, 2, 'POMEC', 0.00, 9.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (38, 1, 3, 2, 'FF&E', 0.00, 3.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
-(39, 1, 3, 2, 'Service', 0.00, 10.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL);
+(39, 1, 3, 2, 'Service', 0.00, 10.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
+(40, 1, 12, 23, 'Finance', 0.00, 5.00, 'OVER', 1, 1, '2026-05-11 14:03:07', NULL),
+(41, 7, 13, 25, 'Front Office', 0.00, 1.00, 'OVER', 1, 1, '2026-05-13 09:15:53', NULL);
 
 -- --------------------------------------------------------
 
@@ -1531,8 +1344,8 @@ INSERT INTO `ratio_worker` (`id`, `company_id`, `hotel_id`, `target_id`, `depart
 --
 
 CREATE TABLE `refresh_tokens` (
-  `id` int(1) NOT NULL,
-  `user_id` int(1) NOT NULL,
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
   `token` varchar(255) NOT NULL,
   `expires_at` datetime NOT NULL,
   `revoked_at` datetime DEFAULT NULL,
@@ -1561,18 +1374,10 @@ CREATE TABLE `retained_earnings` (
 --
 
 CREATE TABLE `roles` (
-  `id` int(1) NOT NULL,
-  `company_id` int(1) DEFAULT NULL,
+  `id` int(11) NOT NULL,
+  `company_id` int(11) DEFAULT NULL,
   `name` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
---
--- Dumping data for table `roles`
---
-
-INSERT INTO `roles` (`id`, `company_id`, `name`) VALUES
-(1, 0, 'Super Admin'),
-(2, 1, 'Company Owner');
 
 -- --------------------------------------------------------
 
@@ -1581,9 +1386,9 @@ INSERT INTO `roles` (`id`, `company_id`, `name`) VALUES
 --
 
 CREATE TABLE `role_permissions` (
-  `id` int(1) NOT NULL,
-  `role_id` int(1) NOT NULL,
-  `permission_id` int(1) NOT NULL
+  `id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
@@ -1619,11 +1424,11 @@ CREATE TABLE `rooms` (
   `company_id` int(11) NOT NULL,
   `branch_id` int(11) NOT NULL,
   `room_no` varchar(20) NOT NULL,
-  `created_by` int(1) NOT NULL,
+  `created_by` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
-  `updated_by` int(1) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `deleted_by` int(1) DEFAULT NULL,
+  `deleted_by` int(11) DEFAULT NULL,
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1726,7 +1531,9 @@ INSERT INTO `tax_codes` (`id`, `company_id`, `tax_code`, `tax_name`, `tax_type`,
 (5, 1, 'PB1', 'PB1 11%', 'pb1', 11.00, 1, '0000-00-00 00:00:00', 'input', 37, 0, 1),
 (6, 1, 'PB1', 'PB1 11%', 'pb1', 11.00, 1, '0000-00-00 00:00:00', 'output', 37, 0, 1),
 (8, 1, 'FEE10', 'Platform Fee 10%', 'fee', 10.00, 1, '0000-00-00 00:00:00', 'output', 82, 0, 1),
-(9, 1, 'PPN12', 'PPN 12%', 'ppn', 12.00, 1, '0000-00-00 00:00:00', 'output', 22, 0, 1);
+(9, 1, 'PPN12', 'PPN 12%', 'ppn', 12.00, 1, '0000-00-00 00:00:00', 'output', 22, 0, 1),
+(13, 1, 'PBB', 'PBB', 'ppn', 5.00, 1, '0000-00-00 00:00:00', 'both', 24, 0, 1),
+(14, 7, 'FEE10', 'Platform Fee 10%', 'fee', 10.00, 1, '0000-00-00 00:00:00', 'output', 150, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -1751,35 +1558,6 @@ CREATE TABLE `transactions` (
   `status` enum('draft','submitted','approved','posted','rejected') DEFAULT 'draft',
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `transactions`
---
-
-INSERT INTO `transactions` (`id`, `company_id`, `branch_id`, `trx_date`, `trx_type`, `reference_no`, `amount`, `created_at`, `journal_id`, `debit_account_id`, `credit_account_id`, `payment_account_id`, `category_id`, `status`, `updated_at`) VALUES
-(1, 1, 3, '2026-04-30', 'sales', 'ORD20260430130412C4ACC3', 8000000.00, '2026-04-30 13:04:56', 1, NULL, NULL, 1, NULL, 'draft', '2026-04-30 13:04:56'),
-(2, 1, 3, '2026-04-30', 'sales', 'ORD20260430083939B9C52E', 450000.00, '2026-04-30 13:05:52', 2, NULL, NULL, 1, NULL, 'draft', '2026-04-30 13:05:52'),
-(3, 1, 3, '2026-04-30', 'sales', 'ORD2026042815044805118B', 25000000.00, '2026-04-30 13:05:59', 3, NULL, NULL, 1, NULL, 'draft', '2026-04-30 13:05:59'),
-(4, 1, 3, '2026-04-30', 'expense_payroll', 'HW-1777529886177', 600000.00, '2026-04-30 13:18:06', 4, NULL, NULL, 1, 4, 'draft', '2026-04-30 13:18:06'),
-(5, 1, 4, '2026-04-30', 'sales_service', 'JRN-1777529886261', 60000.00, '2026-04-30 13:26:57', 5, NULL, NULL, 1, NULL, 'draft', '2026-04-30 13:26:57'),
-(6, 1, 3, '2026-04-30', 'sales', 'ORD20260430144513917C4C', 750000.00, '2026-04-30 14:45:44', 6, NULL, NULL, 1, NULL, 'draft', '2026-04-30 14:45:44'),
-(7, 1, 3, '2026-04-30', 'sales', 'ORD202604301446135BBE23', 4800000.00, '2026-04-30 14:46:44', 7, NULL, NULL, 1, NULL, 'draft', '2026-04-30 14:46:44'),
-(8, 1, 3, '2026-05-01', 'sales', 'ORD20260501053350ED4AE8', 12000000.00, '2026-05-01 05:34:28', 8, NULL, NULL, 1, NULL, 'draft', '2026-05-01 05:34:28'),
-(9, 1, 3, '2026-05-01', 'expense_payroll', 'HW-1777588877373', 400000.00, '2026-05-01 05:41:17', 9, NULL, NULL, 1, 4, 'draft', '2026-05-01 05:41:17'),
-(10, 1, 4, '2026-05-01', 'sales_service', 'JRN-1777588877476', 40000.00, '2026-05-01 05:41:26', 10, NULL, NULL, 1, NULL, 'draft', '2026-05-01 05:41:26'),
-(11, 1, 3, '2026-05-06', 'purchase_inventory', 'PG-1', 50000.00, '2026-05-06 13:23:32', 11, NULL, NULL, 1, 4, 'draft', '2026-05-06 13:23:32'),
-(12, 1, 3, '2026-05-06', 'expense_electric', 'PG-1', 50000.00, '2026-05-06 13:27:14', 12, NULL, NULL, 3, 4, 'draft', '2026-05-06 13:27:14'),
-(13, 1, 3, '2026-05-06', 'purchase_inventory', 'PG-2', 262500.00, '2026-05-06 14:23:38', 13, NULL, NULL, 1, NULL, 'draft', '2026-05-06 14:23:38'),
-(14, 1, 3, '2026-05-06', 'inventory_usage_food', 'PG-2', 262500.00, '2026-05-06 14:24:27', 14, NULL, NULL, 3, NULL, 'draft', '2026-05-06 14:24:27'),
-(15, 1, 3, '2026-05-06', 'purchase_inventory', 'PG-3', 50000.00, '2026-05-06 16:57:00', 15, NULL, NULL, 1, NULL, 'draft', '2026-05-06 16:57:00'),
-(16, 1, 3, '2026-05-06', 'expense_electric', 'PG-3', 50000.00, '2026-05-06 16:57:36', 16, NULL, NULL, 3, NULL, 'draft', '2026-05-06 16:57:36'),
-(17, 1, 3, '2026-05-06', 'purchase_inventory', 'PG-4', 50000.00, '2026-05-06 17:06:32', 17, NULL, NULL, 1, NULL, 'draft', '2026-05-06 17:06:32'),
-(18, 1, 3, '2026-05-06', 'expense_electric', 'PG-4', 50000.00, '2026-05-06 17:07:09', 18, NULL, NULL, 3, NULL, 'draft', '2026-05-06 17:07:09'),
-(19, 1, 3, '2026-05-06', 'expense_electric', 'PG-3', 100000.00, '2026-05-06 19:06:49', 19, NULL, NULL, 3, NULL, 'draft', '2026-05-06 19:06:49'),
-(20, 1, 3, '2026-05-07', 'purchase_inventory', 'PG-5', 87500.00, '2026-05-07 13:10:18', 20, NULL, NULL, 1, NULL, 'draft', '2026-05-07 13:10:18'),
-(21, 1, 3, '2026-05-07', 'expense_kitchen', 'PG-5', 87500.00, '2026-05-07 13:11:34', 21, NULL, NULL, 3, 1, 'draft', '2026-05-07 13:11:34'),
-(22, 1, 3, '2026-05-07', 'inventory_usage_food', 'PG-2', 262500.00, '2026-05-07 13:16:15', 22, NULL, NULL, 3, NULL, 'draft', '2026-05-07 13:16:15'),
-(23, 1, 3, '2026-05-07', 'purchase_inventory', 'INVT-1', 362500.00, '2026-05-07 13:39:46', 23, NULL, NULL, 1, NULL, 'draft', '2026-05-07 13:39:46');
 
 -- --------------------------------------------------------
 
@@ -1856,7 +1634,60 @@ INSERT INTO `transaction_account_map` (`id`, `company_id`, `trx_type`, `debit_ac
 (52, 1, 'expense_credit', 83, 1, NULL, NULL, NULL, '2026-04-23 15:32:26'),
 (53, 1, 'payment_loan', 35, 1, NULL, NULL, NULL, '2026-04-23 16:02:25'),
 (54, 1, 'expense_platform_fee', 82, 1, NULL, NULL, NULL, '2026-04-23 17:30:11'),
-(55, 1, 'loan_installment', 35, 1, NULL, 83, 82, '2026-04-23 18:35:44');
+(55, 1, 'loan_installment', 35, 1, NULL, 83, 82, '2026-04-23 18:35:44'),
+(56, 7, 'sales', 91, 112, 113, NULL, NULL, '2026-02-21 18:21:20'),
+(57, 7, 'expense_salary', 122, 91, NULL, NULL, NULL, '2026-02-21 18:21:27'),
+(58, 7, 'expense_electric', 124, 91, NULL, NULL, NULL, '2026-02-21 18:21:33'),
+(59, 7, 'expense_operational', 123, 91, NULL, NULL, NULL, '2026-02-21 18:21:33'),
+(60, 7, 'capital_injection', 91, 106, NULL, NULL, NULL, '2026-02-21 23:38:13'),
+(61, 7, 'capital_withdrawal', 91, 108, NULL, NULL, NULL, '2026-02-21 23:38:13'),
+(62, 7, 'dividend_distribution', 109, 91, NULL, NULL, NULL, '2026-02-21 23:38:13'),
+(63, 7, 'sales_partial', 94, 112, 113, NULL, NULL, '2026-03-27 02:41:08'),
+(64, 7, 'receive_payment', 91, 94, NULL, NULL, NULL, '2026-03-27 02:50:54'),
+(65, 7, 'sales_food', 91, 114, 119, NULL, NULL, '2026-03-27 11:32:31'),
+(66, 7, 'sales_beverage', 91, 115, 119, NULL, NULL, '2026-03-27 11:32:31'),
+(67, 7, 'sales_shisha', 91, 116, 119, NULL, NULL, '2026-03-27 11:32:31'),
+(68, 7, 'sales_catering', 91, 117, 119, NULL, NULL, '2026-03-27 11:32:31'),
+(69, 7, 'sales_package', 91, 118, 119, NULL, NULL, '2026-03-27 11:32:31'),
+(70, 7, 'sales_food_partial', 94, 114, 119, NULL, NULL, '2026-03-27 11:32:40'),
+(71, 7, 'sales_beverage_partial', 94, 115, 119, NULL, NULL, '2026-03-27 11:32:40'),
+(72, 7, 'sales_shisha_partial', 94, 116, 119, NULL, NULL, '2026-03-27 11:55:44'),
+(73, 7, 'sales_catering_partial', 94, 117, 119, NULL, NULL, '2026-03-27 11:55:44'),
+(74, 7, 'sales_package_partial', 94, 118, 119, NULL, NULL, '2026-03-27 11:55:44'),
+(75, 7, 'sales_elqahua', 91, 120, 119, NULL, NULL, '2026-03-27 12:20:48'),
+(76, 7, 'sales_elqahua_partial', 94, 120, 119, NULL, NULL, '2026-03-27 12:20:48'),
+(77, 7, 'sales_service', 91, 119, 113, NULL, NULL, '2026-03-27 12:20:48'),
+(78, 7, 'sales_service_partial', 94, 119, NULL, NULL, NULL, '2026-03-27 12:20:48'),
+(79, 7, 'expense_kitchen', 131, 91, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(80, 7, 'expense_bar', 132, 91, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(81, 7, 'expense_shisha', 133, 91, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(82, 7, 'expense_catering', 134, 91, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(83, 7, 'expense_buffet', 135, 91, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(84, 7, 'expense_entertainment', 147, 91, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(85, 7, 'expense_fuel_gas', 136, 91, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(86, 7, 'expense_payroll', 142, 91, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(87, 7, 'expense_pomec', 144, 91, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(88, 7, 'expense_cleaning', 146, 91, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(89, 7, 'expense_floor', 148, 91, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(90, 7, 'expense_reimburse', 149, 91, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(91, 7, 'expense_photoshoot', 137, 91, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(92, 7, 'expense_pest_control', 138, 91, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(93, 7, 'expense_marketing', 139, 91, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(94, 7, 'expense_branding', 140, 91, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(95, 7, 'expense_maintenance', 141, 91, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(96, 7, 'expense_hrd', 143, 91, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(97, 7, 'expense_other', 145, 91, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(98, 7, 'payable_payment', 100, 91, NULL, NULL, NULL, '2026-03-27 12:33:49'),
+(99, 7, 'purchase_inventory', 95, 91, NULL, NULL, NULL, '2026-04-06 20:34:41'),
+(100, 7, 'inventory_usage_food', 153, 95, NULL, NULL, NULL, '2026-04-06 20:34:50'),
+(101, 7, 'inventory_usage_beverage', 154, 95, NULL, NULL, NULL, '2026-04-06 20:35:00'),
+(102, 7, 'purchase_inventory_partial', 95, 100, NULL, NULL, NULL, '2026-04-09 18:26:57'),
+(103, 7, 'expense_kitchen_partial', 131, 100, NULL, NULL, NULL, '2026-04-09 18:26:57'),
+(104, 7, 'credit_bank', 91, 104, NULL, NULL, NULL, '2026-04-23 15:32:26'),
+(105, 7, 'expense_credit', 151, 91, NULL, NULL, NULL, '2026-04-23 15:32:26'),
+(106, 7, 'payment_loan', 104, 91, NULL, NULL, NULL, '2026-04-23 16:02:25'),
+(107, 7, 'expense_platform_fee', 150, 91, NULL, NULL, NULL, '2026-04-23 17:30:11'),
+(108, 7, 'loan_installment', 104, 91, NULL, 151, 150, '2026-04-23 18:35:44');
 
 -- --------------------------------------------------------
 
@@ -1873,20 +1704,6 @@ CREATE TABLE `transaction_taxes` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `transaction_taxes`
---
-
-INSERT INTO `transaction_taxes` (`id`, `transaction_id`, `tax_code_id`, `tax_base`, `tax_amount`, `created_at`) VALUES
-(1, 1, 6, 6552006.55, 792792.79, '2026-04-30 13:04:56'),
-(2, 2, 6, 368550.37, 44594.59, '2026-04-30 13:05:52'),
-(3, 3, 6, 20475020.48, 2477477.47, '2026-04-30 13:05:59'),
-(4, 4, 8, 600000.00, 60000.00, '2026-04-30 13:18:06'),
-(5, 6, 6, 614250.61, 74324.33, '2026-04-30 14:45:44'),
-(6, 7, 6, 3931203.93, 475675.68, '2026-04-30 14:46:44'),
-(7, 8, 6, 9828009.83, 1189189.19, '2026-05-01 05:34:28'),
-(8, 9, 8, 400000.00, 40000.00, '2026-05-01 05:41:17');
-
 -- --------------------------------------------------------
 
 --
@@ -1894,9 +1711,9 @@ INSERT INTO `transaction_taxes` (`id`, `transaction_id`, `tax_code_id`, `tax_bas
 --
 
 CREATE TABLE `users` (
-  `id` int(1) NOT NULL,
-  `company_id` int(1) NOT NULL,
-  `branch_id` int(1) NOT NULL,
+  `id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `branch_id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
   `role` enum('worker','hotel_hr','hotel_fo','hotel_hk','hotel_fnb_service','hotel_fnb_production','hotel_fna','hotel_eng','hotel_sales','hotel_gm','admin','owner') DEFAULT 'worker',
   `name` varchar(100) DEFAULT NULL,
@@ -1907,11 +1724,11 @@ CREATE TABLE `users` (
   `is_active` enum('active','inactive') DEFAULT 'active',
   `last_login_at` datetime DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
-  `created_by` int(1) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `updated_by` int(1) DEFAULT NULL,
+  `updated_by` int(11) DEFAULT NULL,
   `deleted_at` datetime DEFAULT NULL,
-  `deleted_by` int(1) DEFAULT NULL
+  `deleted_by` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
@@ -1919,12 +1736,14 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `company_id`, `branch_id`, `category_id`, `role`, `name`, `email`, `phone`, `password`, `photo`, `is_active`, `last_login_at`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) VALUES
-(1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-05-07 16:38:53', '2026-01-18 12:25:53', 1, '2026-05-07 16:38:53', NULL, NULL, NULL),
-(2, 1, 3, 4, 'hotel_fo', 'Syahwal Ramadhan', 'syahwal.86@gmail.com', '895330907220', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '2.png', 'active', '2026-05-07 16:32:43', '2026-01-18 18:59:55', 1, '2026-05-07 16:32:43', NULL, NULL, NULL),
-(3, 1, 3, 0, 'hotel_gm', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', '3.png', 'active', '2026-05-11 15:34:48', '2026-01-19 10:53:08', 1, '2026-05-11 15:34:48', NULL, NULL, NULL),
+(1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-05-14 19:05:17', '2026-01-18 12:25:53', 1, '2026-05-14 19:05:17', NULL, NULL, NULL),
+(2, 1, 3, 4, 'hotel_fo', 'Syahwal Ramadhan', 'syahwal.86@gmail.com', '895330907220', '$2y$10$rdtsq9uvBQpM3kpNMd2/SOGcs93aud5lAKf8dl5qZ4lG0wC8OvIFq', '2.png', 'active', '2026-05-13 16:06:49', '2026-01-18 18:59:55', 1, '2026-05-13 16:06:49', 1, NULL, NULL),
+(3, 1, 3, 0, 'hotel_gm', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$QFAtuh/F3qA1gcwrVncrZ.dl2sPbCtj//xmHYJLd40uDcOic6zmVe', '3.png', 'active', '2026-05-14 15:33:53', '2026-01-19 10:53:08', 1, '2026-05-14 15:33:53', 1, NULL, NULL),
 (17, 1, 3, 1, 'hotel_fnb_production', 'Aji Kitchen', 'aji.kitchen@gmail.com', '-', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', NULL, 'active', '2026-05-07 14:42:35', '2026-04-08 15:28:02', NULL, '2026-05-07 14:42:35', NULL, NULL, NULL),
-(18, 0, 4, 8, NULL, 'User IT', 'it@heywork.id', '081234567890', '$2y$10$fL85xpOpYQBc8P0iNoJfH.BxzXS7p2vCb4ZMQSbZUQttpsupuEKzy', NULL, 'active', NULL, '2026-04-09 01:39:28', NULL, '2026-04-09 01:39:28', NULL, NULL, NULL),
-(19, 0, 3, 0, '', 'FPP', 'fpp@gmail.com', '0812', '$2y$10$/oRPi6wi/t7INHPytXYlNe6IJVkmQ31Dum5wdTV7B/GpL1xGABqdu', NULL, 'active', NULL, '2026-04-29 17:07:05', NULL, '2026-04-29 17:07:05', NULL, NULL, NULL);
+(20, 7, 0, 0, 'owner', 'Owner Contoh I', 'admin@contohsatu.com', '81234567890', '$2y$10$Bezv70u91sxRjW/tgl7QUeCF.EtfO.EM0B6uRVVpR56afQE6./2nq', NULL, 'active', '2026-05-13 14:41:53', '2026-05-13 14:39:27', 1, '2026-05-13 14:41:53', 1, NULL, NULL),
+(21, 7, 13, 13, 'hotel_gm', 'GM Contoh I', 'GM@contohsatu.com', '81234567890', '$2y$10$9J22Z/fXEsHYc0BPrJ04VuRzn10a4Sfg3Etm5c5iGwm/dHJcwdCTy', NULL, 'active', '2026-05-14 19:05:56', '2026-05-13 14:44:28', 1, '2026-05-14 19:05:56', 1, NULL, NULL),
+(22, 7, 13, 12, 'hotel_fnb_production', 'Contoh Kitchen', 'kitchen@contohsatu.com', '81234567890', '$2y$10$5fbHE7urawWt8bm6DtGyd.Xagi1BOzspJodDcXPBW2A/qBgXw4KzC', NULL, 'active', NULL, '2026-05-13 15:14:09', 1, '2026-05-13 15:14:09', 1, NULL, NULL),
+(23, 7, 13, 13, 'hotel_fo', 'Contoh FO', 'FO@contohsatu.com', '81234567890', '$2y$10$541YoJ0YaHzG6HmBBkOzmu4iedhxRYZqUgE7nWGpnzwbZsfx3mMHm', NULL, 'active', '2026-05-14 18:52:58', '2026-05-13 15:15:03', 1, '2026-05-14 18:52:58', 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1934,7 +1753,7 @@ INSERT INTO `users` (`id`, `company_id`, `branch_id`, `category_id`, `role`, `na
 
 CREATE TABLE `user_memberships` (
   `id` bigint(20) NOT NULL,
-  `user_id` int(20) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
   `tier_id` bigint(20) DEFAULT NULL,
   `total_spending` decimal(14,2) DEFAULT 0.00,
   `total_points` int(11) DEFAULT 0,
@@ -1952,18 +1771,9 @@ CREATE TABLE `user_memberships` (
 
 CREATE TABLE `user_points` (
   `id` bigint(20) NOT NULL,
-  `user_id` int(20) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
   `points` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `user_points`
---
-
-INSERT INTO `user_points` (`id`, `user_id`, `points`) VALUES
-(1, 2, 5055),
-(2, 19, 479),
-(3, 18, 0);
 
 -- --------------------------------------------------------
 
@@ -1972,18 +1782,11 @@ INSERT INTO `user_points` (`id`, `user_id`, `points`) VALUES
 --
 
 CREATE TABLE `user_roles` (
-  `id` int(1) NOT NULL,
-  `user_id` int(1) NOT NULL,
-  `role_id` int(1) NOT NULL,
-  `branch_id` int(1) DEFAULT NULL
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `branch_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
---
--- Dumping data for table `user_roles`
---
-
-INSERT INTO `user_roles` (`id`, `user_id`, `role_id`, `branch_id`) VALUES
-(1, 1, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -2025,7 +1828,9 @@ CREATE TABLE `vendors` (
 
 INSERT INTO `vendors` (`id`, `company_id`, `name`, `kode`, `no_po`, `pic`, `phone`, `address`, `status`, `is_delete`, `created_at`, `updated_at`) VALUES
 (1, 1, 'Salam Supply', 'SS', 'SS/0326-0001', 'LOREM', '0812233445', 'Jl. Sancang', 'Aktif', 0, '2026-03-27 12:41:58', '2026-03-27 12:41:58'),
-(3, 1, 'SBH Supply', 'SBH', 'SBH/0326-0001', 'LOREM', '0812233445', 'Jl. Sancang', 'Aktif', 0, '2026-03-27 12:41:58', '2026-03-27 12:41:58');
+(3, 1, 'SBH Supply', 'SBH', 'SBH/0326-0001', 'LOREM', '0812233445', 'Jl. Sancang', 'Aktif', 0, '2026-03-27 12:41:58', '2026-03-27 12:41:58'),
+(6, 1, 'Yata Tech Corp', 'YTC', 'A123', 'Arya', '081234567890', 'Jl Raya Bogor No.01', 'Aktif', 0, '2026-05-11 21:26:45', '2026-05-11 14:26:45'),
+(7, 7, 'Yata Tech Corp', 'YTC', '01', 'Arya', '08123456789', 'Bekasi, Jawa Barat', 'Aktif', 0, '2026-05-13 16:08:48', '2026-05-13 09:08:48');
 
 -- --------------------------------------------------------
 
@@ -2056,7 +1861,10 @@ INSERT INTO `vendor_items` (`id`, `vendor_id`, `sparepart`, `type`, `harga`, `no
 (2, 1, 'Freon', 'Elektrik', 500000, '1A23B', 'kg', 'Aktif', 0, '2026-04-01 22:32:27', '2026-04-01 22:32:27'),
 (3, 3, 'Lampu LED 20 Watt', 'Elektrik', 5000, '', 'pcs', 'Aktif', 0, '2026-03-27 12:43:25', '2026-03-27 12:43:25'),
 (4, 1, 'Kerupuk Bawang', 'Umum', 33000, '', 'kg', 'Aktif', 0, '2026-04-02 15:43:53', '2026-04-02 15:43:53'),
-(5, 1, 'Beras Super Cianjur', 'Umum', 17500, '', 'kg', 'Aktif', 0, '2026-04-02 15:44:35', '2026-04-02 15:44:35');
+(5, 1, 'Beras Super Cianjur', 'Umum', 17500, '', 'kg', 'Aktif', 0, '2026-04-02 15:44:35', '2026-04-02 15:44:35'),
+(6, 1, 'Laptop', 'Elektrik', 15000000, 'A123', 'pcs', 'Aktif', 1, '2026-05-11 10:54:03', '2026-05-11 10:54:03'),
+(7, 1, 'Kopi', 'Umum', 60000, '', 'kg', 'Aktif', 0, '2026-05-11 13:49:36', '2026-05-11 13:49:36'),
+(8, 7, 'ATK', 'Umum', 500000, '01', 'pcs', 'Aktif', 0, '2026-05-13 09:11:04', '2026-05-13 09:11:04');
 
 -- --------------------------------------------------------
 
@@ -2076,14 +1884,6 @@ CREATE TABLE `vouchers` (
   `status` enum('active','inactive') DEFAULT 'active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `vouchers`
---
-
-INSERT INTO `vouchers` (`id`, `code`, `discount_type`, `discount_value`, `max_usage`, `used_count`, `start_date`, `end_date`, `status`) VALUES
-(1, 'DISC10', 'percent', 10.00, 1, 0, '2026-03-09 23:39:54', '2026-03-10 23:39:54', 'active'),
-(2, 'DISC20', 'percent', 20.00, 1, 0, '2026-03-17 01:24:00', '2026-03-19 01:24:00', 'active');
-
 -- --------------------------------------------------------
 
 --
@@ -2091,13 +1891,33 @@ INSERT INTO `vouchers` (`id`, `code`, `discount_type`, `discount_value`, `max_us
 -- (See below for the actual view)
 --
 CREATE TABLE `vw_export_journal` (
-`journal_no` varchar(50)
+`id` int(11)
+,`company_id` int(11)
+,`branch_id` int(11)
+,`fiscal_year_id` int(11)
+,`journal_no` varchar(50)
 ,`journal_date` date
-,`account_code` varchar(20)
-,`account_name` varchar(100)
+,`description` varchar(255)
+,`total_amount` decimal(18,2)
+,`period_month` tinyint(4)
+,`period_year` smallint(6)
+,`status` enum('draft','waiting','approved','posted','rejected')
+,`is_locked` tinyint(4)
+,`reversal_of` int(11)
+,`reverse_date` date
+,`created_at` datetime
+,`deleted_at` datetime
+,`journal_detail_id` int(11)
+,`account_id` int(11)
 ,`debit` decimal(18,2)
 ,`credit` decimal(18,2)
-,`description` varchar(255)
+,`account_code` varchar(20)
+,`account_name` varchar(100)
+,`account_type` enum('asset','liability','equity','revenue','expense','cogs')
+,`cashflow_type` enum('operating','investing','financing')
+,`company_name` varchar(100)
+,`branch_name` varchar(100)
+,`year_name` varchar(20)
 );
 
 -- --------------------------------------------------------
@@ -2108,16 +1928,9 @@ CREATE TABLE `vw_export_journal` (
 
 CREATE TABLE `wallets` (
   `id` bigint(20) NOT NULL,
-  `user_id` int(20) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
   `balance` decimal(12,2) DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `wallets`
---
-
-INSERT INTO `wallets` (`id`, `user_id`, `balance`) VALUES
-(1, 3, 45000.00);
 
 -- --------------------------------------------------------
 
@@ -2137,23 +1950,6 @@ CREATE TABLE `wallet_transactions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `wallet_transactions`
---
-
-INSERT INTO `wallet_transactions` (`id`, `wallet_id`, `type`, `amount`, `reference_type`, `reference_id`, `description`, `created_at`) VALUES
-(1, 1, 'credit', 100000.00, 'topup', NULL, 'Wallet Topup', '2026-03-09 23:34:10'),
-(2, 1, 'credit', 250000.00, 'topup', NULL, 'Wallet Topup', '2026-03-09 23:37:59'),
-(3, 1, 'debit', 35000.00, 'order', 8, 'Order payment', '2026-03-22 18:05:48'),
-(4, 1, 'debit', 35000.00, 'order', 9, 'Order payment', '2026-03-22 18:17:19'),
-(5, 1, 'debit', 35000.00, 'order', 10, 'Order payment', '2026-03-22 18:20:47'),
-(6, 1, 'debit', 35000.00, 'order', 11, 'Order payment', '2026-03-22 18:22:39'),
-(7, 1, 'debit', 35000.00, 'order', 12, 'Order payment', '2026-03-22 18:24:59'),
-(8, 1, 'debit', 35000.00, 'order', 13, 'Order payment', '2026-03-22 18:27:17'),
-(9, 1, 'debit', 35000.00, 'order', 14, 'Order payment', '2026-03-22 18:29:08'),
-(10, 1, 'debit', 35000.00, 'order', 15, 'Order payment', '2026-03-22 18:29:52'),
-(11, 1, 'debit', 25000.00, 'order', 16, 'Order payment', '2026-03-22 18:32:15');
-
---
 -- Indexes for dumped tables
 --
 
@@ -2162,99 +1958,108 @@ INSERT INTO `wallet_transactions` (`id`, `wallet_id`, `type`, `amount`, `referen
 --
 ALTER TABLE `accounting_periods`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uk_period` (`company_id`,`period_month`,`period_year`);
+  ADD KEY `fk_accounting_periods_company` (`company_id`);
 
 --
 -- Indexes for table `approval_flows`
 --
 ALTER TABLE `approval_flows`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `company_id` (`company_id`);
+  ADD KEY `fk_approval_flows_company` (`company_id`);
 
 --
 -- Indexes for table `approval_logs`
 --
 ALTER TABLE `approval_logs`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_approval_logs_journal` (`journal_id`),
+  ADD KEY `fk_approval_logs_role` (`role_id`),
+  ADD KEY `fk_approval_logs_user` (`approved_by`);
 
 --
 -- Indexes for table `approval_rules`
 --
 ALTER TABLE `approval_rules`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_approval_rules_flow_2026` (`approval_flow_id`);
 
 --
 -- Indexes for table `approval_steps`
 --
 ALTER TABLE `approval_steps`
   ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_approval_steps_rule_2026` (`approval_rule_id`),
   ADD KEY `fk_approval_steps_role` (`role_id`);
 
 --
 -- Indexes for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_audit_logs_company` (`company_id`),
+  ADD KEY `fk_audit_logs_user` (`user_id`);
 
 --
 -- Indexes for table `branches`
 --
 ALTER TABLE `branches`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `company_id` (`company_id`);
+  ADD KEY `fk_branches_company` (`company_id`);
 
 --
 -- Indexes for table `branches_target`
 --
 ALTER TABLE `branches_target`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `branch_id` (`branch_id`) USING BTREE;
+  ADD KEY `fk_branches_target_company` (`company_id`),
+  ADD KEY `fk_branches_target_branch` (`branch_id`);
 
 --
 -- Indexes for table `branch_items`
 --
 ALTER TABLE `branch_items`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `branch_variant` (`branch_id`,`variant_id`),
-  ADD KEY `item_id` (`item_id`),
-  ADD KEY `variant_id` (`variant_id`) USING BTREE;
+  ADD KEY `fk_branch_items_company` (`company_id`),
+  ADD KEY `fk_branch_items_branch` (`branch_id`),
+  ADD KEY `fk_branch_items_item` (`item_id`),
+  ADD KEY `fk_branch_items_variant` (`variant_id`);
 
 --
 -- Indexes for table `branch_opening_hours`
 --
 ALTER TABLE `branch_opening_hours`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `branch_id` (`branch_id`);
+  ADD KEY `fk_branch_opening_branch` (`branch_id`);
 
 --
 -- Indexes for table `branch_referral_rules`
 --
 ALTER TABLE `branch_referral_rules`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `branch_id` (`branch_id`);
+  ADD KEY `fk_branch_referral_branch` (`branch_id`);
 
 --
 -- Indexes for table `business_partners`
 --
 ALTER TABLE `business_partners`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `company_id` (`company_id`);
+  ADD KEY `fk_business_partners_company` (`company_id`);
 
 --
 -- Indexes for table `carts`
 --
 ALTER TABLE `carts`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `branch_id` (`branch_id`);
+  ADD KEY `fk_carts_user` (`user_id`),
+  ADD KEY `fk_carts_branch` (`branch_id`);
 
 --
 -- Indexes for table `cart_items`
 --
 ALTER TABLE `cart_items`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `cart_id` (`cart_id`),
-  ADD KEY `item_id` (`item_id`);
+  ADD KEY `fk_cart_items_cart` (`cart_id`),
+  ADD KEY `fk_cart_items_item` (`item_id`);
 
 --
 -- Indexes for table `categories`
@@ -2267,58 +2072,61 @@ ALTER TABLE `categories`
 -- Indexes for table `category_trx_map`
 --
 ALTER TABLE `category_trx_map`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_category_trx_company` (`company_id`),
+  ADD KEY `fk_category_trx_category` (`category_id`);
 
 --
 -- Indexes for table `chats`
 --
 ALTER TABLE `chats`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `branch_id` (`branch_id`);
+  ADD KEY `fk_chats_user` (`user_id`),
+  ADD KEY `fk_chats_branch` (`branch_id`);
 
 --
 -- Indexes for table `chat_messages`
 --
 ALTER TABLE `chat_messages`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `chat_id` (`chat_id`);
+  ADD KEY `fk_chat_messages_chat` (`chat_id`);
 
 --
 -- Indexes for table `coa`
 --
 ALTER TABLE `coa`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `company_id` (`company_id`),
-  ADD KEY `parent_id` (`parent_id`),
-  ADD KEY `idx_coa_type` (`account_type`);
+  ADD KEY `fk_coa_company` (`company_id`),
+  ADD KEY `fk_coa_parent` (`parent_id`);
 
 --
 -- Indexes for table `coa_opening_balances`
 --
 ALTER TABLE `coa_opening_balances`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_balance` (`company_id`,`coa_id`,`period_year`);
+  ADD KEY `fk_coa_opening_company` (`company_id`),
+  ADD KEY `fk_coa_opening_coa` (`coa_id`);
 
 --
 -- Indexes for table `companies`
 --
 ALTER TABLE `companies`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `company_code` (`company_code`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `fiscal_years`
 --
 ALTER TABLE `fiscal_years`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `company_id` (`company_id`);
+  ADD KEY `fk_fiscal_years_company` (`company_id`);
 
 --
 -- Indexes for table `form_pengajuan`
 --
 ALTER TABLE `form_pengajuan`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_form_pengajuan_company` (`company_id`),
+  ADD KEY `fk_form_pengajuan_branch` (`branch_id`);
 
 --
 -- Indexes for table `form_pengajuan_detail`
@@ -2333,7 +2141,7 @@ ALTER TABLE `form_pengajuan_detail`
 --
 ALTER TABLE `form_purchasing`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_purchasing_pengajuan` (`pengajuan_id`);
+  ADD KEY `fk_form_purchasing_pengajuan` (`pengajuan_id`);
 
 --
 -- Indexes for table `inventori`
@@ -2349,41 +2157,40 @@ ALTER TABLE `inventori`
 --
 ALTER TABLE `items`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `category_id` (`category_id`);
+  ADD KEY `fk_items_category` (`category_id`);
 
 --
 -- Indexes for table `journal_approvals`
 --
 ALTER TABLE `journal_approvals`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `journal_id` (`journal_id`);
+  ADD KEY `fk_journal_approvals_journal` (`journal_id`),
+  ADD KEY `fk_journal_approvals_user` (`approved_by`);
 
 --
 -- Indexes for table `journal_details`
 --
 ALTER TABLE `journal_details`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `journal_id` (`journal_id`),
-  ADD KEY `idx_journal_account` (`account_id`);
+  ADD KEY `fk_journal_details_journal` (`journal_id`),
+  ADD KEY `fk_journal_details_account` (`account_id`);
 
 --
 -- Indexes for table `journal_headers`
 --
 ALTER TABLE `journal_headers`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `journal_no` (`journal_no`),
-  ADD KEY `branch_id` (`branch_id`),
-  ADD KEY `fiscal_year_id` (`fiscal_year_id`),
-  ADD KEY `reversal_of` (`reversal_of`),
-  ADD KEY `idx_journal_period` (`company_id`,`period_year`,`period_month`);
+  ADD KEY `fk_journal_headers_company` (`company_id`),
+  ADD KEY `fk_journal_headers_branch` (`branch_id`),
+  ADD KEY `fk_journal_headers_fiscal` (`fiscal_year_id`);
 
 --
 -- Indexes for table `journal_taxes`
 --
 ALTER TABLE `journal_taxes`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `journal_id` (`journal_id`),
-  ADD KEY `tax_id` (`tax_id`);
+  ADD KEY `fk_journal_taxes_journal` (`journal_id`),
+  ADD KEY `fk_journal_taxes_tax` (`tax_id`);
 
 --
 -- Indexes for table `loyalty_tiers`
@@ -2395,7 +2202,10 @@ ALTER TABLE `loyalty_tiers`
 -- Indexes for table `maintenance`
 --
 ALTER TABLE `maintenance`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_maintenance_company` (`company_id`),
+  ADD KEY `fk_maintenance_branch` (`branch_id`),
+  ADD KEY `fk_maintenance_room` (`room_id`);
 
 --
 -- Indexes for table `maintenances`
@@ -2407,20 +2217,22 @@ ALTER TABLE `maintenances`
 -- Indexes for table `maintenance_items`
 --
 ALTER TABLE `maintenance_items`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_maintenance_items_maintenance` (`maintenance_id`);
 
 --
 -- Indexes for table `maintenance_logs`
 --
 ALTER TABLE `maintenance_logs`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_maintenance_logs_maintenance` (`maintenance_id`);
 
 --
 -- Indexes for table `maintenance_orders`
 --
 ALTER TABLE `maintenance_orders`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `maintenance_id` (`maintenance_id`),
+  ADD KEY `fk_maintenance_orders_maintenance` (`maintenance_id`),
   ADD KEY `fk_maintenance_orders_inventori` (`inventori_id`);
 
 --
@@ -2434,23 +2246,24 @@ ALTER TABLE `migrations`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `branch_id` (`branch_id`);
+  ADD KEY `fk_orders_user` (`user_id`),
+  ADD KEY `fk_orders_branch` (`branch_id`),
+  ADD KEY `fk_orders_cart` (`cart_id`);
 
 --
 -- Indexes for table `order_items`
 --
 ALTER TABLE `order_items`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_order_id` (`order_id`),
-  ADD KEY `idx_item_id` (`item_id`);
+  ADD KEY `fk_order_items_order` (`order_id`),
+  ADD KEY `fk_order_items_item` (`item_id`);
 
 --
 -- Indexes for table `payments`
 --
 ALTER TABLE `payments`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `order_id` (`order_id`);
+  ADD KEY `fk_payments_order` (`order_id`);
 
 --
 -- Indexes for table `permissions`
@@ -2462,154 +2275,160 @@ ALTER TABLE `permissions`
 -- Indexes for table `point_rules`
 --
 ALTER TABLE `point_rules`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_point_rules_branch` (`branch_id`);
 
 --
 -- Indexes for table `point_transactions`
 --
 ALTER TABLE `point_transactions`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD KEY `fk_point_transactions_user` (`user_id`);
 
 --
 -- Indexes for table `ratio_dw`
 --
 ALTER TABLE `ratio_dw`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_hotel` (`hotel_id`),
-  ADD KEY `idx_department` (`department_category`),
-  ADD KEY `idx_range` (`min_value`,`max_value`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `ratio_spend`
 --
 ALTER TABLE `ratio_spend`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_hotel` (`hotel_id`),
-  ADD KEY `idx_department` (`department_category`),
-  ADD KEY `idx_range` (`min_value`,`max_value`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `ratio_worker`
 --
 ALTER TABLE `ratio_worker`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_hotel` (`hotel_id`),
-  ADD KEY `idx_department` (`department_category`),
-  ADD KEY `idx_range` (`min_value`,`max_value`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `refresh_tokens`
 --
 ALTER TABLE `refresh_tokens`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_refresh_tokens_user` (`user_id`);
 
 --
 -- Indexes for table `retained_earnings`
 --
 ALTER TABLE `retained_earnings`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `company_id` (`company_id`);
+  ADD KEY `fk_retained_earnings_company` (`company_id`);
 
 --
 -- Indexes for table `roles`
 --
 ALTER TABLE `roles`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_roles_company` (`company_id`);
 
 --
 -- Indexes for table `role_permissions`
 --
 ALTER TABLE `role_permissions`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_role_permissions_role` (`role_id`),
+  ADD KEY `fk_role_permissions_permission` (`permission_id`);
 
 --
 -- Indexes for table `rooms`
 --
 ALTER TABLE `rooms`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_rooms_company` (`company_id`),
+  ADD KEY `fk_rooms_branch` (`branch_id`);
 
 --
 -- Indexes for table `sub_ledgers`
 --
 ALTER TABLE `sub_ledgers`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `company_id` (`company_id`),
-  ADD KEY `partner_id` (`partner_id`),
-  ADD KEY `journal_detail_id` (`journal_detail_id`);
+  ADD KEY `fk_sub_ledgers_company` (`company_id`),
+  ADD KEY `fk_sub_ledgers_partner` (`partner_id`),
+  ADD KEY `fk_sub_ledgers_journal_detail` (`journal_detail_id`);
 
 --
 -- Indexes for table `tax_codes`
 --
 ALTER TABLE `tax_codes`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_tax_codes_company` (`company_id`),
+  ADD KEY `fk_tax_codes_coa` (`coa_account_id`);
 
 --
 -- Indexes for table `transactions`
 --
 ALTER TABLE `transactions`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `company_id` (`company_id`),
-  ADD KEY `branch_id` (`branch_id`),
-  ADD KEY `idx_trx_date` (`trx_date`),
-  ADD KEY `idx_trx_type` (`trx_type`),
-  ADD KEY `idx_company` (`company_id`),
-  ADD KEY `idx_branch` (`branch_id`),
-  ADD KEY `idx_journal` (`journal_id`);
+  ADD KEY `fk_transactions_company` (`company_id`),
+  ADD KEY `fk_transactions_branch` (`branch_id`),
+  ADD KEY `fk_transactions_journal` (`journal_id`),
+  ADD KEY `fk_transactions_debit` (`debit_account_id`),
+  ADD KEY `fk_transactions_credit` (`credit_account_id`),
+  ADD KEY `fk_transactions_payment` (`payment_account_id`);
 
 --
 -- Indexes for table `transaction_account_map`
 --
 ALTER TABLE `transaction_account_map`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_tam_company` (`company_id`);
 
 --
 -- Indexes for table `transaction_taxes`
 --
 ALTER TABLE `transaction_taxes`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `transaction_id` (`transaction_id`),
-  ADD KEY `tax_code_id` (`tax_code_id`);
+  ADD KEY `fk_transaction_taxes_transaction` (`transaction_id`),
+  ADD KEY `fk_transaction_taxes_tax` (`tax_code_id`);
 
 --
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD KEY `fk_users_company` (`company_id`),
+  ADD KEY `fk_users_branch` (`branch_id`);
 
 --
 -- Indexes for table `user_memberships`
 --
 ALTER TABLE `user_memberships`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `tier_id` (`tier_id`);
+  ADD KEY `fk_user_memberships_user` (`user_id`),
+  ADD KEY `fk_user_memberships_tier` (`tier_id`);
 
 --
 -- Indexes for table `user_points`
 --
 ALTER TABLE `user_points`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD KEY `fk_user_points_user` (`user_id`);
 
 --
 -- Indexes for table `user_roles`
 --
 ALTER TABLE `user_roles`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_user_roles_user` (`user_id`),
+  ADD KEY `fk_user_roles_role` (`role_id`),
+  ADD KEY `fk_user_roles_branch` (`branch_id`);
 
 --
 -- Indexes for table `variants`
 --
 ALTER TABLE `variants`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_variants_item` (`item_id`);
 
 --
 -- Indexes for table `vendors`
 --
 ALTER TABLE `vendors`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_vendors_company` (`company_id`);
 
 --
 -- Indexes for table `vendor_items`
@@ -2622,22 +2441,21 @@ ALTER TABLE `vendor_items`
 -- Indexes for table `vouchers`
 --
 ALTER TABLE `vouchers`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `code` (`code`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `wallets`
 --
 ALTER TABLE `wallets`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `user_id` (`user_id`);
+  ADD KEY `fk_wallets_user` (`user_id`);
 
 --
 -- Indexes for table `wallet_transactions`
 --
 ALTER TABLE `wallet_transactions`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `wallet_id` (`wallet_id`);
+  ADD KEY `fk_wallet_transactions_wallet` (`wallet_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -2683,25 +2501,25 @@ ALTER TABLE `audit_logs`
 -- AUTO_INCREMENT for table `branches`
 --
 ALTER TABLE `branches`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `branches_target`
 --
 ALTER TABLE `branches_target`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `branch_items`
 --
 ALTER TABLE `branch_items`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `branch_opening_hours`
 --
 ALTER TABLE `branch_opening_hours`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `branch_referral_rules`
@@ -2719,91 +2537,91 @@ ALTER TABLE `business_partners`
 -- AUTO_INCREMENT for table `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `cart_items`
 --
 ALTER TABLE `cart_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `category_trx_map`
 --
 ALTER TABLE `category_trx_map`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `chats`
 --
 ALTER TABLE `chats`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `chat_messages`
 --
 ALTER TABLE `chat_messages`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `coa`
 --
 ALTER TABLE `coa`
-  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=159;
 
 --
 -- AUTO_INCREMENT for table `coa_opening_balances`
 --
 ALTER TABLE `coa_opening_balances`
-  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `companies`
 --
 ALTER TABLE `companies`
-  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `fiscal_years`
 --
 ALTER TABLE `fiscal_years`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `form_pengajuan`
 --
 ALTER TABLE `form_pengajuan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `form_pengajuan_detail`
 --
 ALTER TABLE `form_pengajuan_detail`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `form_purchasing`
 --
 ALTER TABLE `form_purchasing`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `inventori`
 --
 ALTER TABLE `inventori`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `journal_approvals`
@@ -2815,13 +2633,13 @@ ALTER TABLE `journal_approvals`
 -- AUTO_INCREMENT for table `journal_details`
 --
 ALTER TABLE `journal_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `journal_headers`
 --
 ALTER TABLE `journal_headers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `journal_taxes`
@@ -2839,7 +2657,7 @@ ALTER TABLE `loyalty_tiers`
 -- AUTO_INCREMENT for table `maintenance`
 --
 ALTER TABLE `maintenance`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `maintenances`
@@ -2851,13 +2669,13 @@ ALTER TABLE `maintenances`
 -- AUTO_INCREMENT for table `maintenance_items`
 --
 ALTER TABLE `maintenance_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `maintenance_logs`
 --
 ALTER TABLE `maintenance_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `maintenance_orders`
@@ -2875,19 +2693,19 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `permissions`
@@ -2905,19 +2723,19 @@ ALTER TABLE `point_rules`
 -- AUTO_INCREMENT for table `point_transactions`
 --
 ALTER TABLE `point_transactions`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `ratio_dw`
 --
 ALTER TABLE `ratio_dw`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `ratio_spend`
 --
 ALTER TABLE `ratio_spend`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `ratio_worker`
@@ -2929,7 +2747,7 @@ ALTER TABLE `ratio_worker`
 -- AUTO_INCREMENT for table `refresh_tokens`
 --
 ALTER TABLE `refresh_tokens`
-  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `retained_earnings`
@@ -2941,13 +2759,13 @@ ALTER TABLE `retained_earnings`
 -- AUTO_INCREMENT for table `roles`
 --
 ALTER TABLE `roles`
-  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `role_permissions`
 --
 ALTER TABLE `role_permissions`
-  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `rooms`
@@ -2965,31 +2783,31 @@ ALTER TABLE `sub_ledgers`
 -- AUTO_INCREMENT for table `tax_codes`
 --
 ALTER TABLE `tax_codes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `transaction_account_map`
 --
 ALTER TABLE `transaction_account_map`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=109;
 
 --
 -- AUTO_INCREMENT for table `transaction_taxes`
 --
 ALTER TABLE `transaction_taxes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `user_memberships`
@@ -3001,13 +2819,13 @@ ALTER TABLE `user_memberships`
 -- AUTO_INCREMENT for table `user_points`
 --
 ALTER TABLE `user_points`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `user_roles`
 --
 ALTER TABLE `user_roles`
-  MODIFY `id` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `variants`
@@ -3019,31 +2837,31 @@ ALTER TABLE `variants`
 -- AUTO_INCREMENT for table `vendors`
 --
 ALTER TABLE `vendors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `vendor_items`
 --
 ALTER TABLE `vendor_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `vouchers`
 --
 ALTER TABLE `vouchers`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `wallets`
 --
 ALTER TABLE `wallets`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `wallet_transactions`
 --
 ALTER TABLE `wallet_transactions`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 -- --------------------------------------------------------
 
@@ -3052,7 +2870,7 @@ ALTER TABLE `wallet_transactions`
 --
 DROP TABLE IF EXISTS `vw_export_journal`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vw_export_journal`  AS SELECT `jh`.`journal_no` AS `journal_no`, `jh`.`journal_date` AS `journal_date`, `coa`.`account_code` AS `account_code`, `coa`.`account_name` AS `account_name`, `jd`.`debit` AS `debit`, `jd`.`credit` AS `credit`, `jh`.`description` AS `description` FROM ((`journal_headers` `jh` join `journal_details` `jd` on(`jd`.`journal_id` = `jh`.`id`)) join `coa` on(`coa`.`id` = `jd`.`account_id`)) WHERE `jh`.`status` = 'posted' ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vw_export_journal`  AS SELECT `jh`.`id` AS `id`, `jh`.`company_id` AS `company_id`, `jh`.`branch_id` AS `branch_id`, `jh`.`fiscal_year_id` AS `fiscal_year_id`, `jh`.`journal_no` AS `journal_no`, `jh`.`journal_date` AS `journal_date`, `jh`.`description` AS `description`, `jh`.`total_amount` AS `total_amount`, `jh`.`period_month` AS `period_month`, `jh`.`period_year` AS `period_year`, `jh`.`status` AS `status`, `jh`.`is_locked` AS `is_locked`, `jh`.`reversal_of` AS `reversal_of`, `jh`.`reverse_date` AS `reverse_date`, `jh`.`created_at` AS `created_at`, `jh`.`deleted_at` AS `deleted_at`, `jd`.`id` AS `journal_detail_id`, `jd`.`account_id` AS `account_id`, `jd`.`debit` AS `debit`, `jd`.`credit` AS `credit`, `c`.`account_code` AS `account_code`, `c`.`account_name` AS `account_name`, `c`.`account_type` AS `account_type`, `c`.`cashflow_type` AS `cashflow_type`, `comp`.`company_name` AS `company_name`, `b`.`branch_name` AS `branch_name`, `fy`.`year_name` AS `year_name` FROM (((((`journal_headers` `jh` join `journal_details` `jd` on(`jd`.`journal_id` = `jh`.`id`)) left join `coa` `c` on(`c`.`id` = `jd`.`account_id`)) left join `companies` `comp` on(`comp`.`id` = `jh`.`company_id`)) left join `branches` `b` on(`b`.`id` = `jh`.`branch_id`)) left join `fiscal_years` `fy` on(`fy`.`id` = `jh`.`fiscal_year_id`)) WHERE `jh`.`deleted_at` is null ;
 
 --
 -- Constraints for dumped tables
@@ -3062,89 +2880,148 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 -- Constraints for table `accounting_periods`
 --
 ALTER TABLE `accounting_periods`
-  ADD CONSTRAINT `accounting_periods_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`);
+  ADD CONSTRAINT `fk_accounting_periods_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `approval_flows`
 --
 ALTER TABLE `approval_flows`
-  ADD CONSTRAINT `approval_flows_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`);
+  ADD CONSTRAINT `fk_approval_flows_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `approval_logs`
+--
+ALTER TABLE `approval_logs`
+  ADD CONSTRAINT `fk_approval_logs_journal` FOREIGN KEY (`journal_id`) REFERENCES `journal_headers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_approval_logs_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_approval_logs_user` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `approval_rules`
+--
+ALTER TABLE `approval_rules`
+  ADD CONSTRAINT `fk_approval_rules_flow_2026` FOREIGN KEY (`approval_flow_id`) REFERENCES `approval_flows` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `approval_steps`
 --
 ALTER TABLE `approval_steps`
-  ADD CONSTRAINT `fk_approval_steps_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`);
+  ADD CONSTRAINT `fk_approval_steps_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_approval_steps_rule_2026` FOREIGN KEY (`approval_rule_id`) REFERENCES `approval_rules` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `audit_logs`
+--
+ALTER TABLE `audit_logs`
+  ADD CONSTRAINT `fk_audit_logs_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_audit_logs_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `branches`
 --
 ALTER TABLE `branches`
-  ADD CONSTRAINT `branches_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`);
+  ADD CONSTRAINT `fk_branches_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `branches_target`
 --
 ALTER TABLE `branches_target`
-  ADD CONSTRAINT `fk_branches_target_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_branches_target_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_branches_target_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `branch_items`
 --
 ALTER TABLE `branch_items`
-  ADD CONSTRAINT `branch_items_ibfk_1` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`),
-  ADD CONSTRAINT `branch_items_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`);
+  ADD CONSTRAINT `fk_branch_items_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_branch_items_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_branch_items_item` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_branch_items_variant` FOREIGN KEY (`variant_id`) REFERENCES `variants` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `branch_opening_hours`
 --
 ALTER TABLE `branch_opening_hours`
-  ADD CONSTRAINT `branch_opening_hours_ibfk_1` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`);
+  ADD CONSTRAINT `fk_branch_opening_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `branch_referral_rules`
+--
+ALTER TABLE `branch_referral_rules`
+  ADD CONSTRAINT `fk_branch_referral_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `business_partners`
 --
 ALTER TABLE `business_partners`
-  ADD CONSTRAINT `business_partners_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`);
+  ADD CONSTRAINT `fk_business_partners_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `carts`
 --
 ALTER TABLE `carts`
-  ADD CONSTRAINT `carts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `carts_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`);
+  ADD CONSTRAINT `fk_carts_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_carts_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `cart_items`
+--
+ALTER TABLE `cart_items`
+  ADD CONSTRAINT `fk_cart_items_cart` FOREIGN KEY (`cart_id`) REFERENCES `carts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_cart_items_item` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `categories`
 --
 ALTER TABLE `categories`
-  ADD CONSTRAINT `fk_categories_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_categories_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `category_trx_map`
+--
+ALTER TABLE `category_trx_map`
+  ADD CONSTRAINT `fk_category_trx_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_category_trx_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `chats`
 --
 ALTER TABLE `chats`
-  ADD CONSTRAINT `chats_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `chats_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`);
+  ADD CONSTRAINT `fk_chats_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_chats_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `chat_messages`
 --
 ALTER TABLE `chat_messages`
-  ADD CONSTRAINT `chat_messages_ibfk_1` FOREIGN KEY (`chat_id`) REFERENCES `chats` (`id`);
+  ADD CONSTRAINT `fk_chat_messages_chat` FOREIGN KEY (`chat_id`) REFERENCES `chats` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `coa`
 --
 ALTER TABLE `coa`
-  ADD CONSTRAINT `coa_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
-  ADD CONSTRAINT `coa_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `coa` (`id`);
+  ADD CONSTRAINT `fk_coa_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_coa_parent` FOREIGN KEY (`parent_id`) REFERENCES `coa` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `coa_opening_balances`
+--
+ALTER TABLE `coa_opening_balances`
+  ADD CONSTRAINT `fk_coa_opening_coa` FOREIGN KEY (`coa_id`) REFERENCES `coa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_coa_opening_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `fiscal_years`
 --
 ALTER TABLE `fiscal_years`
-  ADD CONSTRAINT `fiscal_years_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`);
+  ADD CONSTRAINT `fk_fiscal_years_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `form_pengajuan`
+--
+ALTER TABLE `form_pengajuan`
+  ADD CONSTRAINT `fk_form_pengajuan_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_form_pengajuan_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `form_pengajuan_detail`
@@ -3157,135 +3034,239 @@ ALTER TABLE `form_pengajuan_detail`
 -- Constraints for table `form_purchasing`
 --
 ALTER TABLE `form_purchasing`
-  ADD CONSTRAINT `fk_purchasing_pengajuan` FOREIGN KEY (`pengajuan_id`) REFERENCES `form_pengajuan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_form_purchasing_pengajuan` FOREIGN KEY (`pengajuan_id`) REFERENCES `form_pengajuan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `inventori`
 --
 ALTER TABLE `inventori`
   ADD CONSTRAINT `fk_inventori_purchasing` FOREIGN KEY (`form_purchasing_id`) REFERENCES `form_purchasing` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_inventori_vendor` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_inventori_vendor_item` FOREIGN KEY (`vendor_item_id`) REFERENCES `vendor_items` (`id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_inventori_vendor` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_inventori_vendor_item` FOREIGN KEY (`vendor_item_id`) REFERENCES `vendor_items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `items`
 --
 ALTER TABLE `items`
-  ADD CONSTRAINT `items_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`);
+  ADD CONSTRAINT `fk_items_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `journal_approvals`
 --
 ALTER TABLE `journal_approvals`
-  ADD CONSTRAINT `journal_approvals_ibfk_1` FOREIGN KEY (`journal_id`) REFERENCES `journal_headers` (`id`);
+  ADD CONSTRAINT `fk_journal_approvals_journal` FOREIGN KEY (`journal_id`) REFERENCES `journal_headers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_journal_approvals_user` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `journal_details`
 --
 ALTER TABLE `journal_details`
-  ADD CONSTRAINT `journal_details_ibfk_1` FOREIGN KEY (`journal_id`) REFERENCES `journal_headers` (`id`),
-  ADD CONSTRAINT `journal_details_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `coa` (`id`);
+  ADD CONSTRAINT `fk_journal_details_account` FOREIGN KEY (`account_id`) REFERENCES `coa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_journal_details_journal` FOREIGN KEY (`journal_id`) REFERENCES `journal_headers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `journal_headers`
 --
 ALTER TABLE `journal_headers`
-  ADD CONSTRAINT `journal_headers_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
-  ADD CONSTRAINT `journal_headers_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`),
-  ADD CONSTRAINT `journal_headers_ibfk_3` FOREIGN KEY (`fiscal_year_id`) REFERENCES `fiscal_years` (`id`),
-  ADD CONSTRAINT `journal_headers_ibfk_4` FOREIGN KEY (`reversal_of`) REFERENCES `journal_headers` (`id`);
+  ADD CONSTRAINT `fk_journal_headers_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_journal_headers_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_journal_headers_fiscal` FOREIGN KEY (`fiscal_year_id`) REFERENCES `fiscal_years` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `journal_taxes`
 --
 ALTER TABLE `journal_taxes`
-  ADD CONSTRAINT `journal_taxes_ibfk_1` FOREIGN KEY (`journal_id`) REFERENCES `journal_headers` (`id`),
-  ADD CONSTRAINT `journal_taxes_ibfk_2` FOREIGN KEY (`tax_id`) REFERENCES `tax_codes` (`id`);
+  ADD CONSTRAINT `fk_journal_taxes_journal` FOREIGN KEY (`journal_id`) REFERENCES `journal_headers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_journal_taxes_tax` FOREIGN KEY (`tax_id`) REFERENCES `tax_codes` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `maintenance`
+--
+ALTER TABLE `maintenance`
+  ADD CONSTRAINT `fk_maintenance_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_maintenance_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_maintenance_room` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `maintenance_items`
+--
+ALTER TABLE `maintenance_items`
+  ADD CONSTRAINT `fk_maintenance_items_maintenance` FOREIGN KEY (`maintenance_id`) REFERENCES `maintenance` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `maintenance_logs`
+--
+ALTER TABLE `maintenance_logs`
+  ADD CONSTRAINT `fk_maintenance_logs_maintenance` FOREIGN KEY (`maintenance_id`) REFERENCES `maintenance` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `maintenance_orders`
 --
 ALTER TABLE `maintenance_orders`
-  ADD CONSTRAINT `fk_maintenance_orders_header` FOREIGN KEY (`maintenance_id`) REFERENCES `maintenances` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_maintenance_orders_inventori` FOREIGN KEY (`inventori_id`) REFERENCES `inventori` (`id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_maintenance_orders_inventori` FOREIGN KEY (`inventori_id`) REFERENCES `inventori` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_maintenance_orders_maintenance` FOREIGN KEY (`maintenance_id`) REFERENCES `maintenances` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `orders`
 --
 ALTER TABLE `orders`
-  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`);
+  ADD CONSTRAINT `fk_orders_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_orders_cart` FOREIGN KEY (`cart_id`) REFERENCES `carts` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_orders_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `order_items`
+--
+ALTER TABLE `order_items`
+  ADD CONSTRAINT `fk_order_items_item` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_order_items_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `payments`
 --
 ALTER TABLE `payments`
-  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`);
+  ADD CONSTRAINT `fk_payments_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `point_rules`
+--
+ALTER TABLE `point_rules`
+  ADD CONSTRAINT `fk_point_rules_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `point_transactions`
 --
 ALTER TABLE `point_transactions`
-  ADD CONSTRAINT `point_transactions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `fk_point_transactions_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `refresh_tokens`
+--
+ALTER TABLE `refresh_tokens`
+  ADD CONSTRAINT `fk_refresh_tokens_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `retained_earnings`
 --
 ALTER TABLE `retained_earnings`
-  ADD CONSTRAINT `retained_earnings_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`);
+  ADD CONSTRAINT `fk_retained_earnings_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `roles`
+--
+ALTER TABLE `roles`
+  ADD CONSTRAINT `fk_roles_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `role_permissions`
+--
+ALTER TABLE `role_permissions`
+  ADD CONSTRAINT `fk_role_permissions_permission` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_role_permissions_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `rooms`
+--
+ALTER TABLE `rooms`
+  ADD CONSTRAINT `fk_rooms_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_rooms_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `sub_ledgers`
 --
 ALTER TABLE `sub_ledgers`
-  ADD CONSTRAINT `sub_ledgers_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
-  ADD CONSTRAINT `sub_ledgers_ibfk_2` FOREIGN KEY (`partner_id`) REFERENCES `business_partners` (`id`),
-  ADD CONSTRAINT `sub_ledgers_ibfk_3` FOREIGN KEY (`journal_detail_id`) REFERENCES `journal_details` (`id`);
+  ADD CONSTRAINT `fk_sub_ledgers_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_sub_ledgers_journal_detail` FOREIGN KEY (`journal_detail_id`) REFERENCES `journal_details` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_sub_ledgers_partner` FOREIGN KEY (`partner_id`) REFERENCES `business_partners` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `tax_codes`
+--
+ALTER TABLE `tax_codes`
+  ADD CONSTRAINT `fk_tax_codes_coa` FOREIGN KEY (`coa_account_id`) REFERENCES `coa` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_tax_codes_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `transactions`
 --
 ALTER TABLE `transactions`
-  ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`),
-  ADD CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`);
+  ADD CONSTRAINT `fk_transactions_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_transactions_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_transactions_credit` FOREIGN KEY (`credit_account_id`) REFERENCES `coa` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_transactions_debit` FOREIGN KEY (`debit_account_id`) REFERENCES `coa` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_transactions_journal` FOREIGN KEY (`journal_id`) REFERENCES `journal_headers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_transactions_payment` FOREIGN KEY (`payment_account_id`) REFERENCES `coa` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+--
+-- Constraints for table `transaction_account_map`
+--
+ALTER TABLE `transaction_account_map`
+  ADD CONSTRAINT `fk_tam_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `transaction_taxes`
 --
 ALTER TABLE `transaction_taxes`
-  ADD CONSTRAINT `fk_transaction_tax_code` FOREIGN KEY (`tax_code_id`) REFERENCES `tax_codes` (`id`),
-  ADD CONSTRAINT `fk_transaction_tax_trx` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_transaction_taxes_tax` FOREIGN KEY (`tax_code_id`) REFERENCES `tax_codes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_transaction_taxes_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `users`
+--
+ALTER TABLE `users`
+  ADD CONSTRAINT `fk_users_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_users_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `user_memberships`
 --
 ALTER TABLE `user_memberships`
-  ADD CONSTRAINT `user_memberships_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `user_memberships_ibfk_2` FOREIGN KEY (`tier_id`) REFERENCES `loyalty_tiers` (`id`);
+  ADD CONSTRAINT `fk_user_memberships_tier` FOREIGN KEY (`tier_id`) REFERENCES `loyalty_tiers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_user_memberships_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `user_points`
 --
 ALTER TABLE `user_points`
-  ADD CONSTRAINT `user_points_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `fk_user_points_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `user_roles`
+--
+ALTER TABLE `user_roles`
+  ADD CONSTRAINT `fk_user_roles_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_user_roles_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_user_roles_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `variants`
+--
+ALTER TABLE `variants`
+  ADD CONSTRAINT `fk_variants_item` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `vendors`
+--
+ALTER TABLE `vendors`
+  ADD CONSTRAINT `fk_vendors_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `vendor_items`
 --
 ALTER TABLE `vendor_items`
-  ADD CONSTRAINT `fk_vendor_items_vendor` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_vendor_items_vendor` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `wallets`
 --
 ALTER TABLE `wallets`
-  ADD CONSTRAINT `wallets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `fk_wallets_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `wallet_transactions`
 --
 ALTER TABLE `wallet_transactions`
-  ADD CONSTRAINT `wallet_transactions_ibfk_1` FOREIGN KEY (`wallet_id`) REFERENCES `wallets` (`id`);
+  ADD CONSTRAINT `fk_wallet_transactions_wallet` FOREIGN KEY (`wallet_id`) REFERENCES `wallets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

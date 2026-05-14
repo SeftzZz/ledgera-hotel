@@ -278,8 +278,9 @@ class BranchController extends BaseApiController
     public function showByName($name = null)
     {
         if (empty($name)) {
+
             return $this->response->setJSON([
-                'status' => false,
+                'status'  => false,
                 'message' => 'Branche Name wajib ada'
             ]);
         }
@@ -298,11 +299,61 @@ class BranchController extends BaseApiController
             ->getRowArray();
 
         if (!$data) {
+
             return $this->response->setJSON([
-                'status' => false,
+                'status'  => false,
                 'message' => 'Data tidak ditemukan'
             ]);
         }
+
+        // ============================================
+        // AMBIL COA KHUSUS KAS
+        // ============================================
+        $coa = $db->table('coa')
+            ->select('
+                id,
+                account_code,
+                account_name,
+                account_type,
+                parent_id,
+                cashflow_type
+            ')
+            ->where('company_id', $data['company_id'])
+            ->where('is_active', 1)
+            ->where('account_name', 'Kas')
+            ->orderBy('account_code', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        // ============================================
+        // AMBIL TAX CODE KHUSUS FEE
+        // ============================================
+        $tax_codes = $db->table('tax_codes')
+            ->select('
+                id,
+                company_id,
+                tax_code,
+                tax_name,
+                tax_type,
+                tax_rate,
+                tax_direction,
+                coa_account_id,
+                is_included,
+                is_creditable,
+                is_active
+            ')
+            ->where('company_id', $data['company_id'])
+            ->where('is_active', 1)
+            ->where('tax_type', 'fee')
+            ->orderBy('tax_code', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        // ============================================
+        // TAMBAHKAN KE RESPONSE
+        // ============================================
+        $data['coa']       = $coa;
+        $data['tax_codes'] = $tax_codes;
 
         return $this->response->setJSON([
             'status' => true,

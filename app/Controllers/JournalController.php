@@ -258,29 +258,11 @@ class JournalController extends BaseController
             ->getResultArray();
 
         if (!$details) {
+
             return $this->response->setJSON([
-                'status' => false,
+                'status'  => false,
                 'message' => 'Journal has no details'
             ]);
-        }
-
-        // =========================
-        // DETECT ACCOUNT
-        // =========================
-        $platformFeeAmount = 0;
-        $depositAmount     = 0;
-
-        foreach ($details as $d) {
-
-            // 🔥 82 = platform fee
-            if ((int)$d['account_id'] === 82 || (int)$d['account_id'] === 86) {
-                $platformFeeAmount += (float)$d['debit'];
-            }
-
-            // 🔥 55 = deposit
-            if ((int)$d['account_id'] === 55) {
-                $depositAmount += (float)$d['credit'];
-            }
         }
 
         // =========================
@@ -292,26 +274,32 @@ class JournalController extends BaseController
             ->getResultArray();
 
         $coaMap = [];
+
         foreach ($coaList as $c) {
+
             $coaMap[$c['id']] = $c;
         }
 
         // =========================
         // 🔥 HELPER: TRACE ROOT
         // =========================
-        $getRootType = function($accountId) use ($coaMap) {
+        $getRootType = function ($accountId) use ($coaMap) {
 
             $visited = [];
 
             while (isset($coaMap[$accountId])) {
 
-                if (in_array($accountId, $visited)) break;
+                if (in_array($accountId, $visited)) {
+                    break;
+                }
+
                 $visited[] = $accountId;
 
                 $coa = $coaMap[$accountId];
 
                 if (empty($coa['parent_id'])) {
-                    return $coa['account_type']; // 🔥 pakai account_type
+
+                    return $coa['account_type'];
                 }
 
                 $accountId = $coa['parent_id'];
@@ -323,6 +311,51 @@ class JournalController extends BaseController
         // =========================
         // 🔥 DETECT ACCOUNT
         // =========================
+        $platformFeeAmount = 0;
+        $depositAmount     = 0;
+
+        // cari account_id platform fee dari COA
+        $platformFeeAccountIds = [];
+
+        foreach ($coaMap as $coaId => $coa) {
+
+            if (
+                strtolower(trim($coa['account_name'])) ===
+                strtolower('Beban Platform Fee')
+            ) {
+
+                $platformFeeAccountIds[] = (int)$coaId;
+            }
+        }
+
+        foreach ($details as $d) {
+
+            $accountId = (int)$d['account_id'];
+
+            // =========================
+            // PLATFORM FEE
+            // =========================
+            if (in_array($accountId, $platformFeeAccountIds)) {
+
+                $platformFeeAmount += (float)$d['debit'];
+            }
+
+            // =========================
+            // DEPOSIT
+            // =========================
+            if (
+                isset($coaMap[$accountId]) &&
+                strtolower(trim($coaMap[$accountId]['account_name'])) ===
+                strtolower('Pendapatan Service Charge')
+            ) {
+
+                $depositAmount += (float)$d['credit'];
+            }
+        }
+
+        // =========================
+        // 🔥 DETECT INVENTORY & EXPENSE
+        // =========================
         $inventoryAccounts = [];
         $expenseAccounts   = [];
 
@@ -330,12 +363,29 @@ class JournalController extends BaseController
 
             $accountId = (int)$d['account_id'];
 
-            // 🔥 skip tetap
-            if (in_array($accountId, [82, 55])) continue;
+            // =========================
+            // SKIP PLATFORM FEE & DEPOSIT
+            // =========================
+            if (
+                in_array($accountId, $platformFeeAccountIds)
+            ) {
+                continue;
+            }
 
-            if (!isset($coaMap[$accountId])) continue;
+            if (
+                isset($coaMap[$accountId]) &&
+                strtolower(trim($coaMap[$accountId]['account_name'])) ===
+                strtolower('Pendapatan Service Charge')
+            ) {
+                continue;
+            }
+
+            if (!isset($coaMap[$accountId])) {
+                continue;
+            }
 
             $coa = $coaMap[$accountId];
+
             $rootType = $getRootType($accountId);
 
             // =========================
@@ -343,8 +393,13 @@ class JournalController extends BaseController
             // =========================
             if ($rootType === 'asset') {
 
-                // hanya yang benar2 persediaan
-                if (stripos($coa['account_name'], 'persediaan') !== false) {
+                if (
+                    stripos(
+                        $coa['account_name'],
+                        'persediaan'
+                    ) !== false
+                ) {
+
                     $inventoryAccounts[] = [
                         'account_id'   => $accountId,
                         'account_name' => $coa['account_name'],
@@ -379,8 +434,27 @@ class JournalController extends BaseController
         $paymentAccountId = null;
 
         foreach ($details as $d) {
-            if ((int)$d['account_id'] !== 82 && (float)$d['credit'] > 0) {
-                $paymentAccountId = $d['account_id'];
+
+            $accountId = (int)$d['account_id'];
+
+            // skip platform fee
+            if (in_array($accountId, $platformFeeAccountIds)) {
+                continue;
+            }
+
+            // skip deposit
+            if (
+                isset($coaMap[$accountId]) &&
+                strtolower(trim($coaMap[$accountId]['account_name'])) ===
+                strtolower('Pendapatan Service Charge')
+            ) {
+                continue;
+            }
+
+            if ((float)$d['credit'] > 0) {
+
+                $paymentAccountId = $accountId;
+
                 break;
             }
         }

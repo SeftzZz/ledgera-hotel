@@ -93,31 +93,33 @@
               <ul class="menu-sub">
 
                 <!-- PRODUCTS -->
-                <li class="menu-item <?= ($segment1=='items')?'open active':'' ?>">
-                  <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <div data-i18n="Products">Products</div>
-                  </a>
-
-                  <ul class="menu-sub">
-                    <li class="menu-item <?= ($segment1=='items' && $segment2=='')?'active':'' ?>">
-                      <a href="<?= base_url('items') ?>" class="menu-link">
-                        <div data-i18n="Product List">Product List</div>
+                <?php if (in_array(session()->get('user_role'), ['admin','owner','hotel_gm','hotel_eng'])) : ?>
+                    <li class="menu-item <?= ($segment1=='items')?'open active':'' ?>">
+                      <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <div data-i18n="Products">Products</div>
                       </a>
-                    </li>
 
-                    <li class="menu-item <?= ($segment2=='item-add')?'active':'' ?>">
-                      <a href="<?= base_url('items/item-add') ?>" class="menu-link">
-                        <div data-i18n="Add Product">Add Product</div>
-                      </a>
-                    </li>
+                      <ul class="menu-sub">
+                        <li class="menu-item <?= ($segment1=='items' && $segment2=='')?'active':'' ?>">
+                          <a href="<?= base_url('items') ?>" class="menu-link">
+                            <div data-i18n="Product List">Product List</div>
+                          </a>
+                        </li>
 
-                    <li class="menu-item <?= ($segment2=='item-category')?'active':'' ?>">
-                      <a href="<?= base_url('items/item-category') ?>" class="menu-link">
-                        <div data-i18n="Category List">Category List</div>
-                      </a>
+                        <li class="menu-item <?= ($segment2=='item-add')?'active':'' ?>">
+                          <a href="<?= base_url('items/item-add') ?>" class="menu-link">
+                            <div data-i18n="Add Product">Add Product</div>
+                          </a>
+                        </li>
+
+                        <li class="menu-item <?= ($segment2=='item-category')?'active':'' ?>">
+                          <a href="<?= base_url('items/item-category') ?>" class="menu-link">
+                            <div data-i18n="Category List">Category List</div>
+                          </a>
+                        </li>
+                      </ul>
                     </li>
-                  </ul>
-                </li>
+                <?php endif; ?>
 
                 <!-- ORDERS -->
                 <li class="menu-item <?= ($segment1=='orders')?'open active':'' ?>">
