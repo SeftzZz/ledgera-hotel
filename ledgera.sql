@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: May 15, 2026 at 04:15 PM
+-- Generation Time: May 15, 2026 at 08:09 PM
 -- Server version: 10.11.10-MariaDB-log
 -- PHP Version: 8.3.27
 
@@ -744,7 +744,81 @@ INSERT INTO `coa` (`id`, `company_id`, `account_code`, `account_name`, `account_
 (229, 8, '5228', 'Beban Reimburse Housebank', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (230, 8, '5229', 'Beban Platform Fee', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (231, 8, '5230', 'Beban Kredit', 'expense', 174, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
-(232, 8, '6107', 'HPP Finance', 'cogs', 175, 'operating', 1, '2026-05-11 21:04:33', 3, '2026-05-11 21:04:33', 3, NULL, NULL);
+(232, 8, '6107', 'HPP Finance', 'cogs', 175, 'operating', 1, '2026-05-11 21:04:33', 3, '2026-05-11 21:04:33', 3, NULL, NULL),
+(233, 9, '1101', 'Kas', 'asset', 245, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(234, 9, '1201', 'Piutang Usaha', 'asset', 245, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(235, 9, '1301', 'Persediaan', 'asset', 245, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(236, 9, '2101', 'Utang Usaha', 'liability', 246, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(237, 9, '2201', 'Utang Pajak', 'liability', 246, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(238, 9, '3100', 'Modal', 'equity', 243, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(239, 9, '3200', 'Laba Ditahan', 'equity', 243, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(240, 9, '4101', 'Penjualan', 'revenue', 247, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(241, 9, '5101', 'Beban Gaji', 'expense', 248, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(242, 9, '5201', 'Beban Operasional', 'expense', 248, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(243, 9, '3000', 'Ekuitas', 'equity', NULL, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(244, 9, '3300', 'Prive', 'equity', 243, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(245, 9, '1000', 'Aset', 'asset', NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(246, 9, '2000', 'Kewajiban', 'liability', NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(247, 9, '4000', 'Pendapatan', 'revenue', NULL, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(248, 9, '5000', 'Beban', 'expense', NULL, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(249, 9, '6000', 'Harga Pokok Penjualan', 'cogs', NULL, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(250, 9, '1102', 'Bank', 'asset', 245, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(251, 9, '1103', 'Kas Kecil', 'asset', 245, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(252, 9, '1401', 'PPN Masukan', 'asset', 245, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(253, 9, '2102', 'Utang Gaji', 'liability', 246, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(254, 9, '2202', 'PPN Keluaran', 'liability', 246, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(255, 9, '3400', 'Saldo Laba Tahun Berjalan', 'equity', 243, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(256, 9, '4102', 'Pendapatan Jasa', 'revenue', 247, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(257, 9, '4201', 'Pendapatan Lain-lain', 'revenue', 247, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(258, 9, '6101', 'HPP Penjualan', 'cogs', 249, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(259, 9, '5202', 'Beban Listrik', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(260, 9, '5203', 'Beban Sewa', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(261, 9, '5204', 'Beban Internet', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(262, 9, '5205', 'Beban Transportasi', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(263, 9, '1501', 'Aset Tetap', 'asset', 245, 'investing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(264, 9, '1502', 'Akumulasi Penyusutan', 'asset', 245, 'investing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(265, 9, '2301', 'Utang Bank', 'liability', 246, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(266, 9, '1500', 'Kelompok Aset Tetap', 'asset', 245, 'investing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(267, 9, '2401', 'Utang PB1', 'liability', 246, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(268, 9, '5206', 'Beban Perlengkapan & Peralatan', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(269, 9, '5207', 'Beban Air', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(270, 9, '5208', 'Beban Gas', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(271, 9, '4103', 'Pendapatan Kamar', 'revenue', 247, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(272, 9, '4104', 'Pendapatan Service', 'revenue', 247, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(273, 9, '4105', 'Pendapatan Food', 'revenue', 247, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(274, 9, '4106', 'Pendapatan Beverage', 'revenue', 247, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(275, 9, '4107', 'Pendapatan Shisha', 'revenue', 247, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(276, 9, '4108', 'Pendapatan Catering', 'revenue', 247, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(277, 9, '4109', 'Pendapatan Paket', 'revenue', 247, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(278, 9, '4110', 'Pendapatan Service Charge', 'revenue', 247, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(279, 9, '4111', 'Pendapatan Elqahua', 'revenue', 247, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(280, 9, '6102', 'HPP Food', 'cogs', 249, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(281, 9, '6103', 'HPP Beverage', 'cogs', 249, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(282, 9, '6104', 'HPP Shisha', 'cogs', 249, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(283, 9, '5209', 'Beban Kitchen', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(284, 9, '5210', 'Beban Bar', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(285, 9, '5211', 'Beban Shisha', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(286, 9, '5212', 'Beban Catering', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(287, 9, '5213', 'Beban Buffet', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(288, 9, '6105', 'HPP Catering', 'cogs', 249, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(289, 9, '6106', 'HPP Buffet', 'cogs', 249, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(290, 9, '5214', 'Beban Fuel & Gas', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(291, 9, '5216', 'Beban Photoshoot', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(292, 9, '5217', 'Beban Pest Control', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(293, 9, '5218', 'Beban Marketing', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(294, 9, '5219', 'Beban Branding', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(295, 9, '5220', 'Beban Maintenance', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(296, 9, '5221', 'Beban Payroll', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(297, 9, '5222', 'Beban HRD', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(298, 9, '5223', 'Beban POMEC', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(299, 9, '5224', 'Beban Lain-lain', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(300, 9, '5225', 'Beban Cleaning Supply', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(301, 9, '5226', 'Beban Entertainment', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(302, 9, '5227', 'Beban Floor Operational', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(303, 9, '5228', 'Beban Reimburse Housebank', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(304, 9, '5229', 'Beban Platform Fee', 'expense', 248, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(305, 9, '5230', 'Beban Kredit', 'expense', 248, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(306, 9, '6107', 'HPP Finance', 'cogs', 249, 'operating', 1, '2026-05-11 21:04:33', 3, '2026-05-11 21:04:33', 3, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -797,7 +871,8 @@ INSERT INTO `companies` (`id`, `company_code`, `company_name`, `company_addr`, `
 (5, 'COMP04', 'COMPANY 3', '-', NULL, NULL, 1, '2026-03-27 18:01:26', 3, NULL, NULL, NULL, NULL),
 (6, 'COMP05', 'COMPANY 4', '-', NULL, NULL, 1, '2026-03-27 18:01:51', 3, NULL, NULL, NULL, NULL),
 (7, 'CMP001', 'Contoh I', 'Bogor, Jawa Barat', NULL, NULL, 1, '2026-05-13 14:19:32', 1, NULL, NULL, NULL, NULL),
-(8, 'PTJBT', 'PT Jabartek Media Teknologi', 'Yasmin, Bogor tengah, Jawa Barat', NULL, NULL, 1, '2026-05-15 11:25:09', 1, NULL, NULL, NULL, NULL);
+(8, 'PTJBT', 'PT Jabartek Media Teknologi', 'Yasmin, Bogor tengah, Jawa Barat', NULL, NULL, 1, '2026-05-15 11:25:09', 1, NULL, NULL, NULL, NULL),
+(9, 'PTLCK', 'PT LUCKY STRIKE', 'Bogor', NULL, NULL, 1, '2026-05-15 17:15:48', 1, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -822,7 +897,9 @@ INSERT INTO `fiscal_years` (`id`, `company_id`, `year_name`, `start_date`, `end_
 (1, 1, 'FY 2025', '2025-01-01', '2025-12-31', 1),
 (2, 1, 'FY 2026', '2026-01-01', '2026-12-31', 1),
 (3, 7, 'FY 2026', '2026-01-01', '2026-12-31', 1),
-(4, 8, 'FY 2026', '2026-01-01', '2026-12-31', 1);
+(4, 8, 'FY 2026', '2026-01-01', '2026-12-31', 1),
+(5, 9, 'FY 2025', '2025-01-01', '2025-12-31', 1),
+(6, 9, 'FY 2026', '2026-01-01', '2026-12-31', 1);
 
 -- --------------------------------------------------------
 
@@ -1260,7 +1337,7 @@ CREATE TABLE `payments` (
 --
 
 INSERT INTO `payments` (`id`, `order_id`, `payment_method`, `amount`, `status`, `transaction_ref`, `paid_at`) VALUES
-(1, 1, 'cash', 670000.00, 'paid', NULL, '2026-05-15 14:55:18');
+(1, 1, 'cash', 670000.00, 'paid', NULL, '2026-05-15 16:39:07');
 
 -- --------------------------------------------------------
 
@@ -1888,7 +1965,60 @@ INSERT INTO `transaction_account_map` (`id`, `company_id`, `trx_type`, `debit_ac
 (158, 8, 'expense_credit', 231, 159, NULL, NULL, NULL, '2026-04-23 15:32:26'),
 (159, 8, 'payment_loan', 191, 159, NULL, NULL, NULL, '2026-04-23 16:02:25'),
 (160, 8, 'expense_platform_fee', 230, 159, NULL, NULL, NULL, '2026-04-23 17:30:11'),
-(161, 8, 'loan_installment', 191, 159, NULL, 231, 230, '2026-04-23 18:35:44');
+(161, 8, 'loan_installment', 191, 159, NULL, 231, 230, '2026-04-23 18:35:44'),
+(162, 9, 'sales', 233, 271, 272, NULL, NULL, '2026-02-21 18:21:20'),
+(163, 9, 'expense_salary', 241, 233, NULL, NULL, NULL, '2026-02-21 18:21:27'),
+(164, 9, 'expense_electric', 259, 233, NULL, NULL, NULL, '2026-02-21 18:21:33'),
+(165, 9, 'expense_operational', 242, 233, NULL, NULL, NULL, '2026-02-21 18:21:33'),
+(166, 9, 'capital_injection', 233, 238, NULL, NULL, NULL, '2026-02-21 23:38:13'),
+(167, 9, 'capital_withdrawal', 233, 238, NULL, NULL, NULL, '2026-02-21 23:38:13'),
+(168, 9, 'dividend_distribution', 233, 238, NULL, NULL, NULL, '2026-02-21 23:38:13'),
+(169, 9, 'sales_partial', 234, 271, 272, NULL, NULL, '2026-03-27 02:41:08'),
+(170, 9, 'receive_payment', 233, 234, NULL, NULL, NULL, '2026-03-27 02:50:54'),
+(171, 9, 'sales_food', 233, 273, 278, NULL, NULL, '2026-03-27 11:32:31'),
+(172, 9, 'sales_beverage', 233, 274, 278, NULL, NULL, '2026-03-27 11:32:31'),
+(173, 9, 'sales_shisha', 233, 275, 278, NULL, NULL, '2026-03-27 11:32:31'),
+(174, 9, 'sales_catering', 233, 276, 278, NULL, NULL, '2026-03-27 11:32:31'),
+(175, 9, 'sales_package', 233, 277, 278, NULL, NULL, '2026-03-27 11:32:31'),
+(176, 9, 'sales_food_partial', 234, 273, 278, NULL, NULL, '2026-03-27 11:32:40'),
+(177, 9, 'sales_beverage_partial', 234, 274, 278, NULL, NULL, '2026-03-27 11:32:40'),
+(178, 9, 'sales_shisha_partial', 234, 275, 278, NULL, NULL, '2026-03-27 11:55:44'),
+(179, 9, 'sales_catering_partial', 234, 276, 278, NULL, NULL, '2026-03-27 11:55:44'),
+(180, 9, 'sales_package_partial', 234, 277, 278, NULL, NULL, '2026-03-27 11:55:44'),
+(181, 9, 'sales_elqahua', 233, 279, 278, NULL, NULL, '2026-03-27 12:20:48'),
+(182, 9, 'sales_elqahua_partial', 234, 279, 278, NULL, NULL, '2026-03-27 12:20:48'),
+(183, 9, 'sales_service', 233, 278, 272, NULL, NULL, '2026-03-27 12:20:48'),
+(184, 9, 'sales_service_partial', 234, 278, NULL, NULL, NULL, '2026-03-27 12:20:48'),
+(185, 9, 'expense_kitchen', 283, 233, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(186, 9, 'expense_bar', 235, 233, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(187, 9, 'expense_shisha', 235, 233, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(188, 9, 'expense_catering', 235, 233, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(189, 9, 'expense_buffet', 235, 233, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(190, 9, 'expense_entertainment', 300, 233, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(191, 9, 'expense_fuel_gas', 290, 233, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(192, 9, 'expense_payroll', 296, 233, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(193, 9, 'expense_pomec', 298, 233, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(194, 9, 'expense_cleaning', 300, 233, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(195, 9, 'expense_floor', 302, 233, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(196, 9, 'expense_reimburse', 303, 233, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(197, 9, 'expense_photoshoot', 291, 233, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(198, 9, 'expense_pest_control', 292, 233, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(199, 9, 'expense_marketing', 293, 233, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(200, 9, 'expense_branding', 294, 233, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(201, 9, 'expense_maintenance', 295, 233, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(202, 9, 'expense_hrd', 297, 233, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(203, 9, 'expense_other', 299, 233, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(204, 9, 'payable_payment', 236, 233, NULL, NULL, NULL, '2026-03-27 12:33:49'),
+(205, 9, 'purchase_inventory', 235, 233, NULL, NULL, NULL, '2026-04-06 20:34:41'),
+(206, 9, 'inventory_usage_food', 280, 235, NULL, NULL, NULL, '2026-04-06 20:34:50'),
+(207, 9, 'inventory_usage_beverage', 281, 235, NULL, NULL, NULL, '2026-04-06 20:35:00'),
+(208, 9, 'purchase_inventory_partial', 235, 236, NULL, NULL, NULL, '2026-04-09 18:26:57'),
+(209, 9, 'expense_kitchen_partial', 283, 236, NULL, NULL, NULL, '2026-04-09 18:26:57'),
+(210, 9, 'credit_bank', 233, 265, NULL, NULL, NULL, '2026-04-23 15:32:26'),
+(211, 9, 'expense_credit', 305, 233, NULL, NULL, NULL, '2026-04-23 15:32:26'),
+(212, 9, 'payment_loan', 265, 233, NULL, NULL, NULL, '2026-04-23 16:02:25'),
+(213, 9, 'expense_platform_fee', 304, 233, NULL, NULL, NULL, '2026-04-23 17:30:11'),
+(214, 9, 'loan_installment', 265, 233, NULL, 305, 304, '2026-04-23 18:35:44');
 
 -- --------------------------------------------------------
 
@@ -1944,7 +2074,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `company_id`, `branch_id`, `category_id`, `role`, `name`, `email`, `phone`, `password`, `photo`, `is_active`, `last_login_at`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) VALUES
-(1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-05-15 15:11:17', '2026-01-18 12:25:53', 1, '2026-05-15 15:11:17', NULL, NULL, NULL),
+(1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-05-15 17:08:36', '2026-01-18 12:25:53', 1, '2026-05-15 17:08:36', NULL, NULL, NULL),
 (2, 1, 3, 4, 'hotel_fo', 'Syahwal Ramadhan', 'syahwal.86@gmail.com', '895330907220', '$2y$10$rdtsq9uvBQpM3kpNMd2/SOGcs93aud5lAKf8dl5qZ4lG0wC8OvIFq', '2.png', 'active', '2026-05-13 16:06:49', '2026-01-18 18:59:55', 1, '2026-05-13 16:06:49', 1, NULL, NULL),
 (3, 1, 3, 0, 'hotel_gm', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$QFAtuh/F3qA1gcwrVncrZ.dl2sPbCtj//xmHYJLd40uDcOic6zmVe', '3.png', 'active', '2026-05-14 15:33:53', '2026-01-19 10:53:08', 1, '2026-05-14 15:33:53', 1, NULL, NULL),
 (17, 1, 3, 1, 'hotel_fnb_production', 'Aji Kitchen', 'aji.kitchen@gmail.com', '-', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', NULL, 'active', '2026-05-07 14:42:35', '2026-04-08 15:28:02', NULL, '2026-05-07 14:42:35', NULL, NULL, NULL),
@@ -1952,7 +2082,7 @@ INSERT INTO `users` (`id`, `company_id`, `branch_id`, `category_id`, `role`, `na
 (21, 7, 13, 13, 'hotel_gm', 'GM Contoh I', 'GM@contohsatu.com', '81234567890', '$2y$10$9J22Z/fXEsHYc0BPrJ04VuRzn10a4Sfg3Etm5c5iGwm/dHJcwdCTy', NULL, 'active', '2026-05-14 19:05:56', '2026-05-13 14:44:28', 1, '2026-05-14 19:05:56', 1, NULL, NULL),
 (22, 7, 13, 12, 'hotel_fnb_production', 'Contoh Kitchen', 'kitchen@contohsatu.com', '81234567890', '$2y$10$5fbHE7urawWt8bm6DtGyd.Xagi1BOzspJodDcXPBW2A/qBgXw4KzC', NULL, 'active', NULL, '2026-05-13 15:14:09', 1, '2026-05-13 15:14:09', 1, NULL, NULL),
 (23, 7, 13, 13, 'hotel_fo', 'Contoh FO', 'FO@contohsatu.com', '81234567890', '$2y$10$541YoJ0YaHzG6HmBBkOzmu4iedhxRYZqUgE7nWGpnzwbZsfx3mMHm', NULL, 'active', '2026-05-14 18:52:58', '2026-05-13 15:15:03', 1, '2026-05-14 18:52:58', 1, NULL, NULL),
-(26, 8, 14, 0, 'hotel_gm', 'GM', 'gm@jabartek.com', '8911223344', '$2y$10$8hO.lYnKq/KzMd5bdBqK2eBxG5VU4HKmTL/Rhc3mZjWLG9zJQuvXa', NULL, 'active', '2026-05-15 14:55:25', '2026-05-15 13:23:38', 1, '2026-05-15 14:55:25', 1, NULL, NULL),
+(26, 8, 14, 0, 'hotel_gm', 'GM', 'gm@jabartek.com', '8911223344', '$2y$10$8hO.lYnKq/KzMd5bdBqK2eBxG5VU4HKmTL/Rhc3mZjWLG9zJQuvXa', NULL, 'active', '2026-05-15 16:39:20', '2026-05-15 13:23:38', 1, '2026-05-15 16:39:20', 1, NULL, NULL),
 (31, 8, 14, 17, 'hotel_fo', 'FO', 'fo@jabartek.com', '8911223344', '$2y$10$6rYabR2Ow6vnEoHtUKtK/u0cId2oW44cECtrjoIg/m5gQ1EdZZivq', NULL, 'active', '2026-05-15 14:45:43', '2026-05-15 13:53:18', 1, '2026-05-15 14:45:43', 1, NULL, NULL),
 (32, 8, 14, 18, 'hotel_fna', 'Finance', 'finance@jabartek.com', '8944223312', '$2y$10$XYlEcv3izRzLZofLvcojFucf/9.J.VYmk5g6sNznmc23bt8MwvxpG', NULL, 'active', NULL, '2026-05-15 15:12:20', 1, '2026-05-15 15:12:20', 1, NULL, NULL);
 
@@ -2792,7 +2922,7 @@ ALTER TABLE `chat_messages`
 -- AUTO_INCREMENT for table `coa`
 --
 ALTER TABLE `coa`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=233;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=307;
 
 --
 -- AUTO_INCREMENT for table `coa_opening_balances`
@@ -2804,13 +2934,13 @@ ALTER TABLE `coa_opening_balances`
 -- AUTO_INCREMENT for table `companies`
 --
 ALTER TABLE `companies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `fiscal_years`
 --
 ALTER TABLE `fiscal_years`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `form_pengajuan`
@@ -3014,7 +3144,7 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `transaction_account_map`
 --
 ALTER TABLE `transaction_account_map`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=162;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=215;
 
 --
 -- AUTO_INCREMENT for table `transaction_taxes`
