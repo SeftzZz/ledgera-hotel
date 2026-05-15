@@ -196,7 +196,7 @@ $('#formProduct').submit(function (e) {
 
       alert('Product saved');
 
-      window.location = '/items/item-list';
+      window.location = '/items';
 
     }
 

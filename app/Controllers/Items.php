@@ -20,11 +20,13 @@ class Items extends BaseController
     $db = Database::connect();
 
     $categories = $db->table('categories')
+      ->where('company_id', session('company_id'))
       ->where('status', 'active')
       ->get()
       ->getResultArray();
 
     $branches = $db->table('branches')
+      ->where('company_id', session('company_id'))
       ->get()
       ->getResultArray();
 

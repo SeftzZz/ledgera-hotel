@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: May 14, 2026 at 09:29 PM
+-- Generation Time: May 15, 2026 at 04:15 PM
 -- Server version: 10.11.10-MariaDB-log
 -- PHP Version: 8.3.27
 
@@ -165,7 +165,8 @@ INSERT INTO `branches` (`id`, `company_id`, `branch_code`, `branch_name`, `branc
 (6, 1, 'SS', 'Salam Supply', '', '', NULL, 0.00, 0.00, 0.00, 0, 0.00),
 (10, 1, 'HC', 'HeyCorp', NULL, NULL, NULL, 0.00, 0.00, 0.00, 0, 0.00),
 (12, 1, 'YTC', 'Yata Tech Corp', NULL, NULL, NULL, 0.00, 0.00, 0.00, 0, 0.00),
-(13, 7, 'CTH01', 'Contoh I', NULL, NULL, NULL, 0.00, 0.00, 0.00, 0, 0.00);
+(13, 7, 'CTH01', 'Contoh I', NULL, NULL, NULL, 0.00, 0.00, 0.00, 0, 0.00),
+(14, 8, 'JBT', 'PT Jabartek Media Teknologi', NULL, NULL, NULL, 0.00, 0.00, 0.00, 0, 0.00);
 
 -- --------------------------------------------------------
 
@@ -198,7 +199,8 @@ INSERT INTO `branches_target` (`id`, `company_id`, `branch_id`, `target`, `room_
 (22, 1, 3, 750000000, 40, 60, 21, 79),
 (23, 1, 12, 100000000, 70, 30, 10, 90),
 (24, 1, 12, 150000000, 70, 30, 10, 90),
-(25, 7, 13, 50000000, 70, 30, 10, 90);
+(25, 7, 13, 50000000, 70, 30, 10, 90),
+(26, 8, 14, 350000000, 40, 60, 21, 79);
 
 -- --------------------------------------------------------
 
@@ -252,7 +254,8 @@ INSERT INTO `branch_items` (`id`, `company_id`, `branch_id`, `item_id`, `variant
 (28, 1, 3, 37, NULL, 0.00, 'fee', 0, 'available'),
 (29, 1, 4, 38, NULL, 0.00, 'none', 0, 'available'),
 (30, 7, 13, 39, NULL, 0.00, 'none', 0, 'available'),
-(31, 7, 13, 40, NULL, 0.00, 'none', 0, 'available');
+(31, 7, 13, 40, NULL, 0.00, 'none', 0, 'available'),
+(32, 8, 14, 50, NULL, 0.00, 'pb1', 0, 'available');
 
 -- --------------------------------------------------------
 
@@ -346,6 +349,13 @@ CREATE TABLE `carts` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `carts`
+--
+
+INSERT INTO `carts` (`id`, `user_id`, `branch_id`, `status`, `created_at`) VALUES
+(1, 31, 14, 'checked_out', '2026-05-15 14:24:25');
+
 -- --------------------------------------------------------
 
 --
@@ -361,6 +371,13 @@ CREATE TABLE `cart_items` (
   `created_at` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `cart_items`
+--
+
+INSERT INTO `cart_items` (`id`, `cart_id`, `item_id`, `quantity`, `price`, `created_at`) VALUES
+(1, 1, 50, 1.00, 670000.00, '0000-00-00');
+
 -- --------------------------------------------------------
 
 --
@@ -369,6 +386,7 @@ CREATE TABLE `cart_items` (
 
 CREATE TABLE `categories` (
   `id` bigint(20) NOT NULL,
+  `company_id` int(11) DEFAULT NULL,
   `branch_id` int(11) DEFAULT NULL,
   `name` varchar(100) DEFAULT NULL,
   `icon` varchar(255) DEFAULT NULL,
@@ -379,20 +397,23 @@ CREATE TABLE `categories` (
 -- Dumping data for table `categories`
 --
 
-INSERT INTO `categories` (`id`, `branch_id`, `name`, `icon`, `status`) VALUES
-(1, 3, 'Kitchen / Culinary', NULL, 'active'),
-(2, 3, 'Food & Beverage Service', NULL, 'active'),
-(3, 3, 'Housekeeping', NULL, 'active'),
-(4, 3, 'Front Office', NULL, 'active'),
-(5, 3, 'Finance', NULL, 'active'),
-(6, 3, 'Human Resources', NULL, 'active'),
-(7, 3, 'Sales & Marketing', NULL, 'active'),
-(8, 3, 'IT', NULL, 'active'),
-(9, 3, 'POMEC', NULL, 'active'),
-(10, 3, 'Engineering', NULL, 'active'),
-(11, 4, 'Human Resources', NULL, 'active'),
-(12, 13, 'Kitchen', NULL, 'active'),
-(13, 13, 'Front Office', NULL, 'active');
+INSERT INTO `categories` (`id`, `company_id`, `branch_id`, `name`, `icon`, `status`) VALUES
+(1, 1, 3, 'Kitchen / Culinary', NULL, 'active'),
+(2, 1, 3, 'Food & Beverage Service', NULL, 'active'),
+(3, 1, 3, 'Housekeeping', NULL, 'active'),
+(4, 1, 3, 'Front Office', NULL, 'active'),
+(5, 1, 3, 'Finance', NULL, 'active'),
+(6, 1, 3, 'Human Resources', NULL, 'active'),
+(7, 1, 3, 'Sales & Marketing', NULL, 'active'),
+(8, 1, 3, 'IT', NULL, 'active'),
+(9, 1, 3, 'POMEC', NULL, 'active'),
+(10, 1, 3, 'Engineering', NULL, 'active'),
+(11, 1, 4, 'Human Resources', NULL, 'active'),
+(12, 7, 13, 'Kitchen', NULL, 'active'),
+(13, 7, 13, 'Front Office', NULL, 'active'),
+(17, 8, 14, 'Front Office', NULL, 'active'),
+(18, 8, 14, 'Finance', NULL, 'active'),
+(19, 8, 14, 'Housekeeping', NULL, 'active');
 
 -- --------------------------------------------------------
 
@@ -443,7 +464,9 @@ INSERT INTO `category_trx_map` (`id`, `company_id`, `category_id`, `trx_type`) V
 (34, 1, 1, 'purchase_inventory'),
 (35, 1, 1, 'inventory_usage_food'),
 (36, 1, 2, 'inventory_usage_beverage'),
-(37, 1, 1, 'purchase_inventory_partial');
+(37, 1, 1, 'purchase_inventory_partial'),
+(38, 8, 4, 'sales'),
+(39, 8, 17, 'sales');
 
 -- --------------------------------------------------------
 
@@ -647,7 +670,81 @@ INSERT INTO `coa` (`id`, `company_id`, `account_code`, `account_name`, `account_
 (155, 7, '6104', 'HPP Shisha', 'cogs', 90, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (156, 7, '6105', 'HPP Catering', 'cogs', 90, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (157, 7, '6106', 'HPP Buffet', 'cogs', 90, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
-(158, 7, '6107', 'HPP Finance', 'cogs', 90, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL);
+(158, 7, '6107', 'HPP Finance', 'cogs', 90, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(159, 8, '1101', 'Kas', 'asset', 171, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(160, 8, '1201', 'Piutang Usaha', 'asset', 171, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(161, 8, '1301', 'Persediaan', 'asset', 171, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(162, 8, '2101', 'Utang Usaha', 'liability', 172, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(163, 8, '2201', 'Utang Pajak', 'liability', 172, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(164, 8, '3100', 'Modal', 'equity', 169, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(165, 8, '3200', 'Laba Ditahan', 'equity', 169, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(166, 8, '4101', 'Penjualan', 'revenue', 173, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(167, 8, '5101', 'Beban Gaji', 'expense', 174, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(168, 8, '5201', 'Beban Operasional', 'expense', 174, 'operating', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(169, 8, '3000', 'Ekuitas', 'equity', NULL, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(170, 8, '3300', 'Prive', 'equity', 169, 'financing', 1, NULL, 0, NULL, NULL, NULL, NULL),
+(171, 8, '1000', 'Aset', 'asset', NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(172, 8, '2000', 'Kewajiban', 'liability', NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(173, 8, '4000', 'Pendapatan', 'revenue', NULL, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(174, 8, '5000', 'Beban', 'expense', NULL, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(175, 8, '6000', 'Harga Pokok Penjualan', 'cogs', NULL, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(176, 8, '1102', 'Bank', 'asset', 171, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(177, 8, '1103', 'Kas Kecil', 'asset', 171, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(178, 8, '1401', 'PPN Masukan', 'asset', 171, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(179, 8, '2102', 'Utang Gaji', 'liability', 172, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(180, 8, '2202', 'PPN Keluaran', 'liability', 172, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(181, 8, '3400', 'Saldo Laba Tahun Berjalan', 'equity', 169, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(182, 8, '4102', 'Pendapatan Jasa', 'revenue', 173, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(183, 8, '4201', 'Pendapatan Lain-lain', 'revenue', 173, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(184, 8, '6101', 'HPP Penjualan', 'cogs', 175, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(185, 8, '5202', 'Beban Listrik', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(186, 8, '5203', 'Beban Sewa', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(187, 8, '5204', 'Beban Internet', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(188, 8, '5205', 'Beban Transportasi', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(189, 8, '1501', 'Aset Tetap', 'asset', 171, 'investing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(190, 8, '1502', 'Akumulasi Penyusutan', 'asset', 171, 'investing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(191, 8, '2301', 'Utang Bank', 'liability', 172, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(192, 8, '1500', 'Kelompok Aset Tetap', 'asset', 171, 'investing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(193, 8, '2401', 'Utang PB1', 'liability', 172, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(194, 8, '5206', 'Beban Perlengkapan & Peralatan', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(195, 8, '5207', 'Beban Air', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(196, 8, '5208', 'Beban Gas', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(197, 8, '4103', 'Pendapatan Kamar', 'revenue', 173, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(198, 8, '4104', 'Pendapatan Service', 'revenue', 173, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(199, 8, '4105', 'Pendapatan Food', 'revenue', 173, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(200, 8, '4106', 'Pendapatan Beverage', 'revenue', 173, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(201, 8, '4107', 'Pendapatan Shisha', 'revenue', 173, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(202, 8, '4108', 'Pendapatan Catering', 'revenue', 173, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(203, 8, '4109', 'Pendapatan Paket', 'revenue', 173, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(204, 8, '4110', 'Pendapatan Service Charge', 'revenue', 173, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(205, 8, '4111', 'Pendapatan Elqahua', 'revenue', 173, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(206, 8, '6102', 'HPP Food', 'cogs', 175, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(207, 8, '6103', 'HPP Beverage', 'cogs', 175, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(208, 8, '6104', 'HPP Shisha', 'cogs', 175, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(209, 8, '5209', 'Beban Kitchen', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(210, 8, '5210', 'Beban Bar', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(211, 8, '5211', 'Beban Shisha', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(212, 8, '5212', 'Beban Catering', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(213, 8, '5213', 'Beban Buffet', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(214, 8, '6105', 'HPP Catering', 'cogs', 175, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(215, 8, '6106', 'HPP Buffet', 'cogs', 175, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(216, 8, '5214', 'Beban Fuel & Gas', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(217, 8, '5216', 'Beban Photoshoot', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(218, 8, '5217', 'Beban Pest Control', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(219, 8, '5218', 'Beban Marketing', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(220, 8, '5219', 'Beban Branding', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(221, 8, '5220', 'Beban Maintenance', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(222, 8, '5221', 'Beban Payroll', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(223, 8, '5222', 'Beban HRD', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(224, 8, '5223', 'Beban POMEC', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(225, 8, '5224', 'Beban Lain-lain', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(226, 8, '5225', 'Beban Cleaning Supply', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(227, 8, '5226', 'Beban Entertainment', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(228, 8, '5227', 'Beban Floor Operational', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(229, 8, '5228', 'Beban Reimburse Housebank', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(230, 8, '5229', 'Beban Platform Fee', 'expense', 174, 'operating', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(231, 8, '5230', 'Beban Kredit', 'expense', 174, 'financing', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(232, 8, '6107', 'HPP Finance', 'cogs', 175, 'operating', 1, '2026-05-11 21:04:33', 3, '2026-05-11 21:04:33', 3, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -699,7 +796,8 @@ INSERT INTO `companies` (`id`, `company_code`, `company_name`, `company_addr`, `
 (4, 'COMP03', 'COMPANY 2', '-', NULL, NULL, 1, '2026-03-27 18:01:08', 3, NULL, NULL, NULL, NULL),
 (5, 'COMP04', 'COMPANY 3', '-', NULL, NULL, 1, '2026-03-27 18:01:26', 3, NULL, NULL, NULL, NULL),
 (6, 'COMP05', 'COMPANY 4', '-', NULL, NULL, 1, '2026-03-27 18:01:51', 3, NULL, NULL, NULL, NULL),
-(7, 'CMP001', 'Contoh I', 'Bogor, Jawa Barat', NULL, NULL, 1, '2026-05-13 14:19:32', 1, NULL, NULL, NULL, NULL);
+(7, 'CMP001', 'Contoh I', 'Bogor, Jawa Barat', NULL, NULL, 1, '2026-05-13 14:19:32', 1, NULL, NULL, NULL, NULL),
+(8, 'PTJBT', 'PT Jabartek Media Teknologi', 'Yasmin, Bogor tengah, Jawa Barat', NULL, NULL, 1, '2026-05-15 11:25:09', 1, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -723,7 +821,8 @@ CREATE TABLE `fiscal_years` (
 INSERT INTO `fiscal_years` (`id`, `company_id`, `year_name`, `start_date`, `end_date`, `is_active`) VALUES
 (1, 1, 'FY 2025', '2025-01-01', '2025-12-31', 1),
 (2, 1, 'FY 2026', '2026-01-01', '2026-12-31', 1),
-(3, 7, 'FY 2026', '2026-01-01', '2026-12-31', 1);
+(3, 7, 'FY 2026', '2026-01-01', '2026-12-31', 1),
+(4, 8, 'FY 2026', '2026-01-01', '2026-12-31', 1);
 
 -- --------------------------------------------------------
 
@@ -856,7 +955,8 @@ INSERT INTO `items` (`id`, `category_id`, `name`, `description`, `image`, `price
 (37, 4, 'Request Casual', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', 'casual'),
 (38, 8, 'Pendapatan Service Charge', NULL, NULL, 0.00, 'available', '2026-03-24 16:15:03', NULL),
 (39, 13, 'FIT', 'Revenue', '', 0.00, 'available', '2026-05-13 08:21:21', NULL),
-(40, 13, 'Request Daily Worker', 'Request pekerja', '', NULL, 'available', '2026-05-13 08:31:01', NULL);
+(40, 13, 'Request Daily Worker', 'Request pekerja', '', NULL, 'available', '2026-05-13 08:31:01', NULL),
+(50, 17, 'Training Finance', 'Training Finance', '', NULL, 'available', '2026-05-15 13:12:38', NULL);
 
 -- --------------------------------------------------------
 
@@ -889,6 +989,16 @@ CREATE TABLE `journal_details` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `journal_details`
+--
+
+INSERT INTO `journal_details` (`id`, `journal_id`, `account_id`, `debit`, `credit`, `created_at`) VALUES
+(1, 1, 159, 670000.00, 0.00, '2026-05-15 14:55:18'),
+(2, 1, 41, 0.00, 548730.55, '2026-05-15 14:55:18'),
+(3, 1, 42, 0.00, 54873.05, '2026-05-15 14:55:18'),
+(4, 1, 193, 0.00, 66396.40, '2026-05-15 14:55:18');
+
 -- --------------------------------------------------------
 
 --
@@ -913,6 +1023,13 @@ CREATE TABLE `journal_headers` (
   `created_at` datetime DEFAULT current_timestamp(),
   `deleted_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `journal_headers`
+--
+
+INSERT INTO `journal_headers` (`id`, `company_id`, `branch_id`, `fiscal_year_id`, `journal_no`, `journal_date`, `description`, `total_amount`, `period_month`, `period_year`, `status`, `is_locked`, `reversal_of`, `reverse_date`, `created_at`, `deleted_at`) VALUES
+(1, 8, 14, 4, 'JRN-1778831718261', '2026-05-15', 'sales-ORD20260515142415FAA88E', 0.00, 5, 2026, 'posted', 0, NULL, NULL, '2026-05-15 14:55:18', '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -1093,6 +1210,13 @@ CREATE TABLE `orders` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id`, `order_number`, `check_in`, `check_out`, `note`, `user_id`, `branch_id`, `cart_id`, `subtotal`, `discount`, `wallet_used`, `deposit`, `total_amount`, `status`, `created_at`) VALUES
+(1, 'ORD20260515142415FAA88E', '2026-05-15', '2026-05-16', 'RB', 31, 14, 1, 670000.00, 0.00, 0.00, 670000.00, 670000.00, 'paid', '2026-05-15 14:24:25');
+
 -- --------------------------------------------------------
 
 --
@@ -1107,6 +1231,13 @@ CREATE TABLE `order_items` (
   `price` decimal(12,2) NOT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `order_id`, `item_id`, `quantity`, `price`, `created_at`) VALUES
+(1, 1, 50, 1.00, 670000.00, '2026-05-15 14:24:25');
 
 -- --------------------------------------------------------
 
@@ -1123,6 +1254,13 @@ CREATE TABLE `payments` (
   `transaction_ref` varchar(255) DEFAULT NULL,
   `paid_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `payments`
+--
+
+INSERT INTO `payments` (`id`, `order_id`, `payment_method`, `amount`, `status`, `transaction_ref`, `paid_at`) VALUES
+(1, 1, 'cash', 670000.00, 'paid', NULL, '2026-05-15 14:55:18');
 
 -- --------------------------------------------------------
 
@@ -1276,7 +1414,8 @@ INSERT INTO `ratio_spend` (`id`, `company_id`, `hotel_id`, `target_id`, `departm
 (38, 1, 3, 2, 'FF&E', 0.00, 3.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (39, 1, 3, 2, 'Service', 0.00, 10.00, 'OVER', 1, 1, '2026-02-27 11:32:52', NULL),
 (40, 1, 12, 23, 'Finance', 0.00, 5.00, 'OVER', 1, 1, '2026-05-11 14:03:07', NULL),
-(41, 7, 13, 25, 'Front Office', 0.00, 1.00, 'OVER', 1, 1, '2026-05-13 09:15:53', NULL);
+(41, 7, 13, 25, 'Front Office', 0.00, 1.00, 'OVER', 1, 1, '2026-05-13 09:15:53', NULL),
+(42, 8, 14, 26, 'Finance', 0.00, 2.00, 'OVER', 1, 1, '2026-05-15 15:07:48', NULL);
 
 -- --------------------------------------------------------
 
@@ -1533,7 +1672,9 @@ INSERT INTO `tax_codes` (`id`, `company_id`, `tax_code`, `tax_name`, `tax_type`,
 (8, 1, 'FEE10', 'Platform Fee 10%', 'fee', 10.00, 1, '0000-00-00 00:00:00', 'output', 82, 0, 1),
 (9, 1, 'PPN12', 'PPN 12%', 'ppn', 12.00, 1, '0000-00-00 00:00:00', 'output', 22, 0, 1),
 (13, 1, 'PBB', 'PBB', 'ppn', 5.00, 1, '0000-00-00 00:00:00', 'both', 24, 0, 1),
-(14, 7, 'FEE10', 'Platform Fee 10%', 'fee', 10.00, 1, '0000-00-00 00:00:00', 'output', 150, 0, 1);
+(14, 7, 'FEE10', 'Platform Fee 10%', 'fee', 10.00, 1, '0000-00-00 00:00:00', 'output', 150, 0, 1),
+(15, 8, 'PB1', 'PB1 11%', 'pb1', 11.00, 1, '0000-00-00 00:00:00', 'output', 193, 0, 1),
+(16, 8, 'PB1', 'PB1 11%', 'pb1', 11.00, 1, '0000-00-00 00:00:00', 'input', 193, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -1558,6 +1699,13 @@ CREATE TABLE `transactions` (
   `status` enum('draft','submitted','approved','posted','rejected') DEFAULT 'draft',
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `transactions`
+--
+
+INSERT INTO `transactions` (`id`, `company_id`, `branch_id`, `trx_date`, `trx_type`, `reference_no`, `amount`, `created_at`, `journal_id`, `debit_account_id`, `credit_account_id`, `payment_account_id`, `category_id`, `status`, `updated_at`) VALUES
+(1, 8, 14, '2026-05-15', 'sales', 'ORD20260515142415FAA88E', 670000.00, '2026-05-15 14:55:18', 1, NULL, NULL, 159, NULL, 'draft', '2026-05-15 14:55:18');
 
 -- --------------------------------------------------------
 
@@ -1687,7 +1835,60 @@ INSERT INTO `transaction_account_map` (`id`, `company_id`, `trx_type`, `debit_ac
 (105, 7, 'expense_credit', 151, 91, NULL, NULL, NULL, '2026-04-23 15:32:26'),
 (106, 7, 'payment_loan', 104, 91, NULL, NULL, NULL, '2026-04-23 16:02:25'),
 (107, 7, 'expense_platform_fee', 150, 91, NULL, NULL, NULL, '2026-04-23 17:30:11'),
-(108, 7, 'loan_installment', 104, 91, NULL, 151, 150, '2026-04-23 18:35:44');
+(108, 7, 'loan_installment', 104, 91, NULL, 151, 150, '2026-04-23 18:35:44'),
+(109, 8, 'sales', 159, 197, 198, NULL, NULL, '2026-02-21 18:21:20'),
+(110, 8, 'expense_salary', 167, 159, NULL, NULL, NULL, '2026-02-21 18:21:27'),
+(111, 8, 'expense_electric', 185, 159, NULL, NULL, NULL, '2026-02-21 18:21:33'),
+(112, 8, 'expense_operational', 168, 159, NULL, NULL, NULL, '2026-02-21 18:21:33'),
+(113, 8, 'capital_injection', 159, 164, NULL, NULL, NULL, '2026-02-21 23:38:13'),
+(114, 8, 'capital_withdrawal', 159, 164, NULL, NULL, NULL, '2026-02-21 23:38:13'),
+(115, 8, 'dividend_distribution', 159, 164, NULL, NULL, NULL, '2026-02-21 23:38:13'),
+(116, 8, 'sales_partial', 160, 197, 198, NULL, NULL, '2026-03-27 02:41:08'),
+(117, 8, 'receive_payment', 159, 160, NULL, NULL, NULL, '2026-03-27 02:50:54'),
+(118, 8, 'sales_food', 159, 199, 204, NULL, NULL, '2026-03-27 11:32:31'),
+(119, 8, 'sales_beverage', 159, 200, 204, NULL, NULL, '2026-03-27 11:32:31'),
+(120, 8, 'sales_shisha', 159, 201, 204, NULL, NULL, '2026-03-27 11:32:31'),
+(121, 8, 'sales_catering', 159, 202, 204, NULL, NULL, '2026-03-27 11:32:31'),
+(122, 8, 'sales_package', 159, 203, 204, NULL, NULL, '2026-03-27 11:32:31'),
+(123, 8, 'sales_food_partial', 160, 199, 204, NULL, NULL, '2026-03-27 11:32:40'),
+(124, 8, 'sales_beverage_partial', 160, 200, 204, NULL, NULL, '2026-03-27 11:32:40'),
+(125, 8, 'sales_shisha_partial', 160, 201, 204, NULL, NULL, '2026-03-27 11:55:44'),
+(126, 8, 'sales_catering_partial', 160, 202, 204, NULL, NULL, '2026-03-27 11:55:44'),
+(127, 8, 'sales_package_partial', 160, 203, 204, NULL, NULL, '2026-03-27 11:55:44'),
+(128, 8, 'sales_elqahua', 159, 205, 204, NULL, NULL, '2026-03-27 12:20:48'),
+(129, 8, 'sales_elqahua_partial', 160, 205, 204, NULL, NULL, '2026-03-27 12:20:48'),
+(130, 8, 'sales_service', 159, 204, 198, NULL, NULL, '2026-03-27 12:20:48'),
+(131, 8, 'sales_service_partial', 160, 204, NULL, NULL, NULL, '2026-03-27 12:20:48'),
+(132, 8, 'expense_kitchen', 209, 159, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(133, 8, 'expense_bar', 161, 159, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(134, 8, 'expense_shisha', 161, 159, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(135, 8, 'expense_catering', 161, 159, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(136, 8, 'expense_buffet', 161, 159, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(137, 8, 'expense_entertainment', 226, 159, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(138, 8, 'expense_fuel_gas', 216, 159, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(139, 8, 'expense_payroll', 222, 159, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(140, 8, 'expense_pomec', 224, 159, NULL, NULL, NULL, '2026-03-27 12:21:48'),
+(141, 8, 'expense_cleaning', 226, 159, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(142, 8, 'expense_floor', 228, 159, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(143, 8, 'expense_reimburse', 229, 159, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(144, 8, 'expense_photoshoot', 217, 159, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(145, 8, 'expense_pest_control', 218, 159, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(146, 8, 'expense_marketing', 219, 159, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(147, 8, 'expense_branding', 220, 159, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(148, 8, 'expense_maintenance', 221, 159, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(149, 8, 'expense_hrd', 223, 159, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(150, 8, 'expense_other', 225, 159, NULL, NULL, NULL, '2026-03-27 12:29:55'),
+(151, 8, 'payable_payment', 162, 159, NULL, NULL, NULL, '2026-03-27 12:33:49'),
+(152, 8, 'purchase_inventory', 161, 159, NULL, NULL, NULL, '2026-04-06 20:34:41'),
+(153, 8, 'inventory_usage_food', 206, 161, NULL, NULL, NULL, '2026-04-06 20:34:50'),
+(154, 8, 'inventory_usage_beverage', 207, 161, NULL, NULL, NULL, '2026-04-06 20:35:00'),
+(155, 8, 'purchase_inventory_partial', 161, 162, NULL, NULL, NULL, '2026-04-09 18:26:57'),
+(156, 8, 'expense_kitchen_partial', 209, 162, NULL, NULL, NULL, '2026-04-09 18:26:57'),
+(157, 8, 'credit_bank', 159, 191, NULL, NULL, NULL, '2026-04-23 15:32:26'),
+(158, 8, 'expense_credit', 231, 159, NULL, NULL, NULL, '2026-04-23 15:32:26'),
+(159, 8, 'payment_loan', 191, 159, NULL, NULL, NULL, '2026-04-23 16:02:25'),
+(160, 8, 'expense_platform_fee', 230, 159, NULL, NULL, NULL, '2026-04-23 17:30:11'),
+(161, 8, 'loan_installment', 191, 159, NULL, 231, 230, '2026-04-23 18:35:44');
 
 -- --------------------------------------------------------
 
@@ -1703,6 +1904,13 @@ CREATE TABLE `transaction_taxes` (
   `tax_amount` decimal(18,2) NOT NULL DEFAULT 0.00,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `transaction_taxes`
+--
+
+INSERT INTO `transaction_taxes` (`id`, `transaction_id`, `tax_code_id`, `tax_base`, `tax_amount`, `created_at`) VALUES
+(1, 1, 15, 548730.55, 66396.40, '2026-05-15 14:55:18');
 
 -- --------------------------------------------------------
 
@@ -1736,14 +1944,17 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `company_id`, `branch_id`, `category_id`, `role`, `name`, `email`, `phone`, `password`, `photo`, `is_active`, `last_login_at`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`) VALUES
-(1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-05-14 19:05:17', '2026-01-18 12:25:53', 1, '2026-05-14 19:05:17', NULL, NULL, NULL),
+(1, 0, 0, 0, 'admin', 'Mick Jagger', 'admin@admin.com', '0812', '$2y$10$TYZN8k0YxaB.jxCtqA4sl.JnllEeN3/UF9oGYK5.LTvbGlCe7HE82', NULL, 'active', '2026-05-15 15:11:17', '2026-01-18 12:25:53', 1, '2026-05-15 15:11:17', NULL, NULL, NULL),
 (2, 1, 3, 4, 'hotel_fo', 'Syahwal Ramadhan', 'syahwal.86@gmail.com', '895330907220', '$2y$10$rdtsq9uvBQpM3kpNMd2/SOGcs93aud5lAKf8dl5qZ4lG0wC8OvIFq', '2.png', 'active', '2026-05-13 16:06:49', '2026-01-18 18:59:55', 1, '2026-05-13 16:06:49', 1, NULL, NULL),
 (3, 1, 3, 0, 'hotel_gm', 'Muhammad', 'muhammad@gmail.com', '99988776', '$2y$10$QFAtuh/F3qA1gcwrVncrZ.dl2sPbCtj//xmHYJLd40uDcOic6zmVe', '3.png', 'active', '2026-05-14 15:33:53', '2026-01-19 10:53:08', 1, '2026-05-14 15:33:53', 1, NULL, NULL),
 (17, 1, 3, 1, 'hotel_fnb_production', 'Aji Kitchen', 'aji.kitchen@gmail.com', '-', '$2y$10$relLlluCofLYvJKJDW65zuxFadTF4X4A.mCur9V2uEbiZVW8vGhaa', NULL, 'active', '2026-05-07 14:42:35', '2026-04-08 15:28:02', NULL, '2026-05-07 14:42:35', NULL, NULL, NULL),
 (20, 7, 0, 0, 'owner', 'Owner Contoh I', 'admin@contohsatu.com', '81234567890', '$2y$10$Bezv70u91sxRjW/tgl7QUeCF.EtfO.EM0B6uRVVpR56afQE6./2nq', NULL, 'active', '2026-05-13 14:41:53', '2026-05-13 14:39:27', 1, '2026-05-13 14:41:53', 1, NULL, NULL),
 (21, 7, 13, 13, 'hotel_gm', 'GM Contoh I', 'GM@contohsatu.com', '81234567890', '$2y$10$9J22Z/fXEsHYc0BPrJ04VuRzn10a4Sfg3Etm5c5iGwm/dHJcwdCTy', NULL, 'active', '2026-05-14 19:05:56', '2026-05-13 14:44:28', 1, '2026-05-14 19:05:56', 1, NULL, NULL),
 (22, 7, 13, 12, 'hotel_fnb_production', 'Contoh Kitchen', 'kitchen@contohsatu.com', '81234567890', '$2y$10$5fbHE7urawWt8bm6DtGyd.Xagi1BOzspJodDcXPBW2A/qBgXw4KzC', NULL, 'active', NULL, '2026-05-13 15:14:09', 1, '2026-05-13 15:14:09', 1, NULL, NULL),
-(23, 7, 13, 13, 'hotel_fo', 'Contoh FO', 'FO@contohsatu.com', '81234567890', '$2y$10$541YoJ0YaHzG6HmBBkOzmu4iedhxRYZqUgE7nWGpnzwbZsfx3mMHm', NULL, 'active', '2026-05-14 18:52:58', '2026-05-13 15:15:03', 1, '2026-05-14 18:52:58', 1, NULL, NULL);
+(23, 7, 13, 13, 'hotel_fo', 'Contoh FO', 'FO@contohsatu.com', '81234567890', '$2y$10$541YoJ0YaHzG6HmBBkOzmu4iedhxRYZqUgE7nWGpnzwbZsfx3mMHm', NULL, 'active', '2026-05-14 18:52:58', '2026-05-13 15:15:03', 1, '2026-05-14 18:52:58', 1, NULL, NULL),
+(26, 8, 14, 0, 'hotel_gm', 'GM', 'gm@jabartek.com', '8911223344', '$2y$10$8hO.lYnKq/KzMd5bdBqK2eBxG5VU4HKmTL/Rhc3mZjWLG9zJQuvXa', NULL, 'active', '2026-05-15 14:55:25', '2026-05-15 13:23:38', 1, '2026-05-15 14:55:25', 1, NULL, NULL),
+(31, 8, 14, 17, 'hotel_fo', 'FO', 'fo@jabartek.com', '8911223344', '$2y$10$6rYabR2Ow6vnEoHtUKtK/u0cId2oW44cECtrjoIg/m5gQ1EdZZivq', NULL, 'active', '2026-05-15 14:45:43', '2026-05-15 13:53:18', 1, '2026-05-15 14:45:43', 1, NULL, NULL),
+(32, 8, 14, 18, 'hotel_fna', 'Finance', 'finance@jabartek.com', '8944223312', '$2y$10$XYlEcv3izRzLZofLvcojFucf/9.J.VYmk5g6sNznmc23bt8MwvxpG', NULL, 'active', NULL, '2026-05-15 15:12:20', 1, '2026-05-15 15:12:20', 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1774,6 +1985,13 @@ CREATE TABLE `user_points` (
   `user_id` int(11) DEFAULT NULL,
   `points` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `user_points`
+--
+
+INSERT INTO `user_points` (`id`, `user_id`, `points`) VALUES
+(1, 31, 0);
 
 -- --------------------------------------------------------
 
@@ -2066,7 +2284,8 @@ ALTER TABLE `cart_items`
 --
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_categories_branch` (`branch_id`);
+  ADD KEY `fk_categories_branch` (`branch_id`),
+  ADD KEY `fk_categories_company` (`company_id`) USING BTREE;
 
 --
 -- Indexes for table `category_trx_map`
@@ -2501,19 +2720,19 @@ ALTER TABLE `audit_logs`
 -- AUTO_INCREMENT for table `branches`
 --
 ALTER TABLE `branches`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `branches_target`
 --
 ALTER TABLE `branches_target`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `branch_items`
 --
 ALTER TABLE `branch_items`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `branch_opening_hours`
@@ -2537,25 +2756,25 @@ ALTER TABLE `business_partners`
 -- AUTO_INCREMENT for table `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `cart_items`
 --
 ALTER TABLE `cart_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `category_trx_map`
 --
 ALTER TABLE `category_trx_map`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `chats`
@@ -2573,7 +2792,7 @@ ALTER TABLE `chat_messages`
 -- AUTO_INCREMENT for table `coa`
 --
 ALTER TABLE `coa`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=159;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=233;
 
 --
 -- AUTO_INCREMENT for table `coa_opening_balances`
@@ -2585,13 +2804,13 @@ ALTER TABLE `coa_opening_balances`
 -- AUTO_INCREMENT for table `companies`
 --
 ALTER TABLE `companies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `fiscal_years`
 --
 ALTER TABLE `fiscal_years`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `form_pengajuan`
@@ -2621,7 +2840,7 @@ ALTER TABLE `inventori`
 -- AUTO_INCREMENT for table `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT for table `journal_approvals`
@@ -2633,13 +2852,13 @@ ALTER TABLE `journal_approvals`
 -- AUTO_INCREMENT for table `journal_details`
 --
 ALTER TABLE `journal_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `journal_headers`
 --
 ALTER TABLE `journal_headers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `journal_taxes`
@@ -2693,19 +2912,19 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `permissions`
@@ -2735,7 +2954,7 @@ ALTER TABLE `ratio_dw`
 -- AUTO_INCREMENT for table `ratio_spend`
 --
 ALTER TABLE `ratio_spend`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `ratio_worker`
@@ -2783,31 +3002,31 @@ ALTER TABLE `sub_ledgers`
 -- AUTO_INCREMENT for table `tax_codes`
 --
 ALTER TABLE `tax_codes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `transaction_account_map`
 --
 ALTER TABLE `transaction_account_map`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=109;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=162;
 
 --
 -- AUTO_INCREMENT for table `transaction_taxes`
 --
 ALTER TABLE `transaction_taxes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `user_memberships`
@@ -2819,7 +3038,7 @@ ALTER TABLE `user_memberships`
 -- AUTO_INCREMENT for table `user_points`
 --
 ALTER TABLE `user_points`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `user_roles`
@@ -2974,7 +3193,8 @@ ALTER TABLE `cart_items`
 -- Constraints for table `categories`
 --
 ALTER TABLE `categories`
-  ADD CONSTRAINT `fk_categories_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_categories_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_categories_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `category_trx_map`

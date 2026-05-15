@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\UserModel;
 use App\Models\CompanyModel;
+use App\Models\BranchModel;
+use App\Models\CategoryModel;
 
 class UserController extends BaseController
 {
@@ -14,15 +16,61 @@ class UserController extends BaseController
     {
         $this->userModel = new UserModel();
         $this->companyModel = new CompanyModel();
+        $this->branchModel = new BranchModel();
+        $this->categoryModel = new CategoryModel();
     }
 
     public function index()
     {
+        $companyId = session()->get('company_id');
+        $branchId  = session()->get('branch_id');
+
+        $isSuperAdmin = $companyId == 0;
+
+        // =========================================
+        // COMPANIES
+        // =========================================
+        $companyQuery = $this->companyModel
+            ->where('deleted_at', null);
+
+        if (!$isSuperAdmin) {
+
+            $companyQuery->where(
+                'id',
+                $companyId
+            );
+        }
+
+        // =========================================
+        // BRANCHES
+        // =========================================
+        $branchQuery = $this->branchModel;
+
+        if (!$isSuperAdmin) {
+
+            $branchQuery->where(
+                'company_id',
+                $companyId
+            );
+
+            if ($branchId) {
+
+                $branchQuery->where(
+                    'id',
+                    $branchId
+                );
+            }
+        }
+
         $data = [
-            'title'  => 'Users',
-            'companies' => $this->companyModel
-                ->where('deleted_at', null)
+            'title' => 'Users',
+
+            'companies' => $companyQuery
                 ->orderBy('company_name', 'ASC')
+                ->findAll(),
+
+            'branches' => $branchQuery
+                ->orderBy('branch_name', 'ASC')
                 ->findAll()
         ];
 
@@ -46,6 +94,7 @@ class UserController extends BaseController
             null,
             'users.name',
             'companies.company_name',
+            'branches.branch_name',
             'users.email',
             'users.phone',
             'users.is_active',
@@ -53,21 +102,46 @@ class UserController extends BaseController
         ];
 
         $companyId = (int) session()->get('company_id');
+        $branchId  = (int) session()->get('branch_id');
 
-        // QUERY FILTERED (COUNT)
+        // =========================================
+        // QUERY FILTERED COUNT
+        // =========================================
         $countQuery = $this->userModel
-            ->join('companies', 'companies.id = users.company_id', 'left')
+            ->join(
+                'companies',
+                'companies.id = users.company_id',
+                'left'
+            )
+            ->join(
+                'branches',
+                'branches.id = users.branch_id',
+                'left'
+            )
             ->where('users.deleted_at', null);
 
-        // Company Scope
+        // COMPANY SCOPE
         if ($companyId !== 0) {
-            $countQuery->where('users.company_id', $companyId);
+            $countQuery->where(
+                'users.company_id',
+                $companyId
+            );
+        }
+
+        // BRANCH SCOPE
+        if ($branchId !== 0) {
+            $countQuery->where(
+                'users.branch_id',
+                $branchId
+            );
         }
 
         if ($searchValue) {
+
             $countQuery->groupStart()
                 ->like('users.name', $searchValue)
                 ->orLike('companies.company_name', $searchValue)
+                ->orLike('branches.branch_name', $searchValue)
                 ->orLike('users.email', $searchValue)
                 ->orLike('users.phone', $searchValue)
                 ->orLike('users.is_active', $searchValue)
@@ -76,47 +150,110 @@ class UserController extends BaseController
 
         $recordsFiltered = $countQuery->countAllResults();
 
+        // =========================================
         // QUERY TOTAL
+        // =========================================
         $totalQuery = $this->userModel
-            ->join('companies', 'companies.id = users.company_id', 'left')
+            ->join(
+                'companies',
+                'companies.id = users.company_id',
+                'left'
+            )
+            ->join(
+                'branches',
+                'branches.id = users.branch_id',
+                'left'
+            )
             ->where('users.deleted_at', null);
 
-        // Company Scope
+        // COMPANY SCOPE
         if ($companyId !== 0) {
-            $totalQuery->where('users.company_id', $companyId);
+            $totalQuery->where(
+                'users.company_id',
+                $companyId
+            );
+        }
+
+        // BRANCH SCOPE
+        if ($branchId !== 0) {
+            $totalQuery->where(
+                'users.branch_id',
+                $branchId
+            );
         }
 
         $recordsTotal = $totalQuery->countAllResults();
 
+        // =========================================
         // QUERY DATA
+        // =========================================
         $dataQuery = $this->userModel
-            ->select('users.*, companies.company_name')
-            ->join('companies', 'companies.id = users.company_id', 'left')
+            ->select('
+                users.*,
+                companies.company_name,
+                branches.branch_name
+            ')
+            ->join(
+                'companies',
+                'companies.id = users.company_id',
+                'left'
+            )
+            ->join(
+                'branches',
+                'branches.id = users.branch_id',
+                'left'
+            )
             ->where('users.deleted_at', null);
 
-        // Company Scope
+        // COMPANY SCOPE
         if ($companyId !== 0) {
-            $dataQuery->where('users.company_id', $companyId);
+            $dataQuery->where(
+                'users.company_id',
+                $companyId
+            );
+        }
+
+        // BRANCH SCOPE
+        if ($branchId !== 0) {
+            $dataQuery->where(
+                'users.branch_id',
+                $branchId
+            );
         }
 
         if ($searchValue) {
+
             $dataQuery->groupStart()
                 ->like('users.name', $searchValue)
                 ->orLike('companies.company_name', $searchValue)
+                ->orLike('branches.branch_name', $searchValue)
                 ->orLike('users.email', $searchValue)
                 ->orLike('users.phone', $searchValue)
                 ->orLike('users.is_active', $searchValue)
             ->groupEnd();
         }
 
+        // =========================================
         // ORDERING
+        // =========================================
         if ($order) {
+
             $idx = (int) $order[0]['column'];
+
             if (!empty($orderColumns[$idx])) {
-                $dataQuery->orderBy($orderColumns[$idx], $order[0]['dir']);
+
+                $dataQuery->orderBy(
+                    $orderColumns[$idx],
+                    $order[0]['dir']
+                );
             }
+
         } else {
-            $dataQuery->orderBy('users.id', 'DESC');
+
+            $dataQuery->orderBy(
+                'users.id',
+                'DESC'
+            );
         }
 
         $data = $dataQuery
@@ -124,30 +261,57 @@ class UserController extends BaseController
             ->get()
             ->getResultArray();
 
+        // =========================================
         // FORMAT DATA
+        // =========================================
         $result = [];
+
         $no = $start + 1;
+
         foreach ($data as $row) {
-            $status = strtolower($row['is_active']);
+
+            $status = strtolower(
+                $row['is_active']
+            );
+
             $badgeStatus = match ($status) {
-                'active'   => '<span class="badge bg-label-success">Active</span>',
-                'inactive' => '<span class="badge bg-label-danger">Inactive</span>',
-                default    => '<span class="badge bg-label-secondary">'.ucfirst(esc($status)).'</span>',
+
+                'active' =>
+                    '<span class="badge bg-label-success">Active</span>',
+
+                'inactive' =>
+                    '<span class="badge bg-label-danger">Inactive</span>',
+
+                default =>
+                    '<span class="badge bg-label-secondary">'
+                    . ucfirst(esc($status)) .
+                    '</span>',
             };
 
             $actionBtn = '<div class="d-flex gap-2">';
 
             if (hasPermission('users.edit')) {
+
                 $actionBtn .= '
-                    <button class="btn btn-sm btn-icon btn-primary btn-edit" data-id="'.$row['id'].'" title="Edit">
+                    <button
+                        class="btn btn-sm btn-icon btn-primary btn-edit"
+                        data-id="'.$row['id'].'"
+                        title="Edit">
                         <i class="ti ti-pencil"></i>
                     </button>
                 ';
             }
 
-            if (hasPermission('users.delete') && session()->get('user_id') != $row['id']) {
+            if (
+                hasPermission('users.delete') &&
+                session()->get('user_id') != $row['id']
+            ) {
+
                 $actionBtn .= '
-                    <button class="btn btn-sm btn-icon btn-danger btn-delete" data-id="'.$row['id'].'" title="Delete">
+                    <button
+                        class="btn btn-sm btn-icon btn-danger btn-delete"
+                        data-id="'.$row['id'].'"
+                        title="Delete">
                         <i class="ti ti-trash"></i>
                     </button>
                 ';
@@ -159,6 +323,7 @@ class UserController extends BaseController
                 'no_urut'       => $no++.'.',
                 'name_user'     => esc($row['name']),
                 'company_user'  => esc($row['company_name'] ?? '-'),
+                'branch_user'   => esc($row['branch_name'] ?? '-'),
                 'email_user'    => esc($row['email']),
                 'hp_user'       => '+62' . esc($row['phone']),
                 'status_user'   => $badgeStatus,
@@ -184,6 +349,8 @@ class UserController extends BaseController
             'phone'      => $request->getPost('hp_user'),
             'password'   => password_hash($request->getPost('pass_user'), PASSWORD_DEFAULT),
             'company_id' => $request->getPost('company_user'),
+            'category_id'=> $request->getPost('role_user'),
+            'branch_id'  => $request->getPost('branch_user'),
             'is_active'  => $request->getPost('status_user'),
             'created_at' => date('Y-m-d H:i:s'),
             'created_by' => session()->get('user_id'),
@@ -334,6 +501,54 @@ class UserController extends BaseController
         return $this->response->setJSON([
             'status'  => false,
             'message' => 'Failed to delete data'
+        ]);
+    }
+
+    public function getRoles()
+    {
+        $request = service('request');
+
+        $companyId = $request->getGet('company_id');
+        $branchId  = $request->getGet('branch_id');
+
+        $query = $this->categoryModel
+            ->select('
+                id,
+                name,
+                company_id,
+                branch_id
+            ')
+            ->where('status', 'active');
+
+        // =========================================
+        // FILTER COMPANY
+        // =========================================
+        if (!empty($companyId)) {
+
+            $query->where(
+                'company_id',
+                $companyId
+            );
+        }
+
+        // =========================================
+        // FILTER BRANCH
+        // =========================================
+        if (!empty($branchId)) {
+
+            $query->where(
+                'branch_id',
+                $branchId
+            );
+        }
+
+        $roles = $query
+            ->orderBy('name', 'ASC')
+            ->findAll();
+
+        return $this->response->setJSON([
+            'status' => true,
+            'data'   => $roles
         ]);
     }
 }

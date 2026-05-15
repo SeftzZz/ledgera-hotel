@@ -121,31 +121,41 @@ class CompanyController extends BaseController
         try {
 
             $request = service('request');
+            $db      = \Config\Database::connect();
 
             $companyCode = trim($request->getPost('company_code'));
             $companyName = trim($request->getPost('company_name'));
             $companyAddr = trim($request->getPost('company_addr'));
 
             if (empty($companyCode) || empty($companyName)) {
+
                 return $this->response->setJSON([
                     'status'  => false,
                     'message' => 'Company code and name are required'
                 ]);
             }
 
-            // Cek duplicate company code
+            // =========================================
+            // CHECK DUPLICATE
+            // =========================================
             $exists = $this->model
                 ->where('company_code', $companyCode)
                 ->where('deleted_at', null)
                 ->first();
 
             if ($exists) {
+
                 return $this->response->setJSON([
                     'status'  => false,
                     'message' => 'Company code already exists'
                 ]);
             }
 
+            $db->transBegin();
+
+            // =========================================
+            // INSERT COMPANY
+            // =========================================
             $this->model->insert([
                 'company_code' => $companyCode,
                 'company_name' => $companyName,
@@ -156,12 +166,147 @@ class CompanyController extends BaseController
                 'deleted_at'   => null
             ]);
 
+            $companyId = $this->model->getInsertID();
+
+            // =========================================
+            // DUPLICATE FISCAL YEARS
+            // =========================================
+            $fiscalYears = $db->table('fiscal_years')
+                ->where('company_id', 1)
+                ->orderBy('id', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            foreach ($fiscalYears as $fy) {
+
+                unset($fy['id']);
+
+                $fy['company_id'] = $companyId;
+
+                $db->table('fiscal_years')->insert($fy);
+            }
+
+            // =========================================
+            // GET COA TEMPLATE
+            // =========================================
+            $coaTemplate = $db->table('coa')
+                ->where('company_id', 1)
+                ->where('deleted_at', null)
+                ->orderBy('id', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            // =========================================
+            // DUPLICATE COA
+            // =========================================
+            $coaIdMap = [];
+
+            foreach ($coaTemplate as $coa) {
+
+                $oldId = $coa['id'];
+
+                unset($coa['id']);
+
+                $coa['company_id'] = $companyId;
+                $coa['parent_id']  = null;
+
+                $db->table('coa')->insert($coa);
+
+                $newId = $db->insertID();
+
+                $coaIdMap[$oldId] = $newId;
+            }
+
+            // =========================================
+            // UPDATE PARENT ID
+            // =========================================
+            foreach ($coaTemplate as $coa) {
+
+                if (!empty($coa['parent_id'])) {
+
+                    $oldId       = $coa['id'];
+                    $oldParentId = $coa['parent_id'];
+
+                    $newId       = $coaIdMap[$oldId];
+                    $newParentId = $coaIdMap[$oldParentId] ?? null;
+
+                    $db->table('coa')
+                        ->where('id', $newId)
+                        ->update([
+                            'parent_id' => $newParentId
+                        ]);
+                }
+            }
+
+            // =========================================
+            // GET TRANSACTION ACCOUNT MAP TEMPLATE
+            // =========================================
+            $trxMaps = $db->table('transaction_account_map')
+                ->where('company_id', 1)
+                ->orderBy('id', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            // =========================================
+            // DUPLICATE TRANSACTION ACCOUNT MAP
+            // =========================================
+            foreach ($trxMaps as $trx) {
+
+                unset($trx['id']);
+
+                $trx['company_id'] = $companyId;
+
+                // REMAP COA IDS
+                $trx['debit_account_id'] = !empty($trx['debit_account_id'])
+                    ? ($coaIdMap[$trx['debit_account_id']] ?? null)
+                    : null;
+
+                $trx['credit_account_id'] = !empty($trx['credit_account_id'])
+                    ? ($coaIdMap[$trx['credit_account_id']] ?? null)
+                    : null;
+
+                $trx['service_account_id'] = !empty($trx['service_account_id'])
+                    ? ($coaIdMap[$trx['service_account_id']] ?? null)
+                    : null;
+
+                $trx['interest_account_id'] = !empty($trx['interest_account_id'])
+                    ? ($coaIdMap[$trx['interest_account_id']] ?? null)
+                    : null;
+
+                $trx['fee_account_id'] = !empty($trx['fee_account_id'])
+                    ? ($coaIdMap[$trx['fee_account_id']] ?? null)
+                    : null;
+
+                $db->table('transaction_account_map')
+                    ->insert($trx);
+            }
+
+            // =========================================
+            // COMMIT
+            // =========================================
+            if ($db->transStatus() === false) {
+
+                $db->transRollback();
+
+                return $this->response->setJSON([
+                    'status'  => false,
+                    'message' => 'Failed to create company'
+                ]);
+            }
+
+            $db->transCommit();
+
             return $this->response->setJSON([
-                'status'  => true,
-                'message' => 'Company successfully added'
+                'status'     => true,
+                'message'    => 'Company successfully added',
+                'company_id' => $companyId
             ]);
 
         } catch (\Throwable $e) {
+
+            if (isset($db)) {
+                $db->transRollback();
+            }
 
             return $this->response->setJSON([
                 'status'  => false,

@@ -183,12 +183,12 @@ $(function () {
       language: {
         sLengthMenu: '_MENU_',
         search: '',
-        searchPlaceholder: 'Search Category'
+        searchPlaceholder: 'Search Department'
       },
       // Button for offcanvas
       buttons: [
         {
-          text: '<i class="ti ti-plus ti-xs me-0 me-sm-2"></i><span class="d-none d-sm-inline-block">Add Category</span>',
+          text: '<i class="ti ti-plus ti-xs me-0 me-sm-2"></i><span class="d-none d-sm-inline-block">Add Department</span>',
           className: 'add-new btn btn-primary ms-2 waves-effect waves-light',
           attr: {
             'data-bs-toggle': 'offcanvas',
@@ -375,7 +375,7 @@ $(function () {
 
         success: function () {
 
-          alert('Category saved');
+          alert('Department saved');
 
           $('.datatables-category-list').DataTable().ajax.reload();
 
@@ -390,7 +390,7 @@ $(function () {
         },
 
         error: function () {
-          alert('Failed to save category');
+          alert('Failed to save department');
         }
 
       });

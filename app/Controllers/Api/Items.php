@@ -196,40 +196,75 @@ class Items extends BaseApiController
         ];
 
         $this->itemModel->insert($itemData);
+
         $itemId = $this->itemModel->getInsertID();
+
+        // =========================
+        // GET BRANCHES BY COMPANY
+        // =========================
+        $branches = $db->table('branches')
+            ->select('id, company_id')
+            ->where('company_id', session('company_id'))
+            ->get()
+            ->getResultArray();
+
+        // =========================
+        // PRICE & STOCK
+        // =========================
+        $prices = $data['price'] ?? [];
+        $stocks = $data['stock'] ?? [];
 
         // =========================
         // INSERT BRANCH ITEMS
         // =========================
-        $branchIds = $data['branch_id'] ?? [];
-        $prices    = $data['price'] ?? [];
-        $stocks    = $data['stock'] ?? [];
+        foreach ($branches as $i => $branch) {
 
-        foreach ($branchIds as $i => $branchId) {
+            $branchId = $branch['id'];
+            $companyId = $branch['company_id'];
 
-            if (!isset($prices[$i]) || $prices[$i] === '' || $prices[$i] <= 0) {
-                continue;
-            }
+            // if (
+            //     !isset($prices[$i]) ||
+            //     $prices[$i] === '' ||
+            //     $prices[$i] <= 0
+            // ) {
+            //     continue;
+            // }
 
-            $stock  = isset($stocks[$i]) ? (int)$stocks[$i] : 0;
-            $status = $stock > 0 ? 'available' : 'out_of_stock';
+            // $stock = isset($stocks[$i])
+            //     ? (int)$stocks[$i]
+            //     : 0;
 
-            $db->table('branch_items')->insert([
+            // $status = $stock > 0
+            //     ? 'available'
+            //     : 'out_of_stock';
+
+            $result = $db->table('branch_items')->insert([
+                'company_id'=> $companyId,
                 'branch_id' => $branchId,
-                'item_id'   => $itemId, // 🔥 langsung ke item
-                'price'     => $prices[$i],
-                'stock'     => $stock,
-                'status'    => $status
+                'item_id'   => $itemId,
+                'price'     => 0,
+                'stock'     => 0,
+                'status'    => 'available'
             ]);
+
+            if (!$result) {
+                dd($db->error());
+            }
         }
 
         $db->transComplete();
 
         if ($db->transStatus() === false) {
-            return $this->error('Failed to create product');
+
+            return $this->error(
+                'Failed to create product'
+            );
         }
 
-        return $this->success([], 'Product created successfully');
+        return $this->success(
+            [],
+            'Product created successfully'
+        );
     }
 
     public function uploadProduct()

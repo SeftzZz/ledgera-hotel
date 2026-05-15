@@ -114,7 +114,7 @@
 
                         <li class="menu-item <?= ($segment2=='item-category')?'active':'' ?>">
                           <a href="<?= base_url('items/item-category') ?>" class="menu-link">
-                            <div data-i18n="Category List">Category List</div>
+                            <div data-i18n="Department List">Department List</div>
                           </a>
                         </li>
                       </ul>

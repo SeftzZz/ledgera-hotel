@@ -8,7 +8,7 @@
 
                 <div class="card mb-4">
                   <div class="card-header">
-                    <h5>Add Product</h5>
+                    <h5>Add Item</h5>
                   </div>
 
                   <div class="card-body">
@@ -21,7 +21,7 @@
                       </div>
 
                       <div class="col-md-6 mb-3">
-                        <label>Category</label>
+                        <label>Department</label>
                         <select name="category_id" class="form-control">
                           <?php foreach ($categories as $c): ?>
                             <option value="<?= $c['id'] ?>">
@@ -104,7 +104,7 @@
                   </div>
                 </div>
 
-                <button class="btn btn-primary">Save Product</button>
+                <button class="btn btn-primary">Save Item</button>
 
               </form>
 

@@ -192,6 +192,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('users/get', 'UserController::getById');
     $routes->post('users/update', 'UserController::update');
     $routes->post('users/delete', 'UserController::delete');
+    $routes->get('users/get-roles', 'UserController::getRoles');
 });
 
 // COA (WEB)

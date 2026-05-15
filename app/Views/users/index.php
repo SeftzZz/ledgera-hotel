@@ -2,6 +2,7 @@
                         <?= $this->section('content') ?>
 	                        <?php 
 								$sessionCompanyId = session()->get('company_id');
+								$sessionBranchId = session()->get('branch_id');
 								$isSuperAdmin = $sessionCompanyId == 0;
 							?>
                             <div class="container-xxl flex-grow-1 container-p-y">
@@ -14,6 +15,7 @@
 							                        <th>No.</th>
 							                        <th>Name</th>
 							                        <th>Company</th>
+							                        <th>Branch</th>
 							                        <th>Email</th>
 							                        <th>Hp</th>
 							                        <th>Status</th>
@@ -36,35 +38,94 @@
 										        </div>
 										        <div class="modal-body">
 										          	<div class="row">
-								                        <div class="col-md-6 mb-3">
+								                        <div class="col-md-4 mb-3">
 								                            <label class="form-label">Full Name *</label>
 										            		<input type="text" class="form-control" name="name_user" required>
 								                        </div>
-								                        <div class="col-md-6 mb-3">
-								                            <label class="form-label">Company *</label>
-								                        	<select
-															    name="company_user"
+								                        <div class="col-md-4 mb-3">
+														    <label class="form-label">Company *</label>
+
+														    <select
+														        name="company_user"
 															    id="add_company_user"
-															    class="form-select select2"
-															    data-placeholder="Select Company"
-															    <?= !$isSuperAdmin ? 'disabled' : '' ?>>
-															    <?php foreach ($companies as $company): ?>
-																    <?php if ($isSuperAdmin || $company['id'] == $sessionCompanyId): ?>
-																        <option value="<?= $company['id'] ?>"
-																            <?= $company['id'] == $sessionCompanyId && !$isSuperAdmin ? 'selected' : '' ?>>
-																            <?= esc($company['company_name']) ?>
-																        </option>
-																    <?php endif; ?>
-																<?php endforeach; ?>
-															</select>
-								                        </div>
+														        class="form-select select2"
+														        data-placeholder="Select Company"
+														        <?= !$isSuperAdmin ? 'disabled' : '' ?>>
+
+														        <?php foreach ($companies as $company): ?>
+
+														            <?php if (
+														                $isSuperAdmin ||
+														                $company['id'] == $sessionCompanyId
+														            ): ?>
+
+														                <option
+														                    value="<?= $company['id'] ?>"
+														                    <?= (
+														                        $company['id'] == $sessionCompanyId
+														                    ) ? 'selected' : '' ?>>
+
+														                    <?= esc($company['company_name']) ?>
+
+														                </option>
+
+														            <?php endif; ?>
+
+														        <?php endforeach; ?>
+
+														    </select>
+														</div>
+
+														<div class="col-md-4 mb-3">
+														    <label class="form-label">Branch *</label>
+
+														    <select
+														        name="branch_user"
+															    id="add_branch_user"
+														        class="form-select select2"
+														        data-placeholder="Select Branch"
+														        <?= !$isSuperAdmin ? 'disabled' : '' ?>>
+
+														        <?php foreach ($branches as $branch): ?>
+
+														            <?php if (
+														                $isSuperAdmin ||
+														                $branch['id'] == $sessionBranchId
+														            ): ?>
+
+														                <option
+														                    value="<?= $branch['id'] ?>"
+														                    <?= (
+														                        $branch['id'] == $sessionBranchId
+														                    ) ? 'selected' : '' ?>>
+
+														                    <?= esc($branch['branch_name']) ?>
+
+														                </option>
+
+														            <?php endif; ?>
+
+														        <?php endforeach; ?>
+
+														    </select>
+														</div>
 								                    </div>
 								                    <div class="row">
-								                        <div class="col-md-6 mb-3">
+								                    	<div class="col-md-4 mb-3">
+														    <label class="form-label">Role *</label>
+														    <select
+														        name="role_user"
+														        id="add_role_user"
+														        class="form-select select2"
+														        data-placeholder="Select Role">
+														        <option value="">Select Role</option>
+														    </select>
+														</div>
+								                        <div class="col-md-4 mb-3">
 								                            <label class="form-label">Email *</label>
 										            		<input type="email" class="form-control" name="email_user" required>
 								                        </div>
-								                        <div class="col-md-6 mb-3">
+								                        <div class="col-md-4 mb-3">
 								                            <label class="form-label">Hp. *</label>
 								                            <div class="input-group">
 									                            <span class="input-group-text">+62</span>
@@ -225,6 +286,7 @@
 						                    { data: 'no_urut' },
 						                    { data: 'name_user' },
 						                    { data: 'company_user' },
+						                    { data: 'branch_user' },
 						                    { data: 'email_user' },
 						                    { data: 'hp_user' },
 						                    { data: 'status_user' },
@@ -389,6 +451,95 @@
 							        });
 							    }
 
+							    async function loadRoles() {
+
+								    const companyId =
+								        $('#add_company_user').val();
+
+								    const branchId =
+								        $('#add_branch_user').val();
+
+								    const roleSelect =
+								        $('#add_role_user');
+
+								    roleSelect.html(`
+								        <option value="">
+								            Loading...
+								        </option>
+								    `);
+
+								    try {
+
+								        const response = await fetch(
+								            `/users/get-roles?company_id=${companyId}&branch_id=${branchId}`
+								        );
+
+								        const result =
+								            await response.json();
+
+								        let html = `
+								            <option value="">
+								                Select Role
+								            </option>
+								        `;
+
+								        if (
+								            result.status &&
+								            result.data.length
+								        ) {
+
+								            result.data.forEach(role => {
+
+								                html += `
+								                    <option value="${role.id}">
+								                        ${role.name}
+								                    </option>
+								                `;
+								            });
+								        }
+
+								        roleSelect.html(html);
+
+								        roleSelect.trigger('change');
+
+								    } catch (err) {
+
+								        console.error(err);
+
+								        roleSelect.html(`
+								            <option value="">
+								                Failed load roles
+								            </option>
+								        `);
+								    }
+								}
+
+								// =====================================
+								// CHANGE COMPANY / BRANCH
+								// =====================================
+								$(document).on(
+								    'change',
+								    '#add_company_user, #add_branch_user',
+								    function () {
+								        loadRoles();
+								    }
+								);
+
+								// =========================================
+								// EVENT
+								// =========================================
+								$(document).on(
+								    'change',
+								    '#add_company_user, #add_branch_user',
+								    function () {
+								        loadRoles();
+								    }
+								);
+
+								// =========================================
+								// INITIAL LOAD
+								// =========================================
+
 							    $('#modalAddUser').on('shown.bs.modal', function () {
 								    initCompanySelect2('#add_company_user', $(this));
 								    if (!isSuperAdmin) {
@@ -514,7 +665,7 @@
 							    let formData = new FormData(this);
 							    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 							    Swal.fire({
-							        title: 'Add new hotel?',
+							        title: 'Add new user?',
 							        icon: 'question',
 							        showCancelButton: true,
 							        reverseButtons: true,

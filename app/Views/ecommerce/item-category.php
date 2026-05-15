@@ -14,7 +14,7 @@
                       <thead>
                         <tr>
                           <th></th>
-                          <th>Category</th>
+                          <th>Department</th>
                           <th>Items</th>
                           <th>Status</th>
                           <th>Actions</th>
@@ -32,7 +32,7 @@
 
                   <div class="offcanvas-header py-4">
                     <h5 id="offcanvasEcommerceCategoryListLabel" class="offcanvas-title">
-                      Add Category
+                      Add Department
                     </h5>
 
                     <button
@@ -46,16 +46,16 @@
 
                     <form id="eCommerceCategoryListForm">
 
-                      <!-- Category Name -->
+                      <!-- Department Name -->
                       <div class="mb-3">
-                        <label class="form-label" for="categoryName">Category Name</label>
+                        <label class="form-label" for="categoryName">Department Name</label>
 
                         <input
                           type="text"
                           id="categoryName"
                           name="name"
                           class="form-control"
-                          placeholder="Enter category name"
+                          placeholder="Enter department name"
                           required>
                       </div>
 
@@ -97,7 +97,7 @@
                         <button
                           type="submit"
                           class="btn btn-primary me-2">
-                          Save Category
+                          Save Department
                         </button>
 
                         <button

@@ -35,29 +35,59 @@ class Categories extends BaseApiController
   */
   public function create()
   {
+      $data = $this->request->getRawInput();
 
-    $data = $this->request->getRawInput();
+      $name   = $data['name']   ?? null;
+      $icon   = $data['icon']   ?? null;
+      $status = $data['status'] ?? 'active';
 
-    $name   = $data['name']   ?? null;
-    $icon   = $data['icon']   ?? null;
-    $status = $data['status'] ?? 'active';
+      if (!$name) {
+          return $this->error('Department name is required');
+      }
 
-    if (!$name) {
-      return $this->error('Category name is required');
-    }
+      // =========================================
+      // GET BRANCH IDS BY COMPANY
+      // =========================================
+      $branches = db_connect()
+          ->table('branches')
+          ->select('id, company_id')
+          ->where('company_id', session('company_id'))
+          ->get()
+          ->getResultArray();
 
-    $insert = [
-      'name'   => $name,
-      'icon'   => $icon ?: null,
-      'status' => $status
-    ];
+      // =========================================
+      // IF NO BRANCH
+      // =========================================
+      if (empty($branches)) {
 
-    $this->categoryModel->insert($insert);
+          return $this->error('No branches found');
+      }
 
-    return $this->success([
-      'id' => $this->categoryModel->getInsertID()
-    ], 'Category created successfully');
+      $insertedIds = [];
 
+      // =========================================
+      // INSERT DEPARTMENT TO EACH BRANCH
+      // =========================================
+      foreach ($branches as $branch) {
+          $insert = [
+              'company_id'=> (int)$branch['company_id'],
+              'branch_id' => (int)$branch['id'],
+              'name'      => $name,
+              'icon'      => $icon ?: null,
+              'status'    => $status
+          ];
+
+          $this->categoryModel->insert($insert);
+
+          $insertedIds[] = [
+              'branch_id'   => $branch['id'],
+              'category_id' => $this->categoryModel->getInsertID()
+          ];
+      }
+
+      return $this->success([
+          'data' => $insertedIds
+      ], 'Category created successfully');
   }
 
 }

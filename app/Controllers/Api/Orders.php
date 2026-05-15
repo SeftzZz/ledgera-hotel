@@ -427,11 +427,11 @@ class Orders extends BaseApiController
 
                 $trxService->create([
                     'company_id'         => $companyId,
-                    'branch_id'          => $order['branch_id'], // 🔥 FIX
-                    'branch_name'        => $data['branch_name'], // 🔥 FIX
+                    'branch_id'          => $order['branch_id'],
+                    'branch_name'        => $data['branch_name'],
                     'trx_date'           => date('Y-m-d'),
 
-                    'trx_type'           => $trxType . '_partial', // 🔥 DINAMIS
+                    'trx_type'           => $trxType . '_partial',
 
                     'reference_no'       => $order['order_number'],
 
@@ -450,11 +450,11 @@ class Orders extends BaseApiController
 
                 $trxService->create([
                     'company_id'         => $companyId,
-                    'branch_id'          => $order['branch_id'], // 🔥 FIX
-                    'branch_name'        => $data['branch_name'], // 🔥 FIX
+                    'branch_id'          => $order['branch_id'],
+                    'branch_name'        => $data['branch_name'],
                     'trx_date'           => date('Y-m-d'),
 
-                    'trx_type'           => $trxType, // 🔥 DINAMIS
+                    'trx_type'           => $trxType,
 
                     'reference_no'       => $order['order_number'],
 
