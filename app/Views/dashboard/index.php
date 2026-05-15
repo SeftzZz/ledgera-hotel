@@ -9,20 +9,20 @@
         <!-- ACCOUNTING OVERVIEW -->
         <!-- ========================= -->
         <div class="col-lg-6 mb-4">
-            <div class="card bg-primary text-white h-100">
+            <div class="card bg-primary text-dark h-100">
                 <div class="card-body">
-                    <h5 class="mb-1 text-white">Accounting (Actual)</h5>
+                    <h5 class="mb-1 text-dark">Accounting (Actual)</h5>
                     <small><?= date('F', mktime(0,0,0,$month,1)) ?> <?= $year ?></small>
 
                     <div class="row mt-4">
                         <div class="col-6">
-                            <h6 class="text-white">Revenue</h6>
-                            <h4 class="text-white" id="revenue-value"><?= number_format($revenue,2) ?></h4>
+                            <h6 class="text-dark">Revenue</h6>
+                            <h4 class="text-dark" id="revenue-value"><?= number_format($revenue,2) ?></h4>
                             <!-- COLLECTION RATE -->
                             <div class="mt-3">
                                 <small>Target Rp</small>
                                 <div class="progress" style="height:10px;">
-                                    <div class="progress-bar bg-success"
+                                    <div class="progress-bar"
                                          style="width: <?= round($collectionRate,2) ?>%">
                                     </div>
                                 </div>
@@ -30,13 +30,13 @@
                             </div>
                         </div>
                         <div class="col-6">
-                            <h6 class="text-white">Expense</h6>
-                            <h4 class="text-white" id="expense-value"><?= number_format($expense,2) ?></h4>
+                            <h6 class="text-dark">Expense</h6>
+                            <h4 class="text-dark" id="expense-value"><?= number_format($expense,2) ?></h4>
                             <!-- COLLECTION RATE -->
                             <div class="mt-3">
                                 <small>Target Rp</small>
                                 <div class="progress" style="height:10px;">
-                                    <div class="progress-bar bg-success"
+                                    <div class="progress-bar"
                                          style="width: <?= round($collectionRate,2) ?>%">
                                     </div>
                                 </div>
@@ -51,29 +51,29 @@
         <!-- ESTIMATED OVERVIEW -->
         <!-- ========================= -->
         <div class="col-lg-6 mb-4">
-            <div class="card bg-info text-white h-100">
+            <div class="card bg-primary text-dark h-100">
                 <div class="card-body">
-                    <h5 class="mb-1 text-white">Estimated Overview</h5>
+                    <h5 class="mb-1 text-dark">Estimated Overview</h5>
                     <small><?= date('F', mktime(0,0,0,$month,1)) ?> <?= $year ?></small>
 
                     <div class="row mt-4">
                         <div class="col-4">
-                            <h6 class="text-white">Total Order</h6>
-                            <h4 class="text-white" id="estimated-value">
+                            <h6 class="text-dark">Total Order</h6>
+                            <h4 class="text-dark" id="estimated-value">
                                 Rp <?= number_format($estimated,0,',','.') ?>
                             </h4>
                         </div>
 
                         <div class="col-4">
-                            <h6 class="text-white">Cash In</h6>
-                            <h4 class="text-white" id="cash-value">
+                            <h6 class="text-dark">Cash In</h6>
+                            <h4 class="text-dark" id="cash-value">
                                 Rp <?= number_format($actualCash,0,',','.') ?>
                             </h4>
                         </div>
 
                         <div class="col-4">
-                            <h6 class="text-white">Outstanding</h6>
-                            <h4 class="text-white" id="outstanding-value">
+                            <h6 class="text-dark">Outstanding</h6>
+                            <h4 class="text-dark" id="outstanding-value">
                                 Rp <?= number_format($outstanding,0,',','.') ?>
                             </h4>
                         </div>
@@ -83,7 +83,7 @@
                     <div class="mt-3">
                         <small>Collection Rate</small>
                         <div class="progress" style="height:10px;">
-                            <div class="progress-bar bg-success"
+                            <div class="progress-bar"
                                  style="width: <?= round($collectionRate,2) ?>%">
                             </div>
                         </div>
@@ -122,7 +122,7 @@
                 </div>
                 <div class="card-body">
                     <div class="progress" style="height: 8px">
-                        <div class="progress-bar bg-success" id="profit-margin-bar"
+                        <div class="progress-bar" id="profit-margin-bar"
                              style="width: <?= $revenue > 0 ? round(($profit/$revenue)*100,2) : 0 ?>%">
                         </div>
                     </div>
@@ -233,7 +233,7 @@
                             <div class="mt-3">
                                 <small>Spend Ratio (<?= $dept['spend_ratio'] ?>%)</small>
                                 <div class="progress" style="height:6px;">
-                                    <div class="progress-bar bg-success"
+                                    <div class="progress-bar"
                                          style="width: <?= $dept['spend_ratio'] ?>%">
                                     </div>
                                 </div>

@@ -18,14 +18,14 @@
   // Chart Colors
   const chartColors = {
     donut: {
-      series1: config.colors.primary,
-      series2: config.colors.warning,
+      series1: '#1b191d',
+      series2: '#dac4a5',
       series3: '#28c76f80',
       series4: config.colors_label.success
     },
     line: {
-      series1: config.colors.warning,
-      series2: config.colors.primary,
+      series1: '#dac4a5',
+      series2: '#1b191d',
       series3: config.colors.danger
     }
   };
@@ -260,7 +260,7 @@
           colors: [
             chartColors?.donut?.series1 || '#28c76f',
             chartColors?.donut?.series2 || '#ea5455',
-            '#e6e6e6',
+            '#f0ede4',
           ],
           stroke: {
             width: 0

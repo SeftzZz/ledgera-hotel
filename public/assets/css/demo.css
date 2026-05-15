@@ -122,3 +122,160 @@
   text-align: center;
   margin-top: 1rem;
 }
+.layout-page {
+  background: #f0ede4;
+}
+.layout-menu {
+  border-right: 2px solid #baa47e;
+}
+.layout-navbar {
+  border: 2px solid #baa47e;
+}
+.bg-primary {
+  background-color: #fff !important;
+}
+.progress-bar {
+  background: linear-gradient(45deg, #baa47e, #dac4a5);
+  color: #fff;
+}
+.btn-primary {
+  color: #fff;
+  background-color: #baa47e;
+  border-color: #baa47e;
+}
+.btn-label-primary {
+  color: #dac4a5;
+  border-color: transparent;
+  background: #f0ede4;
+}
+.btn-label-primary:hover {
+  color: #fff !important;
+  border-color: transparent !important;
+  background: #dac4a5 !important;
+}
+.btn-label-primary:focus {
+  color: #dac4a5 !important;
+  border-color: transparent !important;
+  background: #1b191d !important;
+}
+.btn-primary:hover {
+  color: #fff !important;
+  background-color: #dac4a5 !important;
+  border-color: #dac4a5 !important;
+}
+.btn-primary:focus {
+  color: #dac4a5 !important;
+  border-color: transparent !important;
+  background: #1b191d !important;
+}
+.bg-label-warning {
+  background-color: #dac4a5 !important;
+  color: #fff !important;
+}
+.bg-label-success {
+  background-color: #dac4a5 !important;
+  color: #fff !important;
+}
+.bg-label-primary {
+    background-color: #dac4a5 !important;
+    color: #fff !important;
+}
+.btn-secondary {
+  color: #fff;
+  background-color: #baa47e;
+  border-color: #f0ede4;
+}
+.btn-group .btn-secondary, .input-group .btn-secondary {
+  border-right: var(--bs-border-width) solid #f0ede4;
+  border-left: var(--bs-border-width) solid #f0ede4;
+}
+.btn-secondary:hover {
+  color: #fff !important;
+  background-color: #baa47e !important;
+  border-color: #baa47e !important;
+}
+a {
+  color: #baa47e;
+}
+a:hover {
+  color: #1b191d;
+}
+.text-success {
+  --bs-text-opacity: 1;
+  color: #1b191d !important;
+}
+.text-warning {
+  --bs-text-opacity: 0.5;
+  color: #baa47e !important;
+}
+.page-item.active .page-link, .pagination li.active > a:not(.page-link) {
+  border-color: #baa47e;
+  background-color: #baa47e;
+  color: #fff;
+}
+.btn-success {
+  color: #fff;
+  background-color: #baa47e;
+  border-color: #baa47e;
+}
+.btn-success:hover {
+  color: #fff;
+  background-color: #dac4a5 !important;
+  border-color: #dac4a5 !important;
+}
+.select2-container--default .select2-results__option--highlighted:not([aria-selected=true]) {
+  background-color: #dac4a5 !important;
+  color: #fff !important;
+}
+.select2-results__option[role=option][aria-selected=true] {
+  background-color: #dac4a5;
+  color: #fff;
+}
+.form-control:focus, .form-select:focus {
+  border-color: #dac4a5 !important;
+}
+.flatpickr-day.today {
+    border-color: #baa47e;
+}
+.flatpickr-day.selected, .flatpickr-day.selected.inRange, .flatpickr-day.selected:focus, .flatpickr-day.selected:hover, .flatpickr-day.selected.nextMonthDay, .flatpickr-day.selected.prevMonthDay, .flatpickr-day.startRange, .flatpickr-day.startRange.inRange, .flatpickr-day.startRange:focus, .flatpickr-day.startRange:hover, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.endRange, .flatpickr-day.endRange.inRange, .flatpickr-day.endRange:focus, .flatpickr-day.endRange:hover, .flatpickr-day.endRange.nextMonthDay, .flatpickr-day.endRange.prevMonthDay, .flatpickr-day.week.selected {
+  color: #fff !important;
+  background: #baa47e !important;
+  border-color: #baa47e !important;
+}
+.bg-menu-theme.menu-vertical .menu-item.active > .menu-link:not(.menu-toggle) {
+  background: #baa47e;
+  box-shadow: 0px 2px 6px 0px #baa47e;
+  color: #fff !important;
+}
+table.dataTable.dtr-column > tbody > tr > td.control:before, table.dataTable.dtr-column > tbody > tr > th.control:before {
+  background-color: #baa47e;
+  border: 2px solid #fff;
+  box-shadow: 0 0 3px rgba(75, 70, 92, 0.8);
+}
+.alert-success {
+  background-color: #f0ede4;
+  border-color: #f0ede4;
+  color: #baa47e;
+}
+.text-body[href]:hover {
+  color: #baa47e !important;
+}
+.dropdown-item:not(.disabled).active, .dropdown-item:not(.disabled):active {
+  background-color: #baa47e;
+  color: #fff !important;
+}
+.dropdown-item:hover, .dropdown-item:focus {
+  color: #baa47e;
+  background-color: #f0ede4;
+}
+div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm {
+  border: 0;
+  border-radius: 0.25em;
+  background: initial;
+  background-color: #baa47e;
+  color: #fff;
+  font-size: 1em;
+}
+div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm):hover {
+  background-color: #dac4a5;
+}
